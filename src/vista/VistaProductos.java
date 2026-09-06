@@ -211,12 +211,22 @@ public class VistaProductos extends JPanel {
         JLabel lbl = new JLabel("Cantidad:");
         lbl.setFont(EstilosUI.FONT_BOLD);
         JTextField txtUnits = new JTextField("1", 4);
-        JComboBox<String> cbxSugeridos = new JComboBox<>(new String[]{"1", "2", "3", "5", "10"});
-        cbxSugeridos.addActionListener(e -> txtUnits.setText((String) cbxSugeridos.getSelectedItem()));
+        txtUnits.setHorizontalAlignment(JTextField.CENTER);
+        txtUnits.setEditable(false);
+        
+        //Botones MAS Y MENOS
+        
+        JButton botonMenos = new JButton("-");
+        JButton botonMas = new JButton("+");
+        
+        botonMenos.setPreferredSize(new Dimension(45, 32));
+        botonMas.setPreferredSize(new Dimension(45, 32));
+
+        botonMenos.setFocusPainted(false);
+        botonMas.setFocusPainted(false);
 
         row.add(lbl);
         row.add(txtUnits);
-        row.add(cbxSugeridos);
         body.add(row);
         body.add(Box.createVerticalStrut(20));
 
