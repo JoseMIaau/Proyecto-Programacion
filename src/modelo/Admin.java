@@ -16,4 +16,12 @@ public class Admin {
     public String getContrasena() {
         return contrasena;
     }
+
+    // Validar el inicio de sesion en el login.
+    public boolean validarCredenciales(String usuarioIngresado, String contrasenaIngresada){
+        if (usuarioIngresado == null || contrasenaIngresada == null){
+            return false;
+        }
+        return usuario.equals(usuarioIngresado) && contrasena.equals(contrasenaIngresada);
+    }
 }
