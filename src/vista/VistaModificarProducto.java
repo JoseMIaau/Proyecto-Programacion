@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> Cambios-Antonia-Medina
 package vista;
 
 import modelo.Inventario;
@@ -201,7 +205,7 @@ public class VistaModificarProducto extends JPanel {
                 );
 
                 limpiarFormulario();
-                frame.mostrarVista("ADMINISTRAR");
+                frame.mostrarVista("ADMIN");
 
             } else {
 
