@@ -1,4 +1,3 @@
-//VISTA PARA ADMINISTRAR LA TABLA Y PARA ELIMINAR 
 package vista;
 
 import modelo.Categorias;
@@ -19,6 +18,8 @@ public class VistaAdmin extends JPanel {
 
     private JButton btnEliminar;
     private JButton btnAgregar;
+    private JButton btnModificar;
+    private JButton btnEstadisticas;
     private JButton btnVolver;
 
     public VistaAdmin(BaseFrame frame) {
@@ -34,7 +35,12 @@ public class VistaAdmin extends JPanel {
 
         setLayout(new BorderLayout(5, 5));
 
-        String[] columnas = {"ID", "Nombre", "Precio", "Stock", "Categoría"
+        String[] columnas = {
+            "ID",
+            "Nombre",
+            "Precio",
+            "Stock",
+            "Categoría"
         };
 
         modeloTabla = new DefaultTableModel(columnas, 0) {
@@ -49,38 +55,44 @@ public class VistaAdmin extends JPanel {
 
         add(new JScrollPane(tablaProductos), BorderLayout.CENTER);
 
-
-
         JPanel pnlSur = new JPanel(new FlowLayout());
 
         btnAgregar = new JButton("Agregar Producto");
+        btnModificar = new JButton("Modificar Producto");
         btnEliminar = new JButton("Eliminar Producto");
+        btnEstadisticas = new JButton("Estadísticas");
         btnVolver = new JButton("Volver al Menu Principal");
+
         pnlSur.add(btnAgregar);
+        pnlSur.add(btnModificar);
         pnlSur.add(btnEliminar);
+        pnlSur.add(btnEstadisticas);
         pnlSur.add(btnVolver);
 
         add(pnlSur, BorderLayout.SOUTH);
 
+        // Volver al menú principal
         btnVolver.addActionListener(e -> {
-
             frame.mostrarVista("INICIO");
-
         });
 
-
-
+        // Agregar producto
         btnAgregar.addActionListener(e -> agregarProducto());
 
- 
+        // Modificar producto
+        btnModificar.addActionListener(e -> {
+            frame.mostrarVista("MODIFICAR_PRODUCTO");
+        });
+
+        // Eliminar producto
         btnEliminar.addActionListener(e -> eliminarProducto());
+
+        // Estadísticas
+        btnEstadisticas.addActionListener(e -> mostrarEstadisticas());
     }
-
-
 
     private void agregarProducto() {
 
-        JTextField txtId = new JTextField();
         JTextField txtNombre = new JTextField();
         JTextField txtPrecio = new JTextField();
         JTextField txtStock = new JTextField();
@@ -89,7 +101,6 @@ public class VistaAdmin extends JPanel {
                 new JComboBox<>(Categorias.values());
 
         JPanel panel = new JPanel();
-
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         panel.add(new JLabel("Nombre:"));
@@ -144,7 +155,11 @@ public class VistaAdmin extends JPanel {
             }
 
             Producto producto = new Producto(
-                    0, nombre, precio, stock, categoria
+                    0,
+                    nombre,
+                    precio,
+                    stock,
+                    categoria
             );
 
             boolean agregado =
@@ -157,7 +172,7 @@ public class VistaAdmin extends JPanel {
                 JOptionPane.showMessageDialog(
                         this,
                         "Producto agregado correctamente.",
-                        "exito al agregar",
+                        "Éxito al agregar",
                         JOptionPane.INFORMATION_MESSAGE
                 );
 
@@ -167,7 +182,7 @@ public class VistaAdmin extends JPanel {
                         this,
                         "No se pudo agregar el producto.\n"
                         + "El ID puede estar repetido o el precio/stock ser inválido.",
-                        "Error  ",
+                        "Error",
                         JOptionPane.ERROR_MESSAGE
                 );
             }
@@ -176,7 +191,7 @@ public class VistaAdmin extends JPanel {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "El ID, precio y stock deben ser valores numéricos.",
+                    "El precio y stock deben ser valores numéricos.",
                     "Error",
                     JOptionPane.ERROR_MESSAGE
             );
@@ -192,7 +207,7 @@ public class VistaAdmin extends JPanel {
             JOptionPane.showMessageDialog(
                     this,
                     "Seleccione un producto de la tabla.",
-                    "AtenciOn",
+                    "Atencion",
                     JOptionPane.WARNING_MESSAGE
             );
 
@@ -208,7 +223,7 @@ public class VistaAdmin extends JPanel {
 
         int confirmacion = JOptionPane.showConfirmDialog(
                 this,
-                "¿Está seguro de eliminar el producto \""
+                "¿Esta seguro de eliminar el producto \""
                         + nombreProducto + "\"?",
                 "Confirmar eliminacion",
                 JOptionPane.YES_NO_OPTION,
@@ -229,7 +244,7 @@ public class VistaAdmin extends JPanel {
             JOptionPane.showMessageDialog(
                     this,
                     "Producto eliminado correctamente.",
-                    "Éxito",
+                    "Exito",
                     JOptionPane.INFORMATION_MESSAGE
             );
 
@@ -244,13 +259,161 @@ public class VistaAdmin extends JPanel {
         }
     }
 
+    private void mostrarEstadisticas() {
+
+
+        JComboBox<String> cmbCategoria = new JComboBox<>();
+//AGREGAR LA CATEGORIA DE INVENTARIO PARA MOSTRAR LAS STATS DEL INVENTARIO COMPLETO
+        cmbCategoria.addItem("INVENTARIO");
+
+// categorias normales
+        for (Categorias categoria : Categorias.values()) {
+            cmbCategoria.addItem(categoria.toString());
+        }
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        panel.add(new JLabel("Seleccione una categoría:"));
+        panel.add(cmbCategoria);
+
+        int resultado = JOptionPane.showConfirmDialog(
+                this,
+                panel,
+                "Estadísticas de Productos",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (resultado != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        String seleccion =
+                (String) cmbCategoria.getSelectedItem();
+
+
+        if ("INVENTARIO".equals(seleccion)) {
+
+            
+            java.util.List<Producto> productos =
+                    inventario.leerProductos();
+
+
+            int cantidadProductos = productos.size();
+
+            int unidadesTotales = 0;
+
+            for (Producto producto : productos) {
+                unidadesTotales += producto.getStock();
+            }
+            double valorTotal =
+                    inventario.calculoValorTotalInventario();
+
+            Producto menorStock =
+                    inventario.obtenerProductoPorMenorStockInventario();
+
+            String mensaje =
+                    "RESUMEN DEL INVENTARIO\n"
+                    + "------------------------------\n\n"
+                    + "Cantidad de productos: "
+                    + cantidadProductos
+                    + "\n\n"
+                    + "Unidades totales en stock: "
+                    + unidadesTotales
+                    + "\n\n"
+                    + "Valor total del inventario: $"
+                    + String.format("%.0f", valorTotal)
+                    + "\n\n";
+
+            if (menorStock != null) {
+
+                mensaje +=
+                        "Producto con menor stock:\n"
+                        + menorStock.getNombre()
+                        + "\nStock: "
+                        + menorStock.getStock()
+                        + " unidades";
+
+            } else {
+
+                mensaje +=
+                        "Producto con menor stock:\n"
+                        + "No existen productos en el inventario.";
+            }
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    mensaje,
+                    "Resumen del Inventario",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            return;
+        }
+
+
+        Categorias categoriaSeleccionada = null;
+
+        for (Categorias categoria : Categorias.values()) {
+
+            if (categoria.toString().equals(seleccion)) {
+                categoriaSeleccionada = categoria;
+                break;
+            }
+        }
+
+        double promedio =
+                inventario.calcularPromedioPorCategoria(
+                        categoriaSeleccionada
+                );
+
+        Producto menorStock =
+                inventario.obtenerProductoPorMenorStock(
+                        categoriaSeleccionada
+                );
+
+        String mensaje;
+
+        if (menorStock == null) {
+
+            mensaje =
+                    "No existen productos en la categoría "
+                    + categoriaSeleccionada
+                    + ".";
+
+        } else {
+
+            mensaje =
+                    "Categoría: "
+                    + categoriaSeleccionada
+                    + "\n\n"
+                    + "Promedio de precios: $"
+                    + String.format("%.0f", promedio)
+                    + "\n\n"
+                    + "Producto con menor stock: "
+                    + menorStock.getNombre()
+                    + "\n"
+                    + "Stock: "
+                    + menorStock.getStock()
+                    + " unidades";
+        }
+
+        JOptionPane.showMessageDialog(
+                this,
+                mensaje,
+                "Estadísticas",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+    }
+
     public void poblarTabla() {
 
         modeloTabla.setRowCount(0);
 
         for (Producto p : inventario.leerProductos()) {
 
-            modeloTabla.addRow(new Object[] {
+            modeloTabla.addRow(new Object[]{
                     p.getId(),
                     p.getNombre(),
                     p.getPrecio(),
@@ -260,7 +423,3 @@ public class VistaAdmin extends JPanel {
         }
     }
 }
-
-
-
-//REVISAR EL INVENTARIO YA QUE ESTE CODIGO FUE EXTRAIDO DE UN PROYECTO ANTERIORMENTE HECHO, POR LO CUAL NECESITA LOS PRODUCTOS DE MANERA DIFERENTE
