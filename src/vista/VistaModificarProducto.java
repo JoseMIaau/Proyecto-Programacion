@@ -201,7 +201,7 @@ public class VistaModificarProducto extends JPanel {
                 );
 
                 limpiarFormulario();
-                frame.mostrarVista("ADMINISTRAR");
+                frame.mostrarVista("ADMIN");
 
             } else {
 
