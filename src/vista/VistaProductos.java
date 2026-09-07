@@ -211,12 +211,45 @@ public class VistaProductos extends JPanel {
         JLabel lbl = new JLabel("Cantidad:");
         lbl.setFont(EstilosUI.FONT_BOLD);
         JTextField txtUnits = new JTextField("1", 4);
-        JComboBox<String> cbxSugeridos = new JComboBox<>(new String[]{"1", "2", "3", "5", "10"});
-        cbxSugeridos.addActionListener(e -> txtUnits.setText((String) cbxSugeridos.getSelectedItem()));
+        txtUnits.setHorizontalAlignment(JTextField.CENTER);
+        txtUnits.setEditable(false);
+        
+        //Botones MAS Y MENOS
+        JButton botonMenos = new JButton("-");
+        JButton botonMas = new JButton("+");
+        
+        botonMenos.setPreferredSize(new Dimension(45, 32));
+        botonMas.setPreferredSize(new Dimension(45, 32));
+
+        botonMenos.setFocusPainted(false);
+        botonMas.setFocusPainted(false);
+
+        //Boton menos 
+        botonMenos.addActionListener(click ->{
+            int cantidadActual = Integer.parseInt(txtUnits.getText());
+
+            if(cantidadActual > 1){
+                cantidadActual--;
+                txtUnits.setText(String.valueOf(cantidadActual));
+            }
+        });
+
+        //Boton mas
+        botonMas.addActionListener(click ->{
+            int cantidadActual = Integer.parseInt(txtUnits.getText());
+
+            if(cantidadActual < prod.getStock()){
+                cantidadActual++;
+                txtUnits.setText(String.valueOf(cantidadActual));
+            } else {
+                JOptionPane.showMessageDialog(dialog, "No hay mas Stock", "Stock insuficiente", JOptionPane.WARNING_MESSAGE);
+            }
+        });
 
         row.add(lbl);
+        row.add(botonMenos);
         row.add(txtUnits);
-        row.add(cbxSugeridos);
+        row.add(botonMas);
         body.add(row);
         body.add(Box.createVerticalStrut(20));
 
