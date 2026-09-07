@@ -201,11 +201,18 @@ public class VistaCarrito extends JPanel {
                 JOptionPane.showMessageDialog(dialog, "Complete todos los campos obligatorios.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            JOptionPane.showMessageDialog(dialog, "¡Pago procesado con éxito! Gracias por comprar en SuperCuricó.");
-            Inventario.getInstancia().vaciarCarrito();
-            actualizarCarrito();
-            dialog.dispose();
-            frame.mostrarVista("INICIO");
+            boolean exito = Inventario.getInstancia().procesarCompra();
+            if (exito) {
+                JOptionPane.showMessageDialog(dialog, "¡Pago procesado con éxito! Gracias por su compra en SuperCuricó.");
+                actualizarCarrito(); // Deja la tabla visual vacía y en $0
+                dialog.dispose();
+                frame.mostrarVista("INICIO"); // Redirige al menú principal
+            }else {
+                JOptionPane.showMessageDialog(dialog, 
+                    "Error al procesar el pago: uno o más productos ya no cuentan con stock suficiente.", 
+                    "Error de Stock", 
+                    JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         body.add(btnConfirmar);

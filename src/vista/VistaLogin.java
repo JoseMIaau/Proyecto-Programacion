@@ -2,16 +2,23 @@ package vista;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+
+import modelo.Inventario;
+
 import java.awt.*;
 
 public class VistaLogin extends JPanel {
 
+    private BaseFrame frame; 
     private JTextField txtUsuario;
     private JPasswordField txtContrasena;
     private JButton btnIngresar;
+    private JButton btnVolver;
 
-    public VistaLogin() {
 
+    public VistaLogin(BaseFrame frame) {
+
+        this.frame = frame;
         setLayout(new GridBagLayout());
         setBackground(EstilosUI.FONDO);
 
@@ -68,9 +75,37 @@ public class VistaLogin extends JPanel {
                 Color.WHITE
         );
 
+        btnIngresar.addActionListener(e -> {
+            String user = txtUsuario.getText().trim();
+            String pass = new String(txtContrasena.getPassword()).trim();
+            
+            if (Inventario.getInstancia().iniciarSesion(user, pass) != null) {
+                txtUsuario.setText("");
+                txtContrasena.setText("");
+                this.frame.mostrarVista("ADMIN");
+            }else {
+                JOptionPane.showMessageDialog(this, "Correo o contraseña incorrectos.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
         gbc.gridy = 6;
         gbc.insets = new Insets(20, 8, 8, 8);
         panel.add(btnIngresar, gbc);
+
+
+        btnVolver = EstilosUI.roundedButton(
+                "Volver",
+                Color.GRAY,
+                Color.WHITE
+        );
+
+        btnVolver.addActionListener(e -> {
+            this.frame.mostrarMenuPrincipal();
+        });
+
+        gbc.gridy = 7;
+        gbc.insets = new Insets(8, 8, 8, 8);
+        panel.add(btnVolver, gbc);
 
         add(panel);
     }

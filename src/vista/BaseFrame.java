@@ -12,6 +12,8 @@ public class BaseFrame extends JFrame {
     private VistaMenuPrincipal vistaMenuPrincipal;
     private VistaProductos vistaProductos;
     private VistaCarrito vistaCarrito;
+    private VistaLogin vistaLogin;
+    private VistaAdmin vistaAdmin;
 
     public BaseFrame() {
         super("SuperCuricó");
@@ -23,10 +25,14 @@ public class BaseFrame extends JFrame {
         vistaMenuPrincipal = new VistaMenuPrincipal(this);
         vistaProductos = new VistaProductos(this);
         vistaCarrito = new VistaCarrito(this);
+        vistaLogin = new VistaLogin(this);
+        vistaAdmin = new VistaAdmin(this);
 
         root.add(vistaMenuPrincipal, "INICIO");
         root.add(vistaProductos, "PRODUCTOS");
         root.add(vistaCarrito, "CARRO");
+        root.add(vistaLogin, "LOGIN");
+        root.add(vistaAdmin, "ADMIN");
 
         setContentPane(root);
         cardLayout.show(root, "INICIO");
@@ -37,6 +43,8 @@ public class BaseFrame extends JFrame {
             vistaProductos.mostrarTodosLosProductos();
         } else if ("CARRO".equals(vista)) {
             vistaCarrito.actualizarCarrito();
+        } else if ("ADMIN".equals(vista)) {
+            vistaAdmin.poblarTabla();
         }
         cardLayout.show(root, vista);
     }
@@ -45,7 +53,13 @@ public class BaseFrame extends JFrame {
         vistaProductos.filtrarPorCategoria(cat);
         cardLayout.show(root, "PRODUCTOS");
     }
+    public void mostrarMenuPrincipal() {    
+        cardLayout.show(root, "INICIO");
+    }
 
     public void buscarProductosPorTexto(String query) {
-            }
+        vistaProductos.buscarPorTexto(query);
+        vistaProductos.setTextoBuscador(query);
+        cardLayout.show(root, "PRODUCTOS");
+    }
 }

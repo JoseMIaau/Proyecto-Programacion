@@ -21,7 +21,7 @@ public class Inventario {
         this.usuariosAdmin = gestorUsuario.cargarAdmins();
         this.adminActual = null;
         inicializarDatosDemoSiVacio();
-
+        inicializarAdminPorDefecto();
     }
 
     public static Inventario getInstancia() {
@@ -31,17 +31,67 @@ public class Inventario {
         return instancia;
     }
 
-    public boolean registrarAdmin(String usuario, String contrasena) {
-        if (usuario == null || contrasena == null) return false;
-        String userTrim = usuario.trim();
-        if (userTrim.isEmpty() || contrasena.trim().isEmpty()) return false;
+    private void inicializarDatosDemoSiVacio() {
+        if (productos.isEmpty()) {
+            // FRUTAS Y VERDURAS
+            productos.add(new Producto(1, "Plátano Granel (kg)", 1290.0, 45, Categorias.FRUTAS_Y_VERDURAS));
+            productos.add(new Producto(2, "Manzana fancy (kg)", 1490.0, 30, Categorias.FRUTAS_Y_VERDURAS));
+            productos.add(new Producto(3, "Papas (kg)", 990.0, 80, Categorias.FRUTAS_Y_VERDURAS));
 
-        if (usuariosAdmin.containsKey(userTrim)) {
+            // LACTEOS
+            productos.add(new Producto(4, "Leche Entera 1L", 1050.0, 60, Categorias.LACTEOS));
+            productos.add(new Producto(5, "Yogurt Batido Frutilla", 350.0, 100, Categorias.LACTEOS));
+            productos.add(new Producto(6, "Queso Laminado Mantecoso 250g", 2890.0, 25, Categorias.LACTEOS));
+
+            // PANADERIA
+            productos.add(new Producto(7, "Marraqueta (kg)", 1990.0, 40, Categorias.PANADERIA));
+            productos.add(new Producto(8, "Pan Hallulla (kg)", 1990.0, 35, Categorias.PANADERIA));
+            productos.add(new Producto(9, "Pan de Molde Blanco", 2390.0, 20, Categorias.PANADERIA));
+
+            // CARNICERIA
+            productos.add(new Producto(10, "Pechuga de Pollo Deshuezada (kg)", 4990.0, 15, Categorias.CARNICERIA));
+            productos.add(new Producto(11, "Carnde de Vacuno Filete (kg)", 16990.0, 10, Categorias.CARNICERIA));
+            productos.add(new Producto(12, "Costillar de Cerdo (kg)", 6790.0, 12, Categorias.CARNICERIA));
+
+            // BEBIDAS
+            productos.add(new Producto(13, "Pepsi zero 2.5L", 2000.0, 50, Categorias.BEBIDAS));
+            productos.add(new Producto(14, "Jugo Néctar Durazno 1.5L", 1390.0, 30, Categorias.BEBIDAS));
+            productos.add(new Producto(15, "Agua Mineral Sin Gas 1.5L", 890.0, 45, Categorias.BEBIDAS));
+
+            // LIMPIEZA
+            productos.add(new Producto(16, "Detergente Líquido 3L", 7490.0, 18, Categorias.LIMPIEZA));
+            productos.add(new Producto(17, "Cloro Gel 900ml", 1690.0, 40, Categorias.LIMPIEZA));
+            productos.add(new Producto(18, "Lavaloza Limón 750ml", 2190.0, 28, Categorias.LIMPIEZA));
+                
+
+            gestorArchivo.guardarCatalogo(productos);
+        }
+    }
+
+    private void inicializarAdminPorDefecto() {
+        if (usuariosAdmin.isEmpty()) {
+            Admin prueba = new Admin("admin@supercurico.cl", "admin123");
+            usuariosAdmin.put(prueba.getUsuario(), prueba);
+            gestorUsuario.guardarAdmin(new ArrayList<>(usuariosAdmin.values()));
+        }
+    }
+
+    public boolean registrarAdmin(String correo, String contrasena) {
+        if (correo == null || contrasena == null) return false;
+        String correoLimpio = correo.trim().toLowerCase();
+        String passLimpia = contrasena.trim();
+        if (correoLimpio.isEmpty() || passLimpia.isEmpty()) return false;
+
+        if (!correoLimpio.endsWith("@supercurico.cl")) {//le puse ese sufijo por mientras porque no me acuerdo que nombre le tenemos al super
             return false;
         }
 
-        Admin nuevo = new Admin(userTrim, contrasena);
-        usuariosAdmin.put(userTrim, nuevo);
+        if (usuariosAdmin.containsKey(correoLimpio)) {//no crea el usuario si el correo ya esta enlazado a alguien
+            return false;
+        }
+
+        Admin nuevo = new Admin(correoLimpio, passLimpia);
+        usuariosAdmin.put(correoLimpio, nuevo);
         gestorUsuario.guardarAdmin(new ArrayList<>(usuariosAdmin.values()));
         return true;
     }
@@ -49,28 +99,16 @@ public class Inventario {
     public Admin iniciarSesion(String usuario, String contrasena) {
         if (usuario == null || contrasena == null) return null;
         String userTrim = usuario.trim();
+        String pass = contrasena.trim();
 
         if (usuariosAdmin.containsKey(userTrim)) {
             Admin admin = usuariosAdmin.get(userTrim);
-            if (admin.getContrasena().equals(contrasena)) {
+            if (admin.getContrasena().equals(pass)) {
                 this.adminActual = admin;
                 return admin;
             }
         }
         return null;
-    }
-
-    private void inicializarDatosDemoSiVacio() {
-        if (productos.isEmpty()) {
-            productos.add(new Producto(1, "Plátano", 1490.0, 50, Categorias.FRUTAS_Y_VERDURAS));
-            productos.add(new Producto(2, "Manzana", 1190.0, 40, Categorias.FRUTAS_Y_VERDURAS));
-            productos.add(new Producto(3, "Leche Entera", 990.0, 30, Categorias.LACTEOS));
-            productos.add(new Producto(4, "Marraqueta", 1890.0, 25, Categorias.PANADERIA));
-            productos.add(new Producto(5, "Pechuga Pollo", 4990.0, 15, Categorias.CARNICERIA));
-            productos.add(new Producto(6, "Bebida Cola 2L", 2100.0, 35, Categorias.BEBIDAS));
-            productos.add(new Producto(7, "Detergente 1L", 3490.0, 20, Categorias.LIMPIEZA));
-            gestorArchivo.guardarCatalogo(productos);
-        }
     }
 
     public void cerrarSesion() {
@@ -87,15 +125,31 @@ public class Inventario {
 
     //Metodos CRUD
 
+    //Generador de ID
+    public int generarId(){
+        int mayorId = 0;
+
+        for(Producto producto : productos){
+            if(producto.getId() > mayorId){
+                mayorId = producto.getId();
+            }
+        }
+        return mayorId + 1;
+    }
+
     //  Crear producto 
     public boolean crearProducto(Producto producto){
-        if(producto == null || buscarProducto(producto.getId()) != null){
+        if(producto == null){
             return false;
         }
 
         // verifica que el precio y el stock no sean negativos (como va a valer -100 pesos jajalolxd :V)
         if(producto.getPrecio() < 0 || producto.getStock() < 0){
             return false;
+        }
+
+        if (producto.getId() <= 0 || buscarProducto(producto.getId()) != null) {
+            producto.setId(generarId());
         }
 
         productos.add(producto); // agrega el producto
@@ -159,6 +213,22 @@ public class Inventario {
         return filtrados;
     }
 
+    public List<Producto> buscarPorNombre(String texto) {
+        if (texto == null || texto.trim().isEmpty()) {
+            return leerProductos();
+        }
+        
+        List<Producto> lista = new ArrayList<>();
+        String busqueda = texto.trim().toLowerCase();
+
+        for (Producto p : productos) {
+            if (p.getNombre().toLowerCase().contains(busqueda)) {
+                lista.add(p);
+            }
+        }
+        return lista;
+    }
+
     // Metodos matematicos.
 
     // Calculo del promedio segun la categoria
@@ -215,22 +285,34 @@ public class Inventario {
 
         return valorTotal;
     }
-    //TAREA agregar el genenarador de id 
     
     //---Carrito---
     public List<ItemCarrito> getCarrito() {
         return carrito;
     }
 
-    public void agregarAlCarrito(Producto p, double cantidad) {
+    public boolean agregarAlCarrito(Producto p, double cantidad) {
+        if (p == null || cantidad <= 0) {
+            return false;
+        }
         //Verificacion de si ya existe el prodcuto en el carrito
         for (ItemCarrito item : carrito) {//Busca si el producto esta en el carrito
             if (item.getProducto().getId() == p.getId()) {//si lo encuentra le suma la nueva cantidad en lugar de agregarlo por separado al carrito
+                if (item.getCantidad() + cantidad > p.getStock()) {
+                    return false; // No hay suficiente stock para sumar esa cantidad
+                }
+                
                 item.setCantidad(item.getCantidad() + cantidad);
-                return;//termina la ejecucion
+                return true;//termina la ejecucion
             }
         }
-        carrito.add(new ItemCarrito(p, cantidad));//agrega por defecto el producto al carrito
+        //primera vez que se agrega
+        if (cantidad > p.getStock()) {
+            return false;
+        }
+
+        carrito.add(new ItemCarrito(p, cantidad)); // Agrega el producto al carrito
+        return true;
     }
 
     public void eliminarDelCarrito(int idProducto) {
@@ -247,5 +329,28 @@ public class Inventario {
             total += item.getSubtotal();
         }
         return total;
+    }
+
+    public boolean procesarCompra() {
+        if (carrito.isEmpty()) {
+            return false;
+        }
+
+        // verificacion por si acaso de stock
+        for (ItemCarrito item : carrito) {
+            Producto p = item.getProducto();
+            if (p.getStock() < item.getCantidad()) {
+                return false;
+            }
+        }
+
+        for (ItemCarrito item : carrito) {
+            Producto p = item.getProducto();
+            p.setStock((int) (p.getStock() - item.getCantidad()));
+        }
+
+        gestorArchivo.guardarCatalogo(productos);
+        vaciarCarrito();
+        return true;
     }
 }
