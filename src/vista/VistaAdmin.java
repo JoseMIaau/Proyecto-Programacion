@@ -49,12 +49,13 @@ public class VistaAdmin extends JPanel {
 
         add(new JScrollPane(tablaProductos), BorderLayout.CENTER);
 
+
+
         JPanel pnlSur = new JPanel(new FlowLayout());
 
         btnAgregar = new JButton("Agregar Producto");
         btnEliminar = new JButton("Eliminar Producto");
         btnVolver = new JButton("Volver al Menu Principal");
-        //javi agreguemos aqui el btnModificar y que en el action listener que haga lo que estaba haceidno la clase de modificar producto
         pnlSur.add(btnAgregar);
         pnlSur.add(btnEliminar);
         pnlSur.add(btnVolver);
@@ -67,13 +68,19 @@ public class VistaAdmin extends JPanel {
 
         });
 
+
+
         btnAgregar.addActionListener(e -> agregarProducto());
 
+ 
         btnEliminar.addActionListener(e -> eliminarProducto());
     }
 
+
+
     private void agregarProducto() {
 
+        JTextField txtId = new JTextField();
         JTextField txtNombre = new JTextField();
         JTextField txtPrecio = new JTextField();
         JTextField txtStock = new JTextField();
