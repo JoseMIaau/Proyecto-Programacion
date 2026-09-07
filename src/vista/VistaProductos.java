@@ -215,7 +215,6 @@ public class VistaProductos extends JPanel {
         txtUnits.setEditable(false);
         
         //Botones MAS Y MENOS
-        
         JButton botonMenos = new JButton("-");
         JButton botonMas = new JButton("+");
         
@@ -225,8 +224,32 @@ public class VistaProductos extends JPanel {
         botonMenos.setFocusPainted(false);
         botonMas.setFocusPainted(false);
 
+        //Boton menos 
+        botonMenos.addActionListener(click ->{
+            int cantidadActual = Integer.parseInt(txtUnits.getText());
+
+            if(cantidadActual > 1){
+                cantidadActual--;
+                txtUnits.setText(String.valueOf(cantidadActual));
+            }
+        });
+
+        //Boton mas
+        botonMas.addActionListener(click ->{
+            int cantidadActual = Integer.parseInt(txtUnits.getText());
+
+            if(cantidadActual < prod.getStock()){
+                cantidadActual++;
+                txtUnits.setText(String.valueOf(cantidadActual));
+            } else {
+                JOptionPane.showMessageDialog(dialog, "No hay mas Stock", "Stock insuficiente", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
         row.add(lbl);
+        row.add(botonMenos);
         row.add(txtUnits);
+        row.add(botonMas);
         body.add(row);
         body.add(Box.createVerticalStrut(20));
 
