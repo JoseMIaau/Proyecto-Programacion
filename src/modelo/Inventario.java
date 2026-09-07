@@ -213,6 +213,25 @@ public class Inventario {
         return filtrados;
     }
 
+    //filtrar por precio
+    public List<Producto> filtrarPorPrecio(double precioMinimo, double precioMaximo){
+        List<Producto> productosFiltrados = new ArrayList<>();
+        if(precioMinimo < 0 || precioMaximo < 0){
+            return productosFiltrados;
+        }
+        if(precioMinimo < precioMaximo){
+            return productosFiltrados;
+        }
+        for(Producto producto : productos){
+            if(producto.getPrecio() >= precioMinimo && producto.getPrecio() <= precioMaximo){
+                productosFiltrados.add(producto);
+            }
+        }
+
+        return productosFiltrados;
+
+    }
+
     public List<Producto> buscarPorNombre(String texto) {
         if (texto == null || texto.trim().isEmpty()) {
             return leerProductos();
