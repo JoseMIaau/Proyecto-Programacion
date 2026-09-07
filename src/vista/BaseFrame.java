@@ -56,14 +56,10 @@ public class BaseFrame extends JFrame {
         } else if ("CARRO".equals(vista)) {
 
             vistaCarrito.actualizarCarrito();
-<<<<<<< HEAD
-        } else if ("ADMIN".equals(vista)) {
-=======
 
         } else if ("ADMIN".equals(vista)) {
 
             // Refresca la tabla al volver al administrador
->>>>>>> Cambios-Antonia-Medina
             vistaAdmin.poblarTabla();
         }
 
@@ -75,23 +71,12 @@ public class BaseFrame extends JFrame {
         vistaProductos.filtrarPorCategoria(cat);
         cardLayout.show(root, "PRODUCTOS");
     }
-<<<<<<< HEAD
-    public void mostrarMenuPrincipal() {    
-=======
 
     public void mostrarMenuPrincipal() {
 
->>>>>>> Cambios-Antonia-Medina
         cardLayout.show(root, "INICIO");
     }
 
     public void buscarProductosPorTexto(String query) {
-<<<<<<< HEAD
-        vistaProductos.buscarPorTexto(query);
-        vistaProductos.setTextoBuscador(query);
-        cardLayout.show(root, "PRODUCTOS");
-=======
-
->>>>>>> Cambios-Antonia-Medina
     }
 }

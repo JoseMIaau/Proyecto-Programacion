@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> Cambios-Antonia-Medina
 package vista;
 
 import modelo.Inventario;

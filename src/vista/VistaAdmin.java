@@ -65,7 +65,7 @@ public class VistaAdmin extends JPanel {
         btnModificar = new JButton("Modificar Producto");
         btnEliminar = new JButton("Eliminar Producto");
         btnVolver = new JButton("Volver al Menu Principal");
-        //javi agreguemos aqui el btnModificar y que en el action listener que haga lo que estaba haceidno la clase de modificar producto
+
         pnlSur.add(btnAgregar);
         pnlSur.add(btnModificar);
         pnlSur.add(btnEliminar);
@@ -96,6 +96,7 @@ public class VistaAdmin extends JPanel {
 
     private void agregarProducto() {
 
+        JTextField txtId = new JTextField();
         JTextField txtNombre = new JTextField();
         JTextField txtPrecio = new JTextField();
         JTextField txtStock = new JTextField();
@@ -112,9 +113,6 @@ public class VistaAdmin extends JPanel {
                 )
         );
 
-<<<<<<< HEAD
-        panel.add(new JLabel("Nombre:"));
-=======
         panel.add(
                 new JLabel("ID del producto:")
         );
@@ -123,7 +121,6 @@ public class VistaAdmin extends JPanel {
         panel.add(
                 new JLabel("Nombre:")
         );
->>>>>>> Cambios-Antonia-Medina
         panel.add(txtNombre);
 
         panel.add(
@@ -156,16 +153,12 @@ public class VistaAdmin extends JPanel {
 
         try {
 
-<<<<<<< HEAD
-            String nombre = txtNombre.getText().trim();
-=======
             int id = Integer.parseInt(
                     txtId.getText().trim()
             );
 
             String nombre =
                     txtNombre.getText().trim();
->>>>>>> Cambios-Antonia-Medina
 
             double precio =
                     Double.parseDouble(
@@ -193,11 +186,6 @@ public class VistaAdmin extends JPanel {
                 return;
             }
 
-<<<<<<< HEAD
-            Producto producto = new Producto(
-                    0, nombre, precio, stock, categoria
-            );
-=======
             if (precio < 0) {
 
                 JOptionPane.showMessageDialog(
@@ -230,7 +218,6 @@ public class VistaAdmin extends JPanel {
                             stock,
                             categoria
                     );
->>>>>>> Cambios-Antonia-Medina
 
             boolean agregado =
                     inventario.crearProducto(producto);
