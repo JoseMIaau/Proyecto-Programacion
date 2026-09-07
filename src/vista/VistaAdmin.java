@@ -400,8 +400,8 @@ public class VistaAdmin extends JPanel {
                     + "Unidades totales en stock: "
                     + unidadesTotales
                     + "\n\n"
-                    + "Valor total del inventario: $"
-                    + String.format("%.0f", valorTotal)
+                    + "Valor total del inventario: "
+                    + EstilosUI.formatearCLP(valorTotal)
                     + "\n\n";
 
             if (menorStock != null) {
@@ -466,8 +466,8 @@ public class VistaAdmin extends JPanel {
                     "Categoría: "
                     + categoriaSeleccionada
                     + "\n\n"
-                    + "Promedio de precios: $"
-                    + String.format("%.0f", promedio)
+                    + "Promedio de precios: "
+                    + EstilosUI.formatearCLP(promedio)
                     + "\n\n"
                     + "Producto con menor stock: "
                     + menorStock.getNombre()
