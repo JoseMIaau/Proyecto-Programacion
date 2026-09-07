@@ -1,4 +1,4 @@
-```java
+
 package vista;
 
 import modelo.Inventario;
@@ -89,7 +89,7 @@ public class VistaModificarProducto extends JPanel {
         add(pnlBotones, BorderLayout.SOUTH);
 
         btnAtras.addActionListener(e -> {
-            frame.mostrarVista("ADMINISTRAR");
+            frame.mostrarVista("ADMIN");
         });
 
         btnModificar.addActionListener(e -> {
@@ -202,7 +202,7 @@ public class VistaModificarProducto extends JPanel {
                 );
 
                 limpiarFormulario();
-                frame.mostrarVista("ADMINISTRAR");
+                frame.mostrarVista("ADMIN");
 
             } else {
 

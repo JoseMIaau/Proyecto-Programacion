@@ -1,4 +1,3 @@
-//VISTA PARA ADMINISTRAR LA TABLA Y PARA ELIMINAR 
 package vista;
 
 import modelo.Categorias;
@@ -19,6 +18,7 @@ public class VistaAdmin extends JPanel {
 
     private JButton btnEliminar;
     private JButton btnAgregar;
+    private JButton btnModificar;
     private JButton btnVolver;
 
     public VistaAdmin(BaseFrame frame) {
@@ -34,7 +34,12 @@ public class VistaAdmin extends JPanel {
 
         setLayout(new BorderLayout(5, 5));
 
-        String[] columnas = {"ID", "Nombre", "Precio", "Stock", "Categoría"
+        String[] columnas = {
+                "ID",
+                "Nombre",
+                "Precio",
+                "Stock",
+                "Categoría"
         };
 
         modeloTabla = new DefaultTableModel(columnas, 0) {
@@ -47,29 +52,46 @@ public class VistaAdmin extends JPanel {
 
         tablaProductos = new JTable(modeloTabla);
 
-        add(new JScrollPane(tablaProductos), BorderLayout.CENTER);
+        add(
+                new JScrollPane(tablaProductos),
+                BorderLayout.CENTER
+        );
 
-        JPanel pnlSur = new JPanel(new FlowLayout());
+        JPanel pnlSur = new JPanel(
+                new FlowLayout()
+        );
 
         btnAgregar = new JButton("Agregar Producto");
+        btnModificar = new JButton("Modificar Producto");
         btnEliminar = new JButton("Eliminar Producto");
         btnVolver = new JButton("Volver al Menu Principal");
 
         pnlSur.add(btnAgregar);
+        pnlSur.add(btnModificar);
         pnlSur.add(btnEliminar);
         pnlSur.add(btnVolver);
 
         add(pnlSur, BorderLayout.SOUTH);
 
+        // VOLVER AL MENÚ PRINCIPAL
         btnVolver.addActionListener(e -> {
-
             frame.mostrarVista("INICIO");
-
         });
 
-        btnAgregar.addActionListener(e -> agregarProducto());
+        // AGREGAR PRODUCTO
+        btnAgregar.addActionListener(e -> {
+            agregarProducto();
+        });
 
-        btnEliminar.addActionListener(e -> eliminarProducto());
+        // IR A LA VISTA DE MODIFICAR PRODUCTO
+        btnModificar.addActionListener(e -> {
+            frame.mostrarVista("MODIFICAR");
+        });
+
+        // ELIMINAR PRODUCTO
+        btnEliminar.addActionListener(e -> {
+            eliminarProducto();
+        });
     }
 
     private void agregarProducto() {
@@ -84,30 +106,46 @@ public class VistaAdmin extends JPanel {
 
         JPanel panel = new JPanel();
 
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setLayout(
+                new BoxLayout(
+                        panel,
+                        BoxLayout.Y_AXIS
+                )
+        );
 
-        panel.add(new JLabel("ID del producto:"));
+        panel.add(
+                new JLabel("ID del producto:")
+        );
         panel.add(txtId);
 
-        panel.add(new JLabel("Nombre:"));
+        panel.add(
+                new JLabel("Nombre:")
+        );
         panel.add(txtNombre);
 
-        panel.add(new JLabel("Precio:"));
+        panel.add(
+                new JLabel("Precio:")
+        );
         panel.add(txtPrecio);
 
-        panel.add(new JLabel("Stock:"));
+        panel.add(
+                new JLabel("Stock:")
+        );
         panel.add(txtStock);
 
-        panel.add(new JLabel("Categoría:"));
+        panel.add(
+                new JLabel("Categoría:")
+        );
         panel.add(cmbCategoria);
 
-        int resultado = JOptionPane.showConfirmDialog(
-                this,
-                panel,
-                "Agregar Producto",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE
-        );
+        int resultado =
+                JOptionPane.showConfirmDialog(
+                        this,
+                        panel,
+                        "Agregar Producto",
+                        JOptionPane.OK_CANCEL_OPTION,
+                        JOptionPane.PLAIN_MESSAGE
+                );
 
         if (resultado != JOptionPane.OK_OPTION) {
             return;
@@ -119,18 +157,22 @@ public class VistaAdmin extends JPanel {
                     txtId.getText().trim()
             );
 
-            String nombre = txtNombre.getText().trim();
+            String nombre =
+                    txtNombre.getText().trim();
 
-            double precio = Double.parseDouble(
-                    txtPrecio.getText().trim()
-            );
+            double precio =
+                    Double.parseDouble(
+                            txtPrecio.getText().trim()
+                    );
 
-            int stock = Integer.parseInt(
-                    txtStock.getText().trim()
-            );
+            int stock =
+                    Integer.parseInt(
+                            txtStock.getText().trim()
+                    );
 
             Categorias categoria =
-                    (Categorias) cmbCategoria.getSelectedItem();
+                    (Categorias)
+                            cmbCategoria.getSelectedItem();
 
             if (nombre.isEmpty()) {
 
@@ -144,9 +186,38 @@ public class VistaAdmin extends JPanel {
                 return;
             }
 
-            Producto producto = new Producto(
-                    id, nombre, precio, stock, categoria
-            );
+            if (precio < 0) {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "El precio no puede ser negativo.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+
+                return;
+            }
+
+            if (stock < 0) {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "El stock no puede ser negativo.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+
+                return;
+            }
+
+            Producto producto =
+                    new Producto(
+                            id,
+                            nombre,
+                            precio,
+                            stock,
+                            categoria
+                    );
 
             boolean agregado =
                     inventario.crearProducto(producto);
@@ -158,7 +229,7 @@ public class VistaAdmin extends JPanel {
                 JOptionPane.showMessageDialog(
                         this,
                         "Producto agregado correctamente.",
-                        "exito al agregar",
+                        "Éxito",
                         JOptionPane.INFORMATION_MESSAGE
                 );
 
@@ -167,8 +238,8 @@ public class VistaAdmin extends JPanel {
                 JOptionPane.showMessageDialog(
                         this,
                         "No se pudo agregar el producto.\n"
-                        + "El ID puede estar repetido o el precio/stock ser inválido.",
-                        "Error  ",
+                                + "El ID puede estar repetido.",
+                        "Error",
                         JOptionPane.ERROR_MESSAGE
                 );
             }
@@ -177,7 +248,8 @@ public class VistaAdmin extends JPanel {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "El ID, precio y stock deben ser valores numéricos.",
+                    "El ID y stock deben ser números enteros.\n"
+                            + "El precio debe ser un número válido.",
                     "Error",
                     JOptionPane.ERROR_MESSAGE
             );
@@ -186,42 +258,52 @@ public class VistaAdmin extends JPanel {
 
     private void eliminarProducto() {
 
-        int fila = tablaProductos.getSelectedRow();
+        int fila =
+                tablaProductos.getSelectedRow();
 
         if (fila == -1) {
 
             JOptionPane.showMessageDialog(
                     this,
                     "Seleccione un producto de la tabla.",
-                    "AtenciOn",
+                    "Atención",
                     JOptionPane.WARNING_MESSAGE
             );
 
             return;
         }
 
-        int idProducto = Integer.parseInt(
-                modeloTabla.getValueAt(fila, 0).toString()
-        );
+        int idProducto =
+                Integer.parseInt(
+                        modeloTabla
+                                .getValueAt(fila, 0)
+                                .toString()
+                );
 
         String nombreProducto =
-                modeloTabla.getValueAt(fila, 1).toString();
+                modeloTabla
+                        .getValueAt(fila, 1)
+                        .toString();
 
-        int confirmacion = JOptionPane.showConfirmDialog(
-                this,
-                "¿Está seguro de eliminar el producto \""
-                        + nombreProducto + "\"?",
-                "Confirmar eliminacion",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE
-        );
+        int confirmacion =
+                JOptionPane.showConfirmDialog(
+                        this,
+                        "¿Está seguro de eliminar el producto \""
+                                + nombreProducto
+                                + "\"?",
+                        "Confirmar eliminación",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                );
 
         if (confirmacion != JOptionPane.YES_OPTION) {
             return;
         }
 
         boolean eliminado =
-                inventario.eliminarProducto(idProducto);
+                inventario.eliminarProducto(
+                        idProducto
+                );
 
         if (eliminado) {
 
@@ -249,15 +331,18 @@ public class VistaAdmin extends JPanel {
 
         modeloTabla.setRowCount(0);
 
-        for (Producto p : inventario.leerProductos()) {
+        for (Producto p :
+                inventario.leerProductos()) {
 
-            modeloTabla.addRow(new Object[] {
-                    p.getId(),
-                    p.getNombre(),
-                    p.getPrecio(),
-                    p.getStock(),
-                    p.getCategoria()
-            });
+            modeloTabla.addRow(
+                    new Object[]{
+                            p.getId(),
+                            p.getNombre(),
+                            p.getPrecio(),
+                            p.getStock(),
+                            p.getCategoria()
+                    }
+            );
         }
     }
 }
