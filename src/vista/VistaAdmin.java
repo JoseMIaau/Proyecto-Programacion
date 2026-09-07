@@ -96,6 +96,12 @@ public class VistaAdmin extends JPanel {
         btnEliminar.addActionListener(e -> {
             eliminarProducto();
         });
+
+
+        //MOSTRAR LAS STATS DEL SUPERMERCADO (SE PERDIO ESTE ACTIONLISTENER AL RESOLVER EL MERGE)
+        btnEstadisticas.addActionListener(e -> {
+        mostrarEstadisticas();
+        });
     }
 
     private void agregarProducto() {
