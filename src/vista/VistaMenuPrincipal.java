@@ -12,15 +12,7 @@ import java.awt.event.KeyEvent;
 
 public class VistaMenuPrincipal extends JPanel {
     private final BaseFrame frame;
-    private JLabel bannerText;
     private int indicePromo = 0;
-
-//Banner de promociones 
-    private final String[] promociones = {
-            "<html><div style='text-align:center;'>Verduras frescas<br><b>TODOS LOS DÍAS</b></div></html>",
-            "<html><div style='text-align:center;'>Ofertas en Carnes y Lácteos<br><b>HASTA 30% DCTO</b></div></html>",
-            "<html><div style='text-align:center;'>Panadería y Abarrotes<br><b>CALIDAD GARANTIZADA</b></div></html>"
-    };
 
     public VistaMenuPrincipal(BaseFrame frame) {
         this.frame = frame;
@@ -34,30 +26,81 @@ public class VistaMenuPrincipal extends JPanel {
         center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
         center.setBorder(new EmptyBorder(25, 60, 30, 60));
 
-        // Banner rotativo
-        JPanel banner = new JPanel(new BorderLayout());
-        banner.setMaximumSize(new Dimension(750, 130));
-        banner.setPreferredSize(new Dimension(750, 130));
-        banner.setBackground(EstilosUI.VERDE_CLARO);
-        banner.setBorder(new CompoundBorder(
-                new LineBorder(new Color(220, 220, 220), 1, true),
-                new EmptyBorder(15, 20, 15, 20)
-        ));
 
-        bannerText = new JLabel(promociones[0], SwingConstants.CENTER);
-        bannerText.setFont(EstilosUI.FONT_TITLE);
-        bannerText.setForeground(new Color(255, 240, 70));
-        banner.add(bannerText, BorderLayout.CENTER);
+// BANNER ROTATIVO
+JPanel banner = new JPanel(new BorderLayout());
 
-        // Timer Swing para rotar las ofertas cada 3 segundos
-        Timer timerBanner = new Timer(3000, e -> {
-            indicePromo = (indicePromo + 1) % promociones.length;
-            bannerText.setText(promociones[indicePromo]);
-        });
-        timerBanner.start();
+banner.setMaximumSize(new Dimension(800, 288));
+banner.setPreferredSize(new Dimension(800, 288));
 
-        center.add(banner);
-        center.add(Box.createVerticalStrut(25));
+banner.setOpaque(false);
+banner.setBorder(null);
+
+
+//Imagenes para el banner, pre cortadas y con el texto integrado
+String[] imagenesBanner = {
+        "/imagenes/Banners/Banner_verduras.png",
+        "/imagenes/Banners/Banner_carnes_y_lacteos.png",
+        "/imagenes/Banners/Banner_panaderia.png"
+};
+
+// Label que muestra las imagenes
+JLabel bannerImagen = new JLabel();
+bannerImagen.setHorizontalAlignment(SwingConstants.CENTER);
+
+// Primera imagen
+ImageIcon iconoOriginal = new ImageIcon(
+        getClass().getResource(imagenesBanner[0])
+);
+
+Image imagenEscalada = iconoOriginal
+        .getImage()
+        .getScaledInstance(
+                800,
+                288,
+                Image.SCALE_SMOOTH
+        );
+
+bannerImagen.setIcon(
+        new ImageIcon(imagenEscalada)
+);
+
+banner.add(
+        bannerImagen,
+        BorderLayout.CENTER
+);
+
+// Timer con delay de 3 segundos
+Timer timerBanner = new Timer(3000, e -> {
+
+    indicePromo =
+            (indicePromo + 1)
+            % imagenesBanner.length;
+
+    ImageIcon nuevoIcono = new ImageIcon(
+            getClass().getResource(
+                    imagenesBanner[indicePromo]
+            )
+    );
+
+    Image nuevaImagen = nuevoIcono
+            .getImage()
+            .getScaledInstance(
+                    800,
+                    288,
+                    Image.SCALE_SMOOTH
+            );
+
+    bannerImagen.setIcon(
+            new ImageIcon(nuevaImagen)
+    );
+});
+
+timerBanner.start();
+
+// Agregar banner en el centro
+center.add(banner);
+center.add(Box.createVerticalStrut(25));
 
         // Generación dinámica de categorías interactivas
         JPanel categoriesPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 25, 10));
@@ -132,107 +175,84 @@ public class VistaMenuPrincipal extends JPanel {
         contenedor.add(login);
 
         header.add(contenedor, BorderLayout.EAST);
-
-
         /*Tambíen estaba la opción de usar una GridBag */
-
         return header;
     }
 
-  private JPanel createCategoryCard(Categorias cat) {
+   private JPanel createCategoryCard(Categorias cat) {
 
     JPanel p = new JPanel();
-
     p.setOpaque(false);
     p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
 
+    // Ruta de la imagen
+    String ruta = "/imagenes/categorias/"
+            + cat.name().toLowerCase()
+            + ".png";
 
-    JButton circleBtn = new JButton() {
-        //PPT 14: pag 21(Programación Avanzada)  
-        @Override
-        protected void paintComponent(Graphics g) {
+        ImageIcon iconoOriginal = new ImageIcon(
+        getClass().getResource(ruta)
+);
+        Image imagenOriginal = iconoOriginal.getImage();
 
-            Graphics2D g2 = (Graphics2D) g.create(); 
+        int anchoOriginal = iconoOriginal.getIconWidth();
+        int altoOriginal = iconoOriginal.getIconHeight();
 
-            g2.setRenderingHint(
-                    RenderingHints.KEY_ANTIALIASING,
-                    RenderingHints.VALUE_ANTIALIAS_ON
-            );
+        int maximo = 210;
 
-            int ancho = getWidth();
-            int alto = getHeight();
+        double escala = Math.min(
+                (double) maximo / anchoOriginal,
+                (double) maximo / altoOriginal
+        );
 
-            // Forma circular  
-              
-            Shape circulo =
-                    new java.awt.geom.Ellipse2D.Double(
-                            0, 0, ancho, alto
-                    );
+        int nuevoAncho = (int) (anchoOriginal * escala);
+        int nuevoAlto = (int) (altoOriginal * escala);
 
-            // Todo lo que se dibuje después
-            // quedará dentro del círculo
-            g2.setClip(circulo);
+        Image imagenEscalada = imagenOriginal.getScaledInstance(
+                nuevoAncho,
+                nuevoAlto,
+                Image.SCALE_SMOOTH
+        );
 
-            // Color de fondo
-            g2.setColor(
-                    EstilosUI.getColorPorCategoria(cat)
-            );
+        ImageIcon icono = new ImageIcon(imagenEscalada);
 
-            g2.fillOval(
-                    0,
-                    0,
-                    ancho,
-                    alto
-            );
+    // Botón normal
+    JButton boton = new JButton(icono);
 
-           
+    boton.setPreferredSize(new Dimension(120, 120));
+    boton.setPreferredSize(new Dimension(120, 120));
+    boton.setMaximumSize(new Dimension(120, 120));
 
-            g2.dispose();
-        }
-    };
+    // Quitar apariencia visual del botón
+    boton.setBorderPainted(false);
+    boton.setContentAreaFilled(false);
+    boton.setFocusPainted(false);
+    boton.setOpaque(false);
+    boton.setMargin(new Insets(0, 0, 0, 0));
 
-    circleBtn.setPreferredSize(
-            new Dimension(85, 85)
+    boton.setCursor(
+            Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
     );
 
-    circleBtn.setMaximumSize(
-            new Dimension(85, 85)
-    );
+    boton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-    circleBtn.setFocusPainted(false);
-    circleBtn.setBorderPainted(false);
-    circleBtn.setContentAreaFilled(false);
-
-    circleBtn.setCursor(
-            Cursor.getPredefinedCursor(
-                    Cursor.HAND_CURSOR
-            )
-    );
-
-    circleBtn.setAlignmentX(
-            Component.CENTER_ALIGNMENT
-    );
-
-    circleBtn.addActionListener(
+    // Acción
+    boton.addActionListener(
             e -> frame.mostrarProductosPorCategoria(cat)
     );
 
+    // Nombre de la categoría
     JLabel label =
             new JLabel(cat.name().replace("_", " "));
 
     label.setFont(
-            new Font(
-                    "SansSerif",
-                    Font.BOLD,
-                    12
-            )
+            new Font("SansSerif", Font.BOLD, 12)
     );
 
-    label.setAlignmentX(
-            Component.CENTER_ALIGNMENT
-    );
+    label.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-    p.add(circleBtn);
+    // Agregar elementos
+    p.add(boton);
     p.add(Box.createVerticalStrut(6));
     p.add(label);
 
