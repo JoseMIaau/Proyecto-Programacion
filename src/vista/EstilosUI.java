@@ -61,4 +61,27 @@ public class EstilosUI {
             default: return new Color(245, 200, 70);
         }
     }
+
+    public static String formatearCLP(double monto) {
+        long valor = (long) monto;
+        if (valor == 0) {
+            return "$0";
+        }
+
+        String res = "";
+        int cont = 0;
+        long aux = valor;
+
+        while (aux > 0) {
+            if (cont == 3) {
+                res = "." + res;
+                cont = 0;
+            }
+            res = (aux % 10) + res;
+            aux /= 10;
+            cont++;
+        }
+
+        return "$" + res;
+    }
 }

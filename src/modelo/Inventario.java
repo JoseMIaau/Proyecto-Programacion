@@ -285,7 +285,22 @@ public class Inventario {
 
         return valorTotal;
     }
-    
+
+  //OBTENER EL MENOR STOCK PERO DEL INVENTARIO COMPLETO NO POR CATEGORIA
+    public Producto obtenerProductoPorMenorStockInventario(){
+        Producto productoMenor = null;
+        
+        //Recorre y filtra los productos
+        for (Producto producto : productos){
+            if(productoMenor== null || producto.getStock()<productoMenor.getStock()){
+                    productoMenor = producto;
+            }
+        }
+        return productoMenor;
+    }
+
+
+
     //---Carrito---
     public List<ItemCarrito> getCarrito() {
         return carrito;

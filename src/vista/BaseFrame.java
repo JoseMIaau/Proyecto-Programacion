@@ -78,5 +78,8 @@ public class BaseFrame extends JFrame {
     }
 
     public void buscarProductosPorTexto(String query) {
+        vistaProductos.buscarPorTexto(query);
+        vistaProductos.setTextoBuscador(query);
+        cardLayout.show(root, "PRODUCTOS");
     }
 }
