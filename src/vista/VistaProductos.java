@@ -12,12 +12,15 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.List;
+import java.util.ArrayList;
 
 public class VistaProductos extends JPanel {
     private final BaseFrame frame;
     private final JPanel grid;
     private final JLabel headerTitle;
     private final JTextField searchField;
+    private final JTextField precioMin;
+    private final JTextField precioMax;
 
     public VistaProductos(BaseFrame frame) {
         this.frame = frame;
@@ -25,6 +28,10 @@ public class VistaProductos extends JPanel {
         setBackground(EstilosUI.FONDO);
 
         searchField = new JTextField();
+
+        precioMin = new JTextField(6);
+        precioMax = new JTextField(6);
+
         headerTitle = new JLabel("Catálogo de Productos");
 
         add(createHeader(), BorderLayout.NORTH);
@@ -49,7 +56,55 @@ public class VistaProductos extends JPanel {
         headerTitle.setText("Categoría: " + cat.name().replace("_", " "));
         renderizarLista(Inventario.getInstancia().filtrarPorCategoria(cat));
     }
-    
+
+    private void filtrarPorPrecio() {
+
+        try {
+
+            double minimo = 0;
+            double maximo = Double.MAX_VALUE;
+
+            if (!precioMin.getText().trim().isEmpty()) {
+                minimo = Double.parseDouble(precioMin.getText().trim());
+            }
+
+            if (!precioMax.getText().trim().isEmpty()) {
+                maximo = Double.parseDouble(precioMax.getText().trim());
+            }
+
+            if (minimo > maximo) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "El precio mínimo no puede ser mayor al máximo."
+                );
+                return;
+            }
+
+            List<Producto> productos =
+                    Inventario.getInstancia().leerProductos();
+
+            List<Producto> filtrados = new ArrayList<>();
+
+            for (Producto producto : productos) {
+
+                if (producto.getPrecio() >= minimo
+                        && producto.getPrecio() <= maximo) {
+
+                    filtrados.add(producto);
+                }
+            }
+
+            renderizarLista(filtrados);
+
+        } catch (NumberFormatException e) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Ingrese precios válidos."
+            );
+        }
+    }
+        
 
     private void renderizarLista(List<Producto> lista) {
         grid.removeAll();
@@ -122,7 +177,41 @@ public class VistaProductos extends JPanel {
                 }
             }
         });
-        header.add(searchField, BorderLayout.CENTER);
+        JPanel centro = new JPanel(new BorderLayout());
+        centro.setOpaque(false);
+
+        centro.add(searchField, BorderLayout.CENTER);
+
+
+        // panel filtro por valor
+        JPanel filtros = new JPanel(new FlowLayout());
+        filtros.setOpaque(false);
+
+        JLabel lblDesde = new JLabel("Desde $");
+        lblDesde.setForeground(Color.WHITE);
+
+        JLabel lblHasta = new JLabel("Hasta $");
+        lblHasta.setForeground(Color.WHITE);
+
+        JButton btnFiltrar = new JButton("Filtrar");
+
+        btnFiltrar.addActionListener(e -> {
+            filtrarPorPrecio();
+        });
+
+
+        filtros.add(lblDesde);
+        filtros.add(precioMin);
+
+        filtros.add(lblHasta);
+        filtros.add(precioMax);
+
+        filtros.add(btnFiltrar);
+
+
+        centro.add(filtros, BorderLayout.SOUTH);
+
+        header.add(centro, BorderLayout.CENTER);
 
         JButton cart = EstilosUI.iconButton("🛒");
         cart.addActionListener(e -> frame.mostrarVista("CARRO"));

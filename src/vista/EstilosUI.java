@@ -6,17 +6,21 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
+// Clase auxiliar que centraliza el estilo visual
 public class EstilosUI {
+    // Colores principales
     public static final Color VERDE = new Color(46, 103, 57);
     public static final Color VERDE_CLARO = new Color(166, 211, 160);
     public static final Color FONDO = Color.WHITE;
 
+    // Fuentes utilizadas en títulos y textos
     public static final Font FONT_NORMAL = new Font("SansSerif", Font.PLAIN, 15);
     public static final Font FONT_BOLD = new Font("SansSerif", Font.BOLD, 16);
     public static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 26);
 
+    // Crea un botón personalizado con bordes redondos
     public static JButton roundedButton(String text, Color bg, Color fg) {
-        JButton button = new JButton(text) {
+        JButton button = new JButton(text) { // Dibujar el fondo redondeado del botón
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -38,6 +42,7 @@ public class EstilosUI {
         return button;
     }
 
+    // Crea un botón transparente utilizado principalmente para iconos (Menu principal x ejemplo)
     public static JButton iconButton(String text) {
         JButton b = new JButton(text);
         b.setFont(new Font("SansSerif", Font.PLAIN, 24));
@@ -49,6 +54,7 @@ public class EstilosUI {
         return b;
     }
 
+    // Devuelve un color diferente segum la categoría
     public static Color getColorPorCategoria(Categorias cat) {
         if (cat == null) return new Color(220, 220, 220);
         switch (cat) {

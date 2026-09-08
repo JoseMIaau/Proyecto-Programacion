@@ -106,7 +106,6 @@ public class VistaAdmin extends JPanel {
 
     private void agregarProducto() {
 
-        JTextField txtId = new JTextField();
         JTextField txtNombre = new JTextField();
         JTextField txtPrecio = new JTextField();
         JTextField txtStock = new JTextField();
@@ -122,11 +121,6 @@ public class VistaAdmin extends JPanel {
                         BoxLayout.Y_AXIS
                 )
         );
-
-        panel.add(
-                new JLabel("ID del producto:")
-        );
-        panel.add(txtId);
 
         panel.add(
                 new JLabel("Nombre:")
@@ -162,10 +156,6 @@ public class VistaAdmin extends JPanel {
         }
 
         try {
-
-            int id = Integer.parseInt(
-                    txtId.getText().trim()
-            );
 
             String nombre =
                     txtNombre.getText().trim();
@@ -222,7 +212,7 @@ public class VistaAdmin extends JPanel {
 
             Producto producto =
                     new Producto(
-                            id,
+                                0,
                             nombre,
                             precio,
                             stock,
