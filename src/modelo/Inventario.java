@@ -23,14 +23,14 @@ public class Inventario {
         inicializarDatosDemoSiVacio();
         inicializarAdminPorDefecto();
     }
-
+    //patron singleton
     public static Inventario getInstancia() {
         if (instancia == null) {
             instancia = new Inventario();
         }
         return instancia;
     }
-
+    //en caso de que no exista un archivo de inventario o esté vacio, se inicializan estos datos base
     private void inicializarDatosDemoSiVacio() {
         if (productos.isEmpty()) {
             // FRUTAS Y VERDURAS
@@ -67,7 +67,7 @@ public class Inventario {
             gestorArchivo.guardarCatalogo(productos);
         }
     }
-
+    //mismo caso que el anterior pero es un usuario admin el que se inicializa
     private void inicializarAdminPorDefecto() {
         if (usuariosAdmin.isEmpty()) {
             Admin prueba = new Admin("admin@supercurico.cl", "admin123");
@@ -75,7 +75,8 @@ public class Inventario {
             gestorUsuario.guardarAdmin(new ArrayList<>(usuariosAdmin.values()));
         }
     }
-
+    /*metodo que sirve para registrar un usuario administrador, verifica que pertenezca a la empresa con el sufijo @supercurico.cl
+    de momento este metodo no es utilizado*/
     public boolean registrarAdmin(String correo, String contrasena) {
         if (correo == null || contrasena == null) return false;
         String correoLimpio = correo.trim().toLowerCase();
@@ -95,13 +96,13 @@ public class Inventario {
         gestorUsuario.guardarAdmin(new ArrayList<>(usuariosAdmin.values()));
         return true;
     }
-
+    //utiliza el hashmap de usuariosAdmin para buscar, por medio de el correo, al usuario, se verifica la contraseña y se inicia sesion
     public Admin iniciarSesion(String usuario, String contrasena) {
         if (usuario == null || contrasena == null) return null;
         String userTrim = usuario.trim();
         String pass = contrasena.trim();
 
-        if (usuariosAdmin.containsKey(userTrim)) {
+        if (usuariosAdmin.containsKey(userTrim)) {//busca en el hashmap el correo
             Admin admin = usuariosAdmin.get(userTrim);
             if (admin.getContrasena().equals(pass)) {
                 this.adminActual = admin;
@@ -110,11 +111,11 @@ public class Inventario {
         }
         return null;
     }
-
+    //metodo no utilizado, lo que hace es quitar el inicio de sesion dejando vacio el campo de adminActual
     public void cerrarSesion() {
         this.adminActual = null;
     }
-
+    //metodo booleano que sirve para saber si hay un inicio de sesion activo, metodo no utilizado
     public boolean hayAdminLogueado() {
         return adminActual != null;
     }
@@ -169,7 +170,7 @@ public class Inventario {
     
     //  Leer productos
     public List<Producto> leerProductos(){
-        return new ArrayList<>(productos);
+        return new ArrayList<>(productos);//copia de la lista de productos para que no modifique la original
     }
 
     //Actualizar producto
@@ -216,12 +217,11 @@ public class Inventario {
     //filtrar por precio
     public List<Producto> filtrarPorPrecio(double precioMinimo, double precioMaximo){
         List<Producto> productosFiltrados = new ArrayList<>();
-        if(precioMinimo < 0 || precioMaximo < 0){
+        //validacion de negativos y que el minimo no sea mayor al maximo
+        if(precioMinimo < 0 || precioMaximo < 0 || precioMinimo > precioMaximo){
             return productosFiltrados;
         }
-        if(precioMinimo < precioMaximo){
-            return productosFiltrados;
-        }
+
         for(Producto producto : productos){
             if(producto.getPrecio() >= precioMinimo && producto.getPrecio() <= precioMaximo){
                 productosFiltrados.add(producto);
@@ -231,7 +231,7 @@ public class Inventario {
         return productosFiltrados;
 
     }
-
+    //metodo que busca un producto en base a una cadena de texto, por medio del .contains() y una lista este metodo sirve para busquedas parciales
     public List<Producto> buscarPorNombre(String texto) {
         if (texto == null || texto.trim().isEmpty()) {
             return leerProductos();
@@ -293,7 +293,7 @@ public class Inventario {
         }
         return productoMenor;
     }
-
+    //calcula el valor de todos los productos que hayan en el inventario, tomando en cuenta su stock
     public double calculoValorTotalInventario(){
 
         double valorTotal = 0.0;
@@ -324,20 +324,20 @@ public class Inventario {
     public List<ItemCarrito> getCarrito() {
         return carrito;
     }
-
+    //agrega uno o varios productos a el carrito
     public boolean agregarAlCarrito(Producto p, double cantidad) {
         if (p == null || cantidad <= 0) {
             return false;
         }
-        //Verificacion de si ya existe el prodcuto en el carrito
-        for (ItemCarrito item : carrito) {//Busca si el producto esta en el carrito
+        //verificacion de si ya existe el prodcuto en el carrito
+        for (ItemCarrito item : carrito) {
             if (item.getProducto().getId() == p.getId()) {//si lo encuentra le suma la nueva cantidad en lugar de agregarlo por separado al carrito
                 if (item.getCantidad() + cantidad > p.getStock()) {
-                    return false; // No hay suficiente stock para sumar esa cantidad
+                    return false; // no hay suficiente stock para sumar esa cantidad
                 }
                 
                 item.setCantidad(item.getCantidad() + cantidad);
-                return true;//termina la ejecucion
+                return true;
             }
         }
         //primera vez que se agrega
@@ -345,10 +345,10 @@ public class Inventario {
             return false;
         }
 
-        carrito.add(new ItemCarrito(p, cantidad)); // Agrega el producto al carrito
+        carrito.add(new ItemCarrito(p, cantidad)); //agrega el producto al carrito
         return true;
     }
-
+    
     public void eliminarDelCarrito(int idProducto) {
         carrito.removeIf(item -> item.getProducto().getId() == idProducto);
     }
@@ -364,7 +364,7 @@ public class Inventario {
         }
         return total;
     }
-
+    //verifica que el stock disponible sea suficiente para la compra del carro, descuenta del stock del inventario las unidades, vacia el carrito y guarda el inventario actualizado
     public boolean procesarCompra() {
         if (carrito.isEmpty()) {
             return false;
@@ -377,13 +377,13 @@ public class Inventario {
                 return false;
             }
         }
-
+        // descuenta del inventario lo que se va a comprar
         for (ItemCarrito item : carrito) {
             Producto p = item.getProducto();
             p.setStock((int) (p.getStock() - item.getCantidad()));
         }
 
-        gestorArchivo.guardarCatalogo(productos);
+        gestorArchivo.guardarCatalogo(productos);//actualizacion del inventario
         vaciarCarrito();
         return true;
     }
