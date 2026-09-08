@@ -43,9 +43,9 @@ banner.setBorder(null);
 
 //ruta de las imagenes para el banner, pre cortadas y con el texto integrado
 String[] imagenesBanner = {
-        "/imagenes/Banners/Banner_verduras.png",
-        "/imagenes/Banners/Banner_carnes_y_lacteos.png",
-        "/imagenes/Banners/Banner_panaderia.png"
+        "/imagenes/Banners/banner_verduras.png",
+        "/imagenes/Banners/banner_carnes_y_lacteos.png",
+        "/imagenes/Banners/banner_panaderia.png"
 };
 
 // Label que muestra las imagenes
