@@ -11,12 +11,14 @@ import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.util.List;
 
+// Vista que muestra los productos agregados al carrito, deja eliminar, calcular el total y pagar
 public class VistaCarrito extends JPanel {
     private final BaseFrame frame;
     private final JPanel leftPanel;
     private final JPanel rightPanel;
     private final JLabel totalLabel;
 
+    // Constructor de la vista del carrito
     public VistaCarrito(BaseFrame frame) {
         this.frame = frame;
         setLayout(new BorderLayout());
@@ -54,17 +56,20 @@ public class VistaCarrito extends JPanel {
         actualizarCarrito();
     }
 
+    // Actualiza los productos en el carrito y calcula el total
     public void actualizarCarrito() {
         leftPanel.removeAll();
         rightPanel.removeAll();
 
+        // Obtenemos los productos agregados al carrito
         List<ItemCarrito> items = Inventario.getInstancia().getCarrito();
 
+        // Comprobamos si el carrito tiene algo
         if (items.isEmpty()) {
             JLabel lblVacio = new JLabel("El carrito está vacío.");
             lblVacio.setFont(EstilosUI.FONT_BOLD);
             leftPanel.add(lblVacio);
-        } else {
+        } else {  // Mostrar productos agregados 
             for (ItemCarrito item : items) {
                 leftPanel.add(createCartRow(item));
                 leftPanel.add(Box.createVerticalStrut(12));
@@ -74,16 +79,18 @@ public class VistaCarrito extends JPanel {
             }
         }
 
+        // Calcula y muestra el total
         rightPanel.add(Box.createVerticalStrut(20));
         totalLabel.setText("Total: $" + (int) Inventario.getInstancia().calcularTotalCarrito());
         rightPanel.add(totalLabel);
         rightPanel.add(Box.createVerticalStrut(25));
 
+        // Botón para iniciar el pago
         JButton btnPagar = EstilosUI.roundedButton("PAGAR", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
         btnPagar.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnPagar.setMaximumSize(new Dimension(160, 44));
         btnPagar.addActionListener(e -> {
-            if (items.isEmpty()) {
+            if (items.isEmpty()) { //comprueba si hay algo en el carrito
                 JOptionPane.showMessageDialog(this, "Debe agregar productos antes de pagar", "Carro Vacío", JOptionPane.WARNING_MESSAGE);
             } else {
                 showCheckoutDialog();
@@ -95,6 +102,7 @@ public class VistaCarrito extends JPanel {
         repaint();
     }
 
+    //Encabezado de la vista del carrito
     private JPanel createCartHeader() {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(EstilosUI.VERDE);
@@ -112,6 +120,7 @@ public class VistaCarrito extends JPanel {
         return header;
     }
 
+    // Crea una fila para cada producto 
     private JPanel createCartRow(ItemCarrito item) {
         JPanel row = new JPanel(new BorderLayout(15, 0));
         row.setBackground(EstilosUI.FONDO);
@@ -130,13 +139,14 @@ public class VistaCarrito extends JPanel {
         JLabel price = new JLabel("$" + (int) item.getSubtotal());
         price.setFont(EstilosUI.FONT_BOLD);
 
+        // Botón para eliminar
         JButton trash = new JButton("🗑");
         trash.setFont(new Font("SansSerif", Font.PLAIN, 18));
         trash.setForeground(Color.RED);
         trash.setBorderPainted(false);
         trash.setContentAreaFilled(false);
         trash.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        trash.addActionListener(e -> {
+        trash.addActionListener(e -> { // Eliminar el producto seleccionado y actualizar
             Inventario.getInstancia().eliminarDelCarrito(item.getProducto().getId());
             actualizarCarrito();
         });
@@ -149,6 +159,7 @@ public class VistaCarrito extends JPanel {
         return row;
     }
 
+    // Crea una línea del resumen con el nombre del producto y el subtotal
     private JPanel summaryLine(String name, String price) {
         JPanel line = new JPanel(new BorderLayout());
         line.setOpaque(false);
@@ -164,6 +175,7 @@ public class VistaCarrito extends JPanel {
         return line;
     }
 
+    // Muestra la ventana con los datos para finalizar la compra
     private void showCheckoutDialog() {
         JDialog dialog = new JDialog(frame, "Finalizar Pago", true);
         dialog.setSize(480, 360);
@@ -194,6 +206,7 @@ public class VistaCarrito extends JPanel {
         body.add(txtTarjeta);
         body.add(Box.createVerticalStrut(20));
 
+        // Validar que los campos obligatorios estén completos
         JButton btnConfirmar = EstilosUI.roundedButton("PAGAR AHORA", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
         btnConfirmar.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnConfirmar.addActionListener(e -> {

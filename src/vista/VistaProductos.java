@@ -14,6 +14,7 @@ import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.ArrayList;
 
+// Vista que muestra el catálogo de productos filtrar productos y agregarlos al carrito 
 public class VistaProductos extends JPanel {
     private final BaseFrame frame;
     private final JPanel grid;
@@ -22,6 +23,7 @@ public class VistaProductos extends JPanel {
     private final JTextField precioMin;
     private final JTextField precioMax;
 
+    // Constructor
     public VistaProductos(BaseFrame frame) {
         this.frame = frame;
         setLayout(new BorderLayout());
@@ -47,20 +49,23 @@ public class VistaProductos extends JPanel {
         mostrarTodosLosProductos();
     }
 
+    // Obtiene y muestra todos los productos registrados en el inventario
     public void mostrarTodosLosProductos() {
         headerTitle.setText("Todos los Productos");
         renderizarLista(Inventario.getInstancia().leerProductos());
     }
 
+    // Muestra solamente los productos pertenecientes a la categoría que se selecciono
     public void filtrarPorCategoria(Categorias cat) {
         headerTitle.setText("Categoría: " + cat.name().replace("_", " "));
         renderizarLista(Inventario.getInstancia().filtrarPorCategoria(cat));
     }
 
+    // Filtra los productos según el precio mínimo y máximo ingresado
     private void filtrarPorPrecio() {
 
         try {
-
+        // Valores por defecto del rango de precios
             double minimo = 0;
             double maximo = Double.MAX_VALUE;
 
@@ -72,6 +77,7 @@ public class VistaProductos extends JPanel {
                 maximo = Double.parseDouble(precioMax.getText().trim());
             }
 
+            // Valida que el rango sea correcto
             if (minimo > maximo) {
                 JOptionPane.showMessageDialog(
                         this,
@@ -79,12 +85,13 @@ public class VistaProductos extends JPanel {
                 );
                 return;
             }
-
+            // Obtiene los productos
             List<Producto> productos =
                     Inventario.getInstancia().leerProductos();
-
+            // Lista donde se almacenarán los productos que cumplen el rango
             List<Producto> filtrados = new ArrayList<>();
 
+            // Recorrer los productos y comparar su precio con el rango
             for (Producto producto : productos) {
 
                 if (producto.getPrecio() >= minimo
@@ -93,9 +100,10 @@ public class VistaProductos extends JPanel {
                     filtrados.add(producto);
                 }
             }
-
+        // Muestra los productos que entran en el rango
             renderizarLista(filtrados);
 
+        // Error en caso de valores invalidos
         } catch (NumberFormatException e) {
 
             JOptionPane.showMessageDialog(
@@ -105,7 +113,7 @@ public class VistaProductos extends JPanel {
         }
     }
         
-
+    // Actualiza el panel del catálogo con la lista de productos recibida (crea tarjeta por producto)
     private void renderizarLista(List<Producto> lista) {
         grid.removeAll();
 
@@ -122,6 +130,7 @@ public class VistaProductos extends JPanel {
         grid.repaint();
     }
 
+    //Crea el encabezado
     private JPanel createHeader() {
         JPanel header = new JPanel(new BorderLayout(15, 0));
         header.setBackground(EstilosUI.VERDE);
@@ -140,6 +149,7 @@ public class VistaProductos extends JPanel {
         left.add(headerTitle);
         header.add(left, BorderLayout.WEST);
 
+        //buscar productos
         String placeholder = "Buscar...";
         searchField.setText(placeholder);
         searchField.setFont(EstilosUI.FONT_NORMAL);
@@ -147,6 +157,7 @@ public class VistaProductos extends JPanel {
                 new LineBorder(new Color(220, 220, 220), 1, true),
                 new EmptyBorder(6, 12, 6, 12)
         ));
+        //Manejo del place holder
         searchField.addFocusListener(new java.awt.event.FocusAdapter() {
         @Override
         public void focusGained(java.awt.event.FocusEvent e) {
@@ -177,6 +188,7 @@ public class VistaProductos extends JPanel {
                 }
             }
         });
+
         JPanel centro = new JPanel(new BorderLayout());
         centro.setOpaque(false);
 
@@ -213,6 +225,7 @@ public class VistaProductos extends JPanel {
 
         header.add(centro, BorderLayout.CENTER);
 
+        //Boton para abrir el carrito
         JButton cart = EstilosUI.iconButton("🛒");
         cart.addActionListener(e -> frame.mostrarVista("CARRO"));
         header.add(cart, BorderLayout.EAST);
@@ -230,6 +243,7 @@ public class VistaProductos extends JPanel {
         searchField.setForeground(Color.BLACK);
     }
 
+    //Crea la card para el producto con sus datos yy el boton de agregar
     private JPanel createProductCard(Producto prod) {
         JPanel card = new JPanel();
         card.setBackground(EstilosUI.FONDO);
@@ -274,6 +288,7 @@ public class VistaProductos extends JPanel {
         return card;
     }
 
+    // Muestra una ventana emergente  para poner la cantidad del producto que se quiere
     private void showQuantityDialog(Producto prod) {
         JDialog dialog = new JDialog(frame, "Agregar " + prod.getNombre(), true);
         dialog.setSize(420, 230);
@@ -317,8 +332,8 @@ public class VistaProductos extends JPanel {
         botonMenos.addActionListener(click ->{
             int cantidadActual = Integer.parseInt(txtUnits.getText());
 
-            if(cantidadActual > 1){
-                cantidadActual--;
+            if(cantidadActual > 1){ //valida que la cantidad actual sea mayor a 0
+                cantidadActual--; 
                 txtUnits.setText(String.valueOf(cantidadActual));
             }
         });
@@ -327,7 +342,7 @@ public class VistaProductos extends JPanel {
         botonMas.addActionListener(click ->{
             int cantidadActual = Integer.parseInt(txtUnits.getText());
 
-            if(cantidadActual < prod.getStock()){
+            if(cantidadActual < prod.getStock()){ //comprobar que exista stock suficiente
                 cantidadActual++;
                 txtUnits.setText(String.valueOf(cantidadActual));
             } else {
@@ -360,6 +375,7 @@ public class VistaProductos extends JPanel {
                 return;
             }
 
+            // Agregar el producto y la cantidad seleccionada al carrito
             boolean agregado = Inventario.getInstancia().agregarAlCarrito(prod, cant);
 
             if (agregado) {

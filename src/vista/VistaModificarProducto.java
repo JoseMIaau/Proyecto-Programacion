@@ -5,7 +5,8 @@ import modelo.Producto;
 
 import javax.swing.*;
 import java.awt.*;
-//clase inutil
+
+// Modificar el precio y stock de un producto existente
 public class VistaModificarProducto extends JPanel {
 
     private final BaseFrame frame;
@@ -18,6 +19,7 @@ public class VistaModificarProducto extends JPanel {
     private JButton btnAtras;
     private JButton btnModificar;
 
+    // Constructor 
     public VistaModificarProducto(BaseFrame frame) {
 
         this.frame = frame;
@@ -26,6 +28,7 @@ public class VistaModificarProducto extends JPanel {
         inicializarComponentes();
     }
 
+    // Inicializa y organiza los componentes del formulario
     private void inicializarComponentes() {
 
         setLayout(new BorderLayout(15, 15));
@@ -96,6 +99,7 @@ public class VistaModificarProducto extends JPanel {
         });
     }
 
+    // Busca el producto, valida los nuevos datos y realiza la modificación
     private void modificarProducto() {
 
         try {
@@ -104,6 +108,7 @@ public class VistaModificarProducto extends JPanel {
             String textoPrecio = txtPrecio.getText().trim();
             String textoStock = txtStock.getText().trim();
 
+            // Verificar que todos los campos estén completos
             if (textoId.isEmpty()
                     || textoPrecio.isEmpty()
                     || textoStock.isEmpty()) {
@@ -118,11 +123,12 @@ public class VistaModificarProducto extends JPanel {
                 return;
             }
 
+            // Convertir los valores ingresados a sus tipos
             int id = Integer.parseInt(textoId);
             double nuevoPrecio = Double.parseDouble(textoPrecio);
             int nuevoStock = Integer.parseInt(textoStock);
 
-            if (nuevoPrecio < 0) {
+            if (nuevoPrecio < 0) { // Validar el nuevo precio
 
                 JOptionPane.showMessageDialog(
                         this,
@@ -134,8 +140,8 @@ public class VistaModificarProducto extends JPanel {
                 return;
             }
 
-            if (nuevoStock < 0) {
-
+            if (nuevoStock < 0) { // Validar el nuevo stock
+ 
                 JOptionPane.showMessageDialog(
                         this,
                         "El stock no puede ser negativo.",
@@ -146,8 +152,10 @@ public class VistaModificarProducto extends JPanel {
                 return;
             }
 
+            // Buscar el producto con su ID
             Producto producto = inventario.buscarProducto(id);
 
+            // Verificamoos que el producto exista
             if (producto == null) {
 
                 JOptionPane.showMessageDialog(
@@ -160,6 +168,7 @@ public class VistaModificarProducto extends JPanel {
                 return;
             }
 
+        // Mostramos los datos actuales y solicitar confirmación de los cambios
             int confirmacion = JOptionPane.showConfirmDialog(
                     this,
                     "¿Desea modificar el producto \""
@@ -184,7 +193,7 @@ public class VistaModificarProducto extends JPanel {
             if (confirmacion != JOptionPane.YES_OPTION) {
                 return;
             }
-
+        // Se actualiza el precio y stock del producto en el inventario
             boolean modificado = inventario.actualizarProducto(
                     id,
                     nuevoPrecio,
@@ -225,6 +234,7 @@ public class VistaModificarProducto extends JPanel {
         }
     }
 
+    // Vacía los campos después de la modificación
     private void limpiarFormulario() {
 
         txtId.setText("");

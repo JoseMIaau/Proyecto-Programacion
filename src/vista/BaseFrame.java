@@ -5,11 +5,14 @@ import modelo.Categorias;
 import javax.swing.*;
 import java.awt.*;
 
+// Ventana principal crea, registra y muestra las vistas
 public class BaseFrame extends JFrame {
 
+// CardLayout deja cambiar entre las distintas pantallas dentro de la misma ventana
     private final CardLayout cardLayout = new CardLayout();
     private final JPanel root = new JPanel(cardLayout);
 
+// Vistas principales
     private VistaMenuPrincipal vistaMenuPrincipal;
     private VistaProductos vistaProductos;
     private VistaCarrito vistaCarrito;
@@ -17,6 +20,7 @@ public class BaseFrame extends JFrame {
     private VistaAdmin vistaAdmin;
     private VistaModificarProducto vistaModificarProducto;
 
+// Constructor de la ventana principal
     public BaseFrame() {
 
         super("SuperCuricó");
@@ -47,6 +51,7 @@ public class BaseFrame extends JFrame {
         cardLayout.show(root, "INICIO");
     }
 
+// Cambia la pantalla visible y actualiza su información cuando sea necesario
     public void mostrarVista(String vista) {
 
         if ("PRODUCTOS".equals(vista)) {
@@ -66,17 +71,20 @@ public class BaseFrame extends JFrame {
         cardLayout.show(root, vista);
     }
 
+    // Muestra la vista de productos filtrada por la categoría seleccionada
     public void mostrarProductosPorCategoria(Categorias cat) {
 
         vistaProductos.filtrarPorCategoria(cat);
         cardLayout.show(root, "PRODUCTOS");
     }
 
+   // Vuelve a la pantalla principal 
     public void mostrarMenuPrincipal() {
 
         cardLayout.show(root, "INICIO");
     }
 
+    // Método que busca los productos según el texto ingresado
     public void buscarProductosPorTexto(String query) {
         vistaProductos.buscarPorTexto(query);
         vistaProductos.setTextoBuscador(query);

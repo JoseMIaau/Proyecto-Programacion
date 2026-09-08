@@ -8,8 +8,10 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
+// Vista del admin, permite ver, agregar, modificar y eliminar productos del inventario
 public class VistaAdmin extends JPanel {
 
+// Inventario y componentes de la tabla
     private final BaseFrame frame;
     private final Inventario inventario;
 
@@ -22,7 +24,7 @@ public class VistaAdmin extends JPanel {
     private JButton btnVolver;
     private JButton btnEstadisticas;
 
-
+// Constructor
     public VistaAdmin(BaseFrame frame) {
 
         this.frame = frame;
@@ -32,10 +34,12 @@ public class VistaAdmin extends JPanel {
         poblarTabla();
     }
 
+    // Crea y configura los componentes gráficos de la vista
     private void inicializarComponentes() {
 
         setLayout(new BorderLayout(5, 5));
 
+        // Definimos las columnas que tendra la tabla del inventario
         String[] columnas = {
                 "ID",
                 "Nombre",
@@ -44,6 +48,7 @@ public class VistaAdmin extends JPanel {
                 "Categoría"
         };
 
+        // Crea el modelo de la tabla, tambien impedir la edición directa de las celdas
         modeloTabla = new DefaultTableModel(columnas, 0) {
 
             @Override
@@ -63,6 +68,7 @@ public class VistaAdmin extends JPanel {
                 new FlowLayout()
         );
 
+        // Creamos los botones de administración de productos
         btnAgregar = new JButton("Agregar Producto");
         btnModificar = new JButton("Modificar Producto");
         btnEliminar = new JButton("Eliminar Producto");
@@ -104,8 +110,9 @@ public class VistaAdmin extends JPanel {
         });
     }
 
+    // Solicita los datos necesarios y crea un nuevo producto en el inventario
     private void agregarProducto() {
-
+        // Campos para ingresar los datos
         JTextField txtNombre = new JTextField();
         JTextField txtPrecio = new JTextField();
         JTextField txtStock = new JTextField();
@@ -142,6 +149,7 @@ public class VistaAdmin extends JPanel {
         );
         panel.add(cmbCategoria);
 
+        // Mostrar formulario para ingresar los datos
         int resultado =
                 JOptionPane.showConfirmDialog(
                         this,
@@ -155,7 +163,7 @@ public class VistaAdmin extends JPanel {
             return;
         }
 
-        try {
+        try { //convertimops los datos en los tipos que correspondan
 
             String nombre =
                     txtNombre.getText().trim();
@@ -174,7 +182,8 @@ public class VistaAdmin extends JPanel {
                     (Categorias)
                             cmbCategoria.getSelectedItem();
 
-            if (nombre.isEmpty()) {
+        //Validamos que no hayan campos vacios o erroneos
+            if (nombre.isEmpty()) { 
 
                 JOptionPane.showMessageDialog(
                         this,
@@ -219,6 +228,7 @@ public class VistaAdmin extends JPanel {
                             categoria
                     );
 
+        // Intentar registrar el producto en el inventario y confirmar cual sea el caso
             boolean agregado =
                     inventario.crearProducto(producto);
 
@@ -256,9 +266,10 @@ public class VistaAdmin extends JPanel {
         }
     }
 
+    // Elimina el producto seleccionado en la tabla
     private void eliminarProducto() {
 
-        int fila =
+        int fila = //Obtenemos la fila seleccionada
                 tablaProductos.getSelectedRow();
 
         if (fila == -1) {
@@ -285,7 +296,7 @@ public class VistaAdmin extends JPanel {
                         .getValueAt(fila, 1)
                         .toString();
 
-        int confirmacion =
+        int confirmacion = // Solicitar confirmación antes de eliminar el producto
                 JOptionPane.showConfirmDialog(
                         this,
                         "¿Está seguro de eliminar el producto \""
@@ -296,10 +307,11 @@ public class VistaAdmin extends JPanel {
                         JOptionPane.WARNING_MESSAGE
                 );
 
-        if (confirmacion != JOptionPane.YES_OPTION) {
+        if (confirmacion != JOptionPane.YES_OPTION) { 
             return;
         }
 
+        // Eliminar el producto del inventario
         boolean eliminado =
                 inventario.eliminarProducto(
                         idProducto
@@ -307,8 +319,7 @@ public class VistaAdmin extends JPanel {
 
         if (eliminado) {
 
-            poblarTabla();
-
+            poblarTabla(); 
             JOptionPane.showMessageDialog(
                     this,
                     "Producto eliminado correctamente.",
@@ -475,6 +486,7 @@ public class VistaAdmin extends JPanel {
         );
     }
 
+    // Carga en la tabla todos los productos actualmente registrados
     public void poblarTabla() {
 
         modeloTabla.setRowCount(0);
