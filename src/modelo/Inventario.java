@@ -191,6 +191,26 @@ public class Inventario {
         return false;
     }
 
+    //2
+    //Aumenta el stock de un producto que ya existe
+    public boolean agregarStock(int id, int cantidad){
+        if(cantidad <= 0){
+            return false;
+        }
+
+        Producto producto = buscarProducto(id);
+
+        if(producto == null){
+            return false;
+        }
+
+        int nuevoStock = producto.getStock() + cantidad;
+        producto.setStock(nuevoStock);
+
+        gestorArchivo.guardarCatalogo(productos);
+        return true;
+    }
+
     //Eliminar producto
     public boolean eliminarProducto(int id){
 
