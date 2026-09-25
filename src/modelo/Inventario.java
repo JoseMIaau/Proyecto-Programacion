@@ -349,31 +349,50 @@ public class Inventario {
         if (p == null || cantidad <= 0) {
             return false;
         }
-        //verificacion de si ya existe el prodcuto en el carrito
-        for (ItemCarrito item : carrito) {
-            if (item.getProducto().getId() == p.getId()) {//si lo encuentra le suma la nueva cantidad en lugar de agregarlo por separado al carrito
-                if (item.getCantidad() + cantidad > p.getStock()) {
-                    return false; // no hay suficiente stock para sumar esa cantidad
-                }
-                
-                item.setCantidad(item.getCantidad() + cantidad);
-                return true;
-            }
-        }
-        //primera vez que se agrega
-        if (cantidad > p.getStock()) {
+
+        //hay stock
+        if (p.getStock() < cantidad) {
             return false;
         }
 
-        carrito.add(new ItemCarrito(p, cantidad)); //agrega el producto al carrito
+        //descuenta inmediatamente el stock del producto
+        p.setStock((int)(p.getStock() - cantidad));
+
+        //verificacion de si ya existe el prodcuto en el carrito
+        boolean existe = false;
+        for (ItemCarrito item : carrito) {
+            if (item.getProducto().getId()==p.getId()) {
+                item.setCantidad(item.getCantidad() + cantidad);
+                existe = true;
+                break;
+            }
+        }
+        if (!existe) {
+            carrito.add(new ItemCarrito(p, cantidad));
+        }
         return true;
     }
     
     public void eliminarDelCarrito(int idProducto) {
-        carrito.removeIf(item -> item.getProducto().getId() == idProducto);
+        ItemCarrito aEliminar = null;
+        for (ItemCarrito item : carrito) {
+            if (item.getProducto().getId() == idProducto) {
+                aEliminar = item;
+                break;
+            }
+        }
+        if (aEliminar != null) {
+            int nuevoStock = (int) (aEliminar.getProducto().getStock() + aEliminar.getCantidad());
+            aEliminar.getProducto().setStock(nuevoStock);
+            carrito.remove(aEliminar);
+        }
     }
 
     public void vaciarCarrito() {
+        for (ItemCarrito item : carrito) {
+            int nuevoStock = (int) (item.getProducto().getStock() + item.getCantidad());
+            item.getProducto().setStock(nuevoStock);
+        }
         carrito.clear();
     }
 
@@ -390,21 +409,8 @@ public class Inventario {
             return false;
         }
 
-        // verificacion por si acaso de stock
-        for (ItemCarrito item : carrito) {
-            Producto p = item.getProducto();
-            if (p.getStock() < item.getCantidad()) {
-                return false;
-            }
-        }
-        // descuenta del inventario lo que se va a comprar
-        for (ItemCarrito item : carrito) {
-            Producto p = item.getProducto();
-            p.setStock((int) (p.getStock() - item.getCantidad()));
-        }
-
         gestorArchivo.guardarCatalogo(productos);//actualizacion del inventario
-        vaciarCarrito();
+        carrito.clear();//como se cambió el metodo de vaciar carrito, usando esto no se genera errores
         return true;
     }
 }
