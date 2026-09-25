@@ -22,6 +22,7 @@ public class VistaProductos extends JPanel {
     private final JTextField searchField;
     private final JTextField precioMin;
     private final JTextField precioMax;
+    private Categorias categoriaActual = null;
 
     // Constructor
     public VistaProductos(BaseFrame frame) {
@@ -51,12 +52,14 @@ public class VistaProductos extends JPanel {
 
     // Obtiene y muestra todos los productos registrados en el inventario
     public void mostrarTodosLosProductos() {
+        categoriaActual = null;
         headerTitle.setText("Todos los Productos");
         renderizarLista(Inventario.getInstancia().leerProductos());
     }
 
     // Muestra solamente los productos pertenecientes a la categoría que se selecciono
     public void filtrarPorCategoria(Categorias cat) {
+        categoriaActual = cat;
         headerTitle.setText("Categoría: " + cat.name().replace("_", " "));
         renderizarLista(Inventario.getInstancia().filtrarPorCategoria(cat));
     }
@@ -316,7 +319,7 @@ public class VistaProductos extends JPanel {
         lbl.setFont(EstilosUI.FONT_BOLD);
         JTextField txtUnits = new JTextField("1", 4);
         txtUnits.setHorizontalAlignment(JTextField.CENTER);
-        txtUnits.setEditable(false);
+        txtUnits.setEditable(true);
         
         //Botones MAS Y MENOS
         JButton botonMenos = new JButton("-");
@@ -330,23 +333,29 @@ public class VistaProductos extends JPanel {
 
         //Boton menos 
         botonMenos.addActionListener(click ->{
-            int cantidadActual = Integer.parseInt(txtUnits.getText());
-
-            if(cantidadActual > 1){ //valida que la cantidad actual sea mayor a 0
-                cantidadActual--; 
-                txtUnits.setText(String.valueOf(cantidadActual));
+            try {
+                int cantidadActual = Integer.parseInt(txtUnits.getText().trim());
+                if (cantidadActual > 1) {
+                    cantidadActual--; 
+                    txtUnits.setText(String.valueOf(cantidadActual));
+                }
+            } catch (NumberFormatException ex) {
+                txtUnits.setText("1");
             }
         });
 
         //Boton mas
         botonMas.addActionListener(click ->{
-            int cantidadActual = Integer.parseInt(txtUnits.getText());
-
-            if(cantidadActual < prod.getStock()){ //comprobar que exista stock suficiente
-                cantidadActual++;
-                txtUnits.setText(String.valueOf(cantidadActual));
-            } else {
-                JOptionPane.showMessageDialog(dialog, "No hay mas Stock", "Stock insuficiente", JOptionPane.WARNING_MESSAGE);
+            try {
+                int cantidadActual = Integer.parseInt(txtUnits.getText().trim());
+                if (cantidadActual < prod.getStock()) {
+                    cantidadActual++;
+                    txtUnits.setText(String.valueOf(cantidadActual));
+                } else {
+                    JOptionPane.showMessageDialog(dialog, "No hay más stock", "Stock insuficiente", JOptionPane.WARNING_MESSAGE);
+                }
+            } catch (NumberFormatException ex) {
+                txtUnits.setText("1");
             }
         });
 
@@ -381,6 +390,13 @@ public class VistaProductos extends JPanel {
             if (agregado) {
                 JOptionPane.showMessageDialog(dialog, "¡" + prod.getNombre() + " agregado al carrito!");
                 dialog.dispose();
+                //vuelve a renderizar
+                if (categoriaActual != null) {
+                    filtrarPorCategoria(categoriaActual);
+                } else {
+                    mostrarTodosLosProductos();
+                }
+                
             } else {
                 JOptionPane.showMessageDialog(dialog, 
                     "No se puede agregar: la cantidad solicitada (sumada a lo que ya tienes en el carro) supera el stock disponible (" + prod.getStock() + ").", 

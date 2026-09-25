@@ -77,7 +77,32 @@ public class VistaCarrito extends JPanel {
                 rightPanel.add(summaryLine(item.getProducto().getNombre() + " (x" + item.getCantidad() + ")", "$" + (int) item.getSubtotal()));
                 rightPanel.add(Box.createVerticalStrut(8));
             }
+
+            //vaciar carrito
+            leftPanel.add(Box.createVerticalStrut(20));
+            JButton btnVaciar = EstilosUI.roundedButton("vaciar carrito", new Color(255, 230, 230), new Color(180, 40, 40));
+            btnVaciar.setAlignmentX(Component.CENTER_ALIGNMENT);
+            btnVaciar.setMaximumSize(new Dimension(160, 44));
+            btnVaciar.addActionListener(e -> {
+                int confirmacion = JOptionPane.showConfirmDialog(
+                        this,
+                        "¿Estás seguro de que deseas eliminar todos los productos del carrito?",
+                        "Confirmar vaciado",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                );
+
+                if (confirmacion == JOptionPane.YES_OPTION) {
+                    Inventario.getInstancia().vaciarCarrito();
+                    actualizarCarrito();
+                }
+            });
+            leftPanel.add(btnVaciar);
         }
+
+        
+
+
 
         // Calcula y muestra el total
         rightPanel.add(Box.createVerticalStrut(20));
