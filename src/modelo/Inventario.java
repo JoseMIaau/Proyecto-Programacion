@@ -1,5 +1,4 @@
 package modelo;
-
 import java.util.HashMap;
 import java.util.ArrayList;
 import persistencia.GestorArchivo;
@@ -64,6 +63,7 @@ public class Inventario {
             productos.add(new Producto(17, "Cloro Gel 900ml", 1690.0, 40, Categorias.LIMPIEZA));
             productos.add(new Producto(18, "Lavaloza Limón 750ml", 2190.0, 28, Categorias.LIMPIEZA));
                 
+
             gestorArchivo.guardarCatalogo(productos);
         }
     }
@@ -135,7 +135,6 @@ public class Inventario {
                 mayorId = producto.getId();
             }
         }
-
         return mayorId + 1;
     }
 
@@ -169,7 +168,7 @@ public class Inventario {
         return null;
     }
     
-    // Leer productos
+    //  Leer productos
     public List<Producto> leerProductos(){
         return new ArrayList<>(productos);//copia de la lista de productos para que no modifique la original
     }
@@ -190,7 +189,6 @@ public class Inventario {
             gestorArchivo.guardarCatalogo(productos); // lo guarda 
             return true;
         }
-
         return false;
     }
 
@@ -224,7 +222,6 @@ public class Inventario {
             gestorArchivo.guardarCatalogo(productos);
             return true;
         }
-
         return false;
     }
     
@@ -268,7 +265,6 @@ public class Inventario {
                 lista.add(p);
             }
         }
-
         return lista;
     }
 
@@ -315,7 +311,6 @@ public class Inventario {
                 }
             }
         }
-
         return productoMenor;
     }
     //calcula el valor de todos los productos que hayan en el inventario, tomando en cuenta su stock
@@ -330,7 +325,7 @@ public class Inventario {
         return valorTotal;
     }
 
-//OBTENER EL MENOR STOCK PERO DEL INVENTARIO COMPLETO NO POR CATEGORIA
+  //OBTENER EL MENOR STOCK PERO DEL INVENTARIO COMPLETO NO POR CATEGORIA
     public Producto obtenerProductoPorMenorStockInventario(){
         Producto productoMenor = null;
         
@@ -340,12 +335,12 @@ public class Inventario {
                     productoMenor = producto;
             }
         }
-
         return productoMenor;
     }
 
 
-    //carrito
+
+    //---Carrito---
     public List<ItemCarrito> getCarrito() {
         return carrito;
     }
@@ -372,11 +367,9 @@ public class Inventario {
                 break;
             }
         }
-
         if (!existe) {
             carrito.add(new ItemCarrito(p, cantidad));
         }
-
         return true;
     }
     
@@ -403,24 +396,24 @@ public class Inventario {
         carrito.clear();
     }
 
-    //subtotal del carrito
+    //CALCULO DE SUBTOTAL
     public double calcularSubtotal() {
         double subtotal = 0.0;
+
         for (ItemCarrito item : carrito) {
-            subtotal += item.getSubtotal();
+                subtotal += item.getSubtotal();
+            }
+
+            return subtotal;
         }
-        return subtotal;
-    }
-
-    //calculo del IVA
+ // CALCULO DEL IVA
     public double calcularIVA() {
-        return calcularSubtotal() * 0.19;
-    }
-
-    ///subtotal mas el iva
+            return calcularSubtotal() * 0.19;
+        }
+ // SUBTOTAL MAS EL IVA 
     public double calcularTotalCarrito() {
-        return calcularSubtotal() + calcularIVA();
-    }
+            return calcularSubtotal() + calcularIVA();
+        }
 
     //verifica que el stock disponible sea suficiente para la compra del carro, descuenta del stock del inventario las unidades, vacia el carrito y guarda el inventario actualizado
     public boolean procesarCompra() {
@@ -428,8 +421,8 @@ public class Inventario {
             return false;
         }
 
-        gestorArchivo.guardarCatalogo(productos);
-        carrito.clear();
+        gestorArchivo.guardarCatalogo(productos);//actualizacion del inventario
+        carrito.clear();//como se cambió el metodo de vaciar carrito, usando esto no se genera errores
         return true;
     }
 }
