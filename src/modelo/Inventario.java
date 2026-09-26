@@ -1,4 +1,5 @@
 package modelo;
+
 import java.util.HashMap;
 import java.util.ArrayList;
 import persistencia.GestorArchivo;
@@ -24,6 +25,7 @@ public class Inventario {
         inicializarAdminPorDefecto();
     }
 
+    //patron singleton
     public static Inventario getInstancia() {
         if (instancia == null) {
             instancia = new Inventario();
@@ -31,6 +33,7 @@ public class Inventario {
         return instancia;
     }
 
+    //en caso de que no exista un archivo de inventario o esté vacio, se inicializan estos datos base
     private void inicializarDatosDemoSiVacio() {
         if (productos.isEmpty()) {
             // FRUTAS Y VERDURAS
@@ -63,11 +66,11 @@ public class Inventario {
             productos.add(new Producto(17, "Cloro Gel 900ml", 1690.0, 40, Categorias.LIMPIEZA));
             productos.add(new Producto(18, "Lavaloza Limón 750ml", 2190.0, 28, Categorias.LIMPIEZA));
                 
-
             gestorArchivo.guardarCatalogo(productos);
         }
     }
 
+    //mismo caso que el anterior pero es un usuario admin el que se inicializa
     private void inicializarAdminPorDefecto() {
         if (usuariosAdmin.isEmpty()) {
             Admin prueba = new Admin("admin@supercurico.cl", "admin123");
@@ -76,6 +79,8 @@ public class Inventario {
         }
     }
 
+    /*metodo que sirve para registrar un usuario administrador, verifica que pertenezca a la empresa con el sufijo @supercurico.cl
+    de momento este metodo no es utilizado*/
     public boolean registrarAdmin(String correo, String contrasena) {
         if (correo == null || contrasena == null) return false;
         String correoLimpio = correo.trim().toLowerCase();
@@ -96,6 +101,7 @@ public class Inventario {
         return true;
     }
 
+    //utiliza el hashmap de usuariosAdmin para buscar, por medio de el correo, al usuario, se verifica la contraseña y se inicia sesion
     public Admin iniciarSesion(String usuario, String contrasena) {
         if (usuario == null || contrasena == null) return null;
         String userTrim = usuario.trim();
@@ -111,10 +117,12 @@ public class Inventario {
         return null;
     }
 
+    //metodo no utilizado, lo que hace es quitar el inicio de sesion dejando vacio el campo de adminActual
     public void cerrarSesion() {
         this.adminActual = null;
     }
 
+    //metodo booleano que sirve para saber si hay un inicio de sesion activo, metodo no utilizado
     public boolean hayAdminLogueado() {
         return adminActual != null;
     }
@@ -134,6 +142,7 @@ public class Inventario {
                 mayorId = producto.getId();
             }
         }
+
         return mayorId + 1;
     }
 
@@ -167,9 +176,9 @@ public class Inventario {
         return null;
     }
     
-    //  Leer productos
+    // Leer productos
     public List<Producto> leerProductos(){
-        return new ArrayList<>(productos);
+        return new ArrayList<>(productos);//copia de la lista de productos para que no modifique la original
     }
 
     //Actualizar producto
@@ -188,7 +197,28 @@ public class Inventario {
             gestorArchivo.guardarCatalogo(productos); // lo guarda 
             return true;
         }
+
         return false;
+    }
+
+    //2
+    //Aumenta el stock de un producto que ya existe
+    public boolean agregarStock(int id, int cantidad){
+        if(cantidad <= 0){
+            return false;
+        }
+
+        Producto producto = buscarProducto(id);
+
+        if(producto == null){
+            return false;
+        }
+
+        int nuevoStock = producto.getStock() + cantidad;
+        producto.setStock(nuevoStock);
+
+        gestorArchivo.guardarCatalogo(productos);
+        return true;
     }
 
     //Eliminar producto
@@ -201,6 +231,7 @@ public class Inventario {
             gestorArchivo.guardarCatalogo(productos);
             return true;
         }
+
         return false;
     }
     
@@ -213,6 +244,25 @@ public class Inventario {
         return filtrados;
     }
 
+    //filtrar por precio
+    public List<Producto> filtrarPorPrecio(double precioMinimo, double precioMaximo){
+        List<Producto> productosFiltrados = new ArrayList<>();
+        //validacion de negativos y que el minimo no sea mayor al maximo
+        if(precioMinimo < 0 || precioMaximo < 0 || precioMinimo > precioMaximo){
+            return productosFiltrados;
+        }
+
+        for(Producto producto : productos){
+            if(producto.getPrecio() >= precioMinimo && producto.getPrecio() <= precioMaximo){
+                productosFiltrados.add(producto);
+            }
+        }
+
+        return productosFiltrados;
+
+    }
+
+    //metodo que busca un producto en base a una cadena de texto, por medio del .contains() y una lista este metodo sirve para busquedas parciales
     public List<Producto> buscarPorNombre(String texto) {
         if (texto == null || texto.trim().isEmpty()) {
             return leerProductos();
@@ -226,6 +276,7 @@ public class Inventario {
                 lista.add(p);
             }
         }
+
         return lista;
     }
 
@@ -272,9 +323,11 @@ public class Inventario {
                 }
             }
         }
+
         return productoMenor;
     }
 
+    //calcula el valor de todos los productos que hayan en el inventario, tomando en cuenta su stock
     public double calculoValorTotalInventario(){
 
         double valorTotal = 0.0;
@@ -286,7 +339,7 @@ public class Inventario {
         return valorTotal;
     }
 
-  //OBTENER EL MENOR STOCK PERO DEL INVENTARIO COMPLETO NO POR CATEGORIA
+//OBTENER EL MENOR STOCK PERO DEL INVENTARIO COMPLETO NO POR CATEGORIA
     public Producto obtenerProductoPorMenorStockInventario(){
         Producto productoMenor = null;
         
@@ -296,76 +349,98 @@ public class Inventario {
                     productoMenor = producto;
             }
         }
+
         return productoMenor;
     }
 
 
-
-    //---Carrito---
+    //carrito
     public List<ItemCarrito> getCarrito() {
         return carrito;
     }
 
+    //agrega uno o varios productos a el carrito
     public boolean agregarAlCarrito(Producto p, double cantidad) {
         if (p == null || cantidad <= 0) {
             return false;
         }
-        //Verificacion de si ya existe el prodcuto en el carrito
-        for (ItemCarrito item : carrito) {//Busca si el producto esta en el carrito
-            if (item.getProducto().getId() == p.getId()) {//si lo encuentra le suma la nueva cantidad en lugar de agregarlo por separado al carrito
-                if (item.getCantidad() + cantidad > p.getStock()) {
-                    return false; // No hay suficiente stock para sumar esa cantidad
-                }
-                
-                item.setCantidad(item.getCantidad() + cantidad);
-                return true;//termina la ejecucion
-            }
-        }
-        //primera vez que se agrega
-        if (cantidad > p.getStock()) {
+
+        //hay stock
+        if (p.getStock() < cantidad) {
             return false;
         }
 
-        carrito.add(new ItemCarrito(p, cantidad)); // Agrega el producto al carrito
+        //descuenta inmediatamente el stock del producto
+        p.setStock((int)(p.getStock() - cantidad));
+
+        //verificacion de si ya existe el prodcuto en el carrito
+        boolean existe = false;
+        for (ItemCarrito item : carrito) {
+            if (item.getProducto().getId()==p.getId()) {
+                item.setCantidad(item.getCantidad() + cantidad);
+                existe = true;
+                break;
+            }
+        }
+
+        if (!existe) {
+            carrito.add(new ItemCarrito(p, cantidad));
+        }
+
         return true;
     }
-
+    
     public void eliminarDelCarrito(int idProducto) {
-        carrito.removeIf(item -> item.getProducto().getId() == idProducto);
+        ItemCarrito aEliminar = null;
+        for (ItemCarrito item : carrito) {
+            if (item.getProducto().getId() == idProducto) {
+                aEliminar = item;
+                break;
+            }
+        }
+
+        if (aEliminar != null) {
+            int nuevoStock = (int) (aEliminar.getProducto().getStock() + aEliminar.getCantidad());
+            aEliminar.getProducto().setStock(nuevoStock);
+            carrito.remove(aEliminar);
+        }
     }
 
     public void vaciarCarrito() {
+        for (ItemCarrito item : carrito) {
+            int nuevoStock = (int) (item.getProducto().getStock() + item.getCantidad());
+            item.getProducto().setStock(nuevoStock);
+        }
         carrito.clear();
     }
 
-    public double calcularTotalCarrito() {
-        double total = 0.0;
+    //subtotal del carrito
+    public double calcularSubtotal() {
+        double subtotal = 0.0;
         for (ItemCarrito item : carrito) {
-            total += item.getSubtotal();
+            subtotal += item.getSubtotal();
         }
-        return total;
+        return subtotal;
     }
 
+    //calculo del IVA
+    public double calcularIVA() {
+        return calcularSubtotal() * 0.19;
+    }
+
+    ///subtotal mas el iva
+    public double calcularTotalCarrito() {
+        return calcularSubtotal() + calcularIVA();
+    }
+
+    //verifica que el stock disponible sea suficiente para la compra del carro, descuenta del stock del inventario las unidades, vacia el carrito y guarda el inventario actualizado
     public boolean procesarCompra() {
         if (carrito.isEmpty()) {
             return false;
         }
 
-        // verificacion por si acaso de stock
-        for (ItemCarrito item : carrito) {
-            Producto p = item.getProducto();
-            if (p.getStock() < item.getCantidad()) {
-                return false;
-            }
-        }
-
-        for (ItemCarrito item : carrito) {
-            Producto p = item.getProducto();
-            p.setStock((int) (p.getStock() - item.getCantidad()));
-        }
-
         gestorArchivo.guardarCatalogo(productos);
-        vaciarCarrito();
+        carrito.clear();
         return true;
     }
 }
