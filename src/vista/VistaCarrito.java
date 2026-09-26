@@ -266,3 +266,5 @@ public class VistaCarrito extends JPanel {
         dialog.setVisible(true);
     }
 }
+
+//texto para que me deje hacer el commit y merge
