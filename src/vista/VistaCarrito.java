@@ -74,7 +74,7 @@ public class VistaCarrito extends JPanel {
             } 
         } 
  
-        //vista actualizada para que se muestre el subtotal y el iva tambien 
+        ///carrito con iva subtotal y total
         rightPanel.add(Box.createVerticalStrut(20));
 
         double subtotal = Inventario.getInstancia().calcularSubtotal();

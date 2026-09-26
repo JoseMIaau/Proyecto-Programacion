@@ -24,7 +24,6 @@ public class Inventario {
         inicializarDatosDemoSiVacio();
         inicializarAdminPorDefecto();
     }
-
     //patron singleton
     public static Inventario getInstancia() {
         if (instancia == null) {
@@ -32,7 +31,6 @@ public class Inventario {
         }
         return instancia;
     }
-
     //en caso de que no exista un archivo de inventario o esté vacio, se inicializan estos datos base
     private void inicializarDatosDemoSiVacio() {
         if (productos.isEmpty()) {
@@ -69,7 +67,6 @@ public class Inventario {
             gestorArchivo.guardarCatalogo(productos);
         }
     }
-
     //mismo caso que el anterior pero es un usuario admin el que se inicializa
     private void inicializarAdminPorDefecto() {
         if (usuariosAdmin.isEmpty()) {
@@ -78,7 +75,6 @@ public class Inventario {
             gestorUsuario.guardarAdmin(new ArrayList<>(usuariosAdmin.values()));
         }
     }
-
     /*metodo que sirve para registrar un usuario administrador, verifica que pertenezca a la empresa con el sufijo @supercurico.cl
     de momento este metodo no es utilizado*/
     public boolean registrarAdmin(String correo, String contrasena) {
@@ -100,14 +96,13 @@ public class Inventario {
         gestorUsuario.guardarAdmin(new ArrayList<>(usuariosAdmin.values()));
         return true;
     }
-
     //utiliza el hashmap de usuariosAdmin para buscar, por medio de el correo, al usuario, se verifica la contraseña y se inicia sesion
     public Admin iniciarSesion(String usuario, String contrasena) {
         if (usuario == null || contrasena == null) return null;
         String userTrim = usuario.trim();
         String pass = contrasena.trim();
 
-        if (usuariosAdmin.containsKey(userTrim)) {
+        if (usuariosAdmin.containsKey(userTrim)) {//busca en el hashmap el correo
             Admin admin = usuariosAdmin.get(userTrim);
             if (admin.getContrasena().equals(pass)) {
                 this.adminActual = admin;
@@ -116,12 +111,10 @@ public class Inventario {
         }
         return null;
     }
-
     //metodo no utilizado, lo que hace es quitar el inicio de sesion dejando vacio el campo de adminActual
     public void cerrarSesion() {
         this.adminActual = null;
     }
-
     //metodo booleano que sirve para saber si hay un inicio de sesion activo, metodo no utilizado
     public boolean hayAdminLogueado() {
         return adminActual != null;
@@ -261,7 +254,6 @@ public class Inventario {
         return productosFiltrados;
 
     }
-
     //metodo que busca un producto en base a una cadena de texto, por medio del .contains() y una lista este metodo sirve para busquedas parciales
     public List<Producto> buscarPorNombre(String texto) {
         if (texto == null || texto.trim().isEmpty()) {
@@ -326,7 +318,6 @@ public class Inventario {
 
         return productoMenor;
     }
-
     //calcula el valor de todos los productos que hayan en el inventario, tomando en cuenta su stock
     public double calculoValorTotalInventario(){
 
@@ -358,7 +349,6 @@ public class Inventario {
     public List<ItemCarrito> getCarrito() {
         return carrito;
     }
-
     //agrega uno o varios productos a el carrito
     public boolean agregarAlCarrito(Producto p, double cantidad) {
         if (p == null || cantidad <= 0) {
@@ -398,7 +388,6 @@ public class Inventario {
                 break;
             }
         }
-
         if (aEliminar != null) {
             int nuevoStock = (int) (aEliminar.getProducto().getStock() + aEliminar.getCantidad());
             aEliminar.getProducto().setStock(nuevoStock);

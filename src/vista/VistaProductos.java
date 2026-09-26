@@ -12,19 +12,29 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.List;
+import java.util.ArrayList;
 
+// Vista que muestra el catálogo de productos filtrar productos y agregarlos al carrito 
 public class VistaProductos extends JPanel {
     private final BaseFrame frame;
     private final JPanel grid;
     private final JLabel headerTitle;
     private final JTextField searchField;
+    private final JTextField precioMin;
+    private final JTextField precioMax;
+    private Categorias categoriaActual = null;
 
+    // Constructor
     public VistaProductos(BaseFrame frame) {
         this.frame = frame;
         setLayout(new BorderLayout());
         setBackground(EstilosUI.FONDO);
 
         searchField = new JTextField();
+
+        precioMin = new JTextField(6);
+        precioMax = new JTextField(6);
+
         headerTitle = new JLabel("Catálogo de Productos");
 
         add(createHeader(), BorderLayout.NORTH);
@@ -40,17 +50,73 @@ public class VistaProductos extends JPanel {
         mostrarTodosLosProductos();
     }
 
+    // Obtiene y muestra todos los productos registrados en el inventario
     public void mostrarTodosLosProductos() {
+        categoriaActual = null;
         headerTitle.setText("Todos los Productos");
         renderizarLista(Inventario.getInstancia().leerProductos());
     }
 
+    // Muestra solamente los productos pertenecientes a la categoría que se selecciono
     public void filtrarPorCategoria(Categorias cat) {
+        categoriaActual = cat;
         headerTitle.setText("Categoría: " + cat.name().replace("_", " "));
         renderizarLista(Inventario.getInstancia().filtrarPorCategoria(cat));
     }
-    
 
+    // Filtra los productos según el precio mínimo y máximo ingresado
+    private void filtrarPorPrecio() {
+
+        try {
+        // Valores por defecto del rango de precios
+            double minimo = 0;
+            double maximo = Double.MAX_VALUE;
+
+            if (!precioMin.getText().trim().isEmpty()) {
+                minimo = Double.parseDouble(precioMin.getText().trim());
+            }
+
+            if (!precioMax.getText().trim().isEmpty()) {
+                maximo = Double.parseDouble(precioMax.getText().trim());
+            }
+
+            // Valida que el rango sea correcto
+            if (minimo > maximo) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "El precio mínimo no puede ser mayor al máximo."
+                );
+                return;
+            }
+            // Obtiene los productos
+            List<Producto> productos =
+                    Inventario.getInstancia().leerProductos();
+            // Lista donde se almacenarán los productos que cumplen el rango
+            List<Producto> filtrados = new ArrayList<>();
+
+            // Recorrer los productos y comparar su precio con el rango
+            for (Producto producto : productos) {
+
+                if (producto.getPrecio() >= minimo
+                        && producto.getPrecio() <= maximo) {
+
+                    filtrados.add(producto);
+                }
+            }
+        // Muestra los productos que entran en el rango
+            renderizarLista(filtrados);
+
+        // Error en caso de valores invalidos
+        } catch (NumberFormatException e) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Ingrese precios válidos."
+            );
+        }
+    }
+        
+    // Actualiza el panel del catálogo con la lista de productos recibida (crea tarjeta por producto)
     private void renderizarLista(List<Producto> lista) {
         grid.removeAll();
 
@@ -67,6 +133,7 @@ public class VistaProductos extends JPanel {
         grid.repaint();
     }
 
+    //Crea el encabezado
     private JPanel createHeader() {
         JPanel header = new JPanel(new BorderLayout(15, 0));
         header.setBackground(EstilosUI.VERDE);
@@ -85,6 +152,7 @@ public class VistaProductos extends JPanel {
         left.add(headerTitle);
         header.add(left, BorderLayout.WEST);
 
+        //buscar productos
         String placeholder = "Buscar...";
         searchField.setText(placeholder);
         searchField.setFont(EstilosUI.FONT_NORMAL);
@@ -92,6 +160,7 @@ public class VistaProductos extends JPanel {
                 new LineBorder(new Color(220, 220, 220), 1, true),
                 new EmptyBorder(6, 12, 6, 12)
         ));
+        //Manejo del place holder
         searchField.addFocusListener(new java.awt.event.FocusAdapter() {
         @Override
         public void focusGained(java.awt.event.FocusEvent e) {
@@ -122,8 +191,44 @@ public class VistaProductos extends JPanel {
                 }
             }
         });
-        header.add(searchField, BorderLayout.CENTER);
 
+        JPanel centro = new JPanel(new BorderLayout());
+        centro.setOpaque(false);
+
+        centro.add(searchField, BorderLayout.CENTER);
+
+
+        // panel filtro por valor
+        JPanel filtros = new JPanel(new FlowLayout());
+        filtros.setOpaque(false);
+
+        JLabel lblDesde = new JLabel("Desde $");
+        lblDesde.setForeground(Color.WHITE);
+
+        JLabel lblHasta = new JLabel("Hasta $");
+        lblHasta.setForeground(Color.WHITE);
+
+        JButton btnFiltrar = new JButton("Filtrar");
+
+        btnFiltrar.addActionListener(e -> {
+            filtrarPorPrecio();
+        });
+
+
+        filtros.add(lblDesde);
+        filtros.add(precioMin);
+
+        filtros.add(lblHasta);
+        filtros.add(precioMax);
+
+        filtros.add(btnFiltrar);
+
+
+        centro.add(filtros, BorderLayout.SOUTH);
+
+        header.add(centro, BorderLayout.CENTER);
+
+        //Boton para abrir el carrito
         JButton cart = EstilosUI.iconButton("🛒");
         cart.addActionListener(e -> frame.mostrarVista("CARRO"));
         header.add(cart, BorderLayout.EAST);
@@ -141,6 +246,7 @@ public class VistaProductos extends JPanel {
         searchField.setForeground(Color.BLACK);
     }
 
+    //Crea la card para el producto con sus datos yy el boton de agregar
     private JPanel createProductCard(Producto prod) {
         JPanel card = new JPanel();
         card.setBackground(EstilosUI.FONDO);
@@ -185,6 +291,7 @@ public class VistaProductos extends JPanel {
         return card;
     }
 
+    // Muestra una ventana emergente  para poner la cantidad del producto que se quiere
     private void showQuantityDialog(Producto prod) {
         JDialog dialog = new JDialog(frame, "Agregar " + prod.getNombre(), true);
         dialog.setSize(420, 230);
@@ -212,7 +319,7 @@ public class VistaProductos extends JPanel {
         lbl.setFont(EstilosUI.FONT_BOLD);
         JTextField txtUnits = new JTextField("1", 4);
         txtUnits.setHorizontalAlignment(JTextField.CENTER);
-        txtUnits.setEditable(false);
+        txtUnits.setEditable(true);
         
         //Botones MAS Y MENOS
         JButton botonMenos = new JButton("-");
@@ -226,23 +333,29 @@ public class VistaProductos extends JPanel {
 
         //Boton menos 
         botonMenos.addActionListener(click ->{
-            int cantidadActual = Integer.parseInt(txtUnits.getText());
-
-            if(cantidadActual > 1){
-                cantidadActual--;
-                txtUnits.setText(String.valueOf(cantidadActual));
+            try {
+                int cantidadActual = Integer.parseInt(txtUnits.getText().trim());
+                if (cantidadActual > 1) {
+                    cantidadActual--; 
+                    txtUnits.setText(String.valueOf(cantidadActual));
+                }
+            } catch (NumberFormatException ex) {
+                txtUnits.setText("1");
             }
         });
 
         //Boton mas
         botonMas.addActionListener(click ->{
-            int cantidadActual = Integer.parseInt(txtUnits.getText());
-
-            if(cantidadActual < prod.getStock()){
-                cantidadActual++;
-                txtUnits.setText(String.valueOf(cantidadActual));
-            } else {
-                JOptionPane.showMessageDialog(dialog, "No hay mas Stock", "Stock insuficiente", JOptionPane.WARNING_MESSAGE);
+            try {
+                int cantidadActual = Integer.parseInt(txtUnits.getText().trim());
+                if (cantidadActual < prod.getStock()) {
+                    cantidadActual++;
+                    txtUnits.setText(String.valueOf(cantidadActual));
+                } else {
+                    JOptionPane.showMessageDialog(dialog, "No hay más stock", "Stock insuficiente", JOptionPane.WARNING_MESSAGE);
+                }
+            } catch (NumberFormatException ex) {
+                txtUnits.setText("1");
             }
         });
 
@@ -271,11 +384,19 @@ public class VistaProductos extends JPanel {
                 return;
             }
 
+            // Agregar el producto y la cantidad seleccionada al carrito
             boolean agregado = Inventario.getInstancia().agregarAlCarrito(prod, cant);
 
             if (agregado) {
                 JOptionPane.showMessageDialog(dialog, "¡" + prod.getNombre() + " agregado al carrito!");
                 dialog.dispose();
+                //vuelve a renderizar
+                if (categoriaActual != null) {
+                    filtrarPorCategoria(categoriaActual);
+                } else {
+                    mostrarTodosLosProductos();
+                }
+                
             } else {
                 JOptionPane.showMessageDialog(dialog, 
                     "No se puede agregar: la cantidad solicitada (sumada a lo que ya tienes en el carro) supera el stock disponible (" + prod.getStock() + ").", 

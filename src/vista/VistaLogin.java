@@ -7,15 +7,17 @@ import modelo.Inventario;
 
 import java.awt.*;
 
+// Vista de inicio de sesión para acceder a admin
 public class VistaLogin extends JPanel {
 
+    // Componentes para ingresar las credenciales del usuario
     private BaseFrame frame; 
     private JTextField txtUsuario;
     private JPasswordField txtContrasena;
     private JButton btnIngresar;
     private JButton btnVolver;
 
-
+    // Constructor
     public VistaLogin(BaseFrame frame) {
 
         this.frame = frame;
@@ -45,6 +47,7 @@ public class VistaLogin extends JPanel {
         gbc.gridy = 1;
         panel.add(subtitulo, gbc);
 
+        //Campo para ingresar el usuario
         JLabel lblUsuario = new JLabel("Usuario");
         lblUsuario.setFont(EstilosUI.FONT_NORMAL);
 
@@ -57,6 +60,7 @@ public class VistaLogin extends JPanel {
         gbc.gridy = 3;
         panel.add(txtUsuario, gbc);
 
+        //Campo para ingresar la contraseña
         JLabel lblContrasena = new JLabel("Contraseña");
         lblContrasena.setFont(EstilosUI.FONT_NORMAL);
 
@@ -69,6 +73,7 @@ public class VistaLogin extends JPanel {
         gbc.gridy = 5;
         panel.add(txtContrasena, gbc);
 
+        // Botón para ir al admin
         btnIngresar = EstilosUI.roundedButton(
                 "Ingresar",
                 EstilosUI.VERDE,
@@ -92,7 +97,7 @@ public class VistaLogin extends JPanel {
         gbc.insets = new Insets(20, 8, 8, 8);
         panel.add(btnIngresar, gbc);
 
-
+    // Botón para volver al menu
         btnVolver = EstilosUI.roundedButton(
                 "Volver",
                 Color.GRAY,
