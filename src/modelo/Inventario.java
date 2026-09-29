@@ -192,7 +192,43 @@ public class Inventario {
         return false;
     }
 
-    //2
+    //Hito 2
+
+    //Separación de actualizar precio y stock para manejar mejor el inventario.
+
+    //Precio 
+    public boolean actualizarPrecio(int id, double nuevoPrecio){
+        if(nuevoPrecio < 0){
+            return false;
+        }
+
+        Producto producto = buscarProducto(id);
+
+        if(producto!=null){
+            producto.setPrecio(nuevoPrecio);
+            gestorArchivo.guardarCatalogo(productos);
+            return true;
+        }
+        return false;
+    }
+
+    //Stock
+    public boolean actualizarStock(int id, int nuevoStock){
+        if(nuevoStock < 0){
+            return false;
+        }
+
+        Producto producto = buscarProducto(id);
+
+        if(producto!=null){
+            producto.setStock(nuevoStock);
+            gestorArchivo.guardarCatalogo(productos);
+            return true;
+        }
+        return false;
+    }
+    
+
     //Aumenta el stock de un producto que ya existe
     public boolean agregarStock(int id, int cantidad){
         if(cantidad <= 0){
@@ -224,7 +260,7 @@ public class Inventario {
         }
         return false;
     }
-    
+
     public List<Producto> filtrarPorCategoria(Categorias cat) {
         if (cat == null) return leerProductos();
         List<Producto> filtrados = new ArrayList<>();
