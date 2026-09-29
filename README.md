@@ -1,4 +1,6 @@
-# Proyecto-Progamacion
+# Proyecto-Programacion
+
+
 SuperCuricó - Sistema de Gestión de Supermercado
 Backend
 -javiwisiddi -->  Javiera Ortega
