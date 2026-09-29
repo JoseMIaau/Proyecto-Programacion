@@ -248,6 +248,17 @@ public class Inventario {
         return true;
     }
 
+    // Vaciar el inventario 
+    public boolean vaciarInventario(){
+        if(productos.isEmpty()){
+            return false;
+        }
+
+        productos.clear();
+        gestorArchivo.guardarCatalogo(productos);
+        return true;
+    }
+
     //Eliminar producto
     public boolean eliminarProducto(int id){
 
