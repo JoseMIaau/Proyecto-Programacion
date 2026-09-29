@@ -16,6 +16,7 @@ Frontend
 -Mauricio-S-Rojas --> Mauricio Rojas
 
 Cooevaluación:
+
 -José Maureira: 7.0
 
 -Javiera Ortega: 6.9
