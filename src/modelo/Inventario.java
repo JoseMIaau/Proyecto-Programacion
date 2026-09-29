@@ -7,17 +7,19 @@ import java.util.List;
 public class Inventario {
     private static Inventario instancia;
     private List<Producto> productos;
-    private List<ItemCarrito> carrito;
     private GestorArchivo gestorArchivo;
     private GestorArchivo gestorUsuario;
     private HashMap<String, Admin> usuariosAdmin;
     private Admin adminActual;
+    private final HashMap<String, Carrito> carritosActivos = new HashMap<>();
+    //id unico para evitar error
+    private String idClienteActual = "Cliente_" + java.util.UUID.randomUUID().toString().substring(0, 6);
+
 
     private Inventario() {
         this.gestorArchivo = new GestorArchivo("inventario.csv");
         this.gestorUsuario = new GestorArchivo("usuarios.csv");
         this.productos = gestorArchivo.cargarCatalogo();
-        this.carrito = new ArrayList<>();
         this.usuariosAdmin = gestorUsuario.cargarAdmins();
         this.adminActual = null;
         inicializarDatosDemoSiVacio();
@@ -388,41 +390,59 @@ public class Inventario {
 
 
     //---Carrito---
-    public List<ItemCarrito> getCarrito() {
-        return carrito;
+    public Carrito obtenerCarrito(String idCliente) {
+        if (!carritosActivos.containsKey(idCliente)) {
+            carritosActivos.put(idCliente, new Carrito(idCliente));
+        }
+        return carritosActivos.get(idCliente);
     }
+
+    public void setSesionActual(String idCliente) {
+        this.idClienteActual = idCliente;
+    }
+
+    public HashMap<String, Carrito> getCarritosActivos() {
+        return carritosActivos;
+    }
+
+    public List<ItemCarrito> getCarrito() {
+        return obtenerCarrito(idClienteActual).getItems();
+    }
+
+    public Carrito getCarritoActual() {
+        if (!carritosActivos.containsKey(idClienteActual)) {
+            carritosActivos.put(idClienteActual, new Carrito(idClienteActual));
+        }
+        return carritosActivos.get(idClienteActual);
+    }
+
     //agrega uno o varios productos a el carrito
     public boolean agregarAlCarrito(Producto p, double cantidad) {
-        if (p == null || cantidad <= 0) {
+        if (p == null || cantidad <= 0 || p.getStock() < cantidad) {
             return false;
         }
 
-        //hay stock
-        if (p.getStock() < cantidad) {
-            return false;
-        }
+       p.setStock((int) (p.getStock() - cantidad));
 
-        //descuenta inmediatamente el stock del producto
-        p.setStock((int)(p.getStock() - cantidad));
-
-        //verificacion de si ya existe el prodcuto en el carrito
+        Carrito c = getCarritoActual();
         boolean existe = false;
-        for (ItemCarrito item : carrito) {
-            if (item.getProducto().getId()==p.getId()) {
+        for (ItemCarrito item : c.getItems()) {
+            if (item.getProducto().getId() == p.getId()) {
                 item.setCantidad(item.getCantidad() + cantidad);
                 existe = true;
                 break;
             }
         }
         if (!existe) {
-            carrito.add(new ItemCarrito(p, cantidad));
+            c.getItems().add(new ItemCarrito(p, cantidad));
         }
         return true;
     }
     
     public void eliminarDelCarrito(int idProducto) {
+        Carrito c = getCarritoActual();
         ItemCarrito aEliminar = null;
-        for (ItemCarrito item : carrito) {
+        for (ItemCarrito item : c.getItems()) {
             if (item.getProducto().getId() == idProducto) {
                 aEliminar = item;
                 break;
@@ -431,45 +451,46 @@ public class Inventario {
         if (aEliminar != null) {
             int nuevoStock = (int) (aEliminar.getProducto().getStock() + aEliminar.getCantidad());
             aEliminar.getProducto().setStock(nuevoStock);
-            carrito.remove(aEliminar);
+            c.getItems().remove(aEliminar);
         }
     }
 
     public void vaciarCarrito() {
-        for (ItemCarrito item : carrito) {
+        Carrito c = getCarritoActual();
+        for (ItemCarrito item : c.getItems()) {
             int nuevoStock = (int) (item.getProducto().getStock() + item.getCantidad());
             item.getProducto().setStock(nuevoStock);
         }
-        carrito.clear();
+        c.limpiar();
     }
 
     //CALCULO DE SUBTOTAL
     public double calcularSubtotal() {
         double subtotal = 0.0;
-
-        for (ItemCarrito item : carrito) {
-                subtotal += item.getSubtotal();
-            }
-
-            return subtotal;
+        for (ItemCarrito item : getCarritoActual().getItems()) {
+            subtotal += item.getSubtotal();
         }
+        return subtotal;
+    }
+
  // CALCULO DEL IVA
     public double calcularIVA() {
             return calcularSubtotal() * 0.19;
-        }
+    }
+
  // SUBTOTAL MAS EL IVA 
     public double calcularTotalCarrito() {
             return calcularSubtotal() + calcularIVA();
-        }
+    }
 
     //verifica que el stock disponible sea suficiente para la compra del carro, descuenta del stock del inventario las unidades, vacia el carrito y guarda el inventario actualizado
     public boolean procesarCompra() {
-        if (carrito.isEmpty()) {
+        Carrito c = getCarritoActual();
+        if (c.estaVacio()) {
             return false;
         }
-
-        gestorArchivo.guardarCatalogo(productos);//actualizacion del inventario
-        carrito.clear();//como se cambió el metodo de vaciar carrito, usando esto no se genera errores
+        gestorArchivo.guardarCatalogo(productos);
+        c.limpiar(); // Se vacía sin restaurar stock
         return true;
     }
 }
