@@ -2,6 +2,8 @@
 
 
 SuperCuricó - Sistema de Gestión de Supermercado
+
+
 Backend
 -javiwisiddi -->  Javiera Ortega
 -JoseMIaau --> José Maureira
