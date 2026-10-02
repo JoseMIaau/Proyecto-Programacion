@@ -130,7 +130,21 @@ center.add(Box.createVerticalStrut(25));
         enter.setMaximumSize(new Dimension(250, 45));
         enter.addActionListener(e -> frame.mostrarVista("PRODUCTOS"));
 
-        center.add(enter);
+        JButton chat = EstilosUI.roundedButton("🗪", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
+
+        chat.addActionListener(e-> abrirChat());
+
+        JPanel botonesAbajo = new JPanel(
+                new FlowLayout(FlowLayout.RIGHT, 180, 0)
+        );
+        botonesAbajo.setOpaque(false);
+        botonesAbajo.add(enter);
+        botonesAbajo.add(chat);
+
+        botonesAbajo.setMaximumSize(
+                new Dimension(Integer.MAX_VALUE, 50)
+        );
+        center.add(botonesAbajo);
         add(center, BorderLayout.CENTER);
     }
 
@@ -298,5 +312,38 @@ center.add(Box.createVerticalStrut(25));
     p.add(label);
 
     return p;
+}
+private void abrirChat(){
+
+JDialog ventanaChat = new JDialog();
+ventanaChat.setTitle("Chat");
+ventanaChat.setSize(300, 400);
+ventanaChat.setLayout(new BorderLayout());
+
+JTextArea chat = new JTextArea();
+chat.setEditable(false);
+
+JTextField mensaje = new JTextField();
+
+JButton enviar = new JButton("Enviar");
+
+JPanel abajo = new JPanel(new BorderLayout());
+
+abajo.add(mensaje, BorderLayout.CENTER);
+abajo.add(enviar, BorderLayout.EAST);
+
+ventanaChat.add(new JScrollPane(chat), BorderLayout.CENTER 
+);
+
+ventanaChat.add(abajo, BorderLayout.SOUTH
+);
+
+ventanaChat.setLocationRelativeTo(frame);
+enviar.addActionListener(e-> {
+        String texto = mensaje.getText();
+});
+
+
+ventanaChat.setVisible(true);
 }
 }
