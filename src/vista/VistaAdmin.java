@@ -349,17 +349,36 @@ public class VistaAdmin extends JPanel {
 
 
     //Vaciar Inventario
-    private void vaciarInventario(){
-        boolean Exito= inventario.vaciarInventario();
+   private void vaciarInventario() {
+    int respuesta = JOptionPane.showConfirmDialog(
+            this,
+            "¿Estas seguro de que quieres vaciar todo el inventario?\nEsta acción no se puede deshacer",
+            "Confirmacion de vaciado",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE
+    );
 
-        if (Exito){
-                System.out.println("Vaciado");
-                poblarTabla();
-                System.out.println("Esta Poblando la tabla");
-                JOptionPane.showMessageDialog(this,"Inventario Vaciado Correctamente" ,"exito", JOptionPane.INFORMATION_MESSAGE); 
+    if (respuesta == JOptionPane.YES_OPTION) {
+
+        boolean exito = inventario.vaciarInventario();
+
+        if (exito) {
+            // SOUTS DE SEGUIMIENTO PARA EL VACIADO DEL INVENTARIO
+            System.out.println("Vaciado");
+
+            poblarTabla();
+
+            System.out.println("Esta poblando la tabla");
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Inventario Vaciado Correctamente",
+                    "Exito",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
         }
-        
-    };
+    }
+}
 
     private void mostrarEstadisticas() {
 
