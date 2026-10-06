@@ -9,7 +9,7 @@ import java.awt.*;
 // Modificar el precio y stock de un producto existente
 public class VistaModificarProducto extends JPanel {
 
-    private final BaseFrame frame;
+    private final BaseFrameAdmin frame;
     private final Inventario inventario;
 
     private JTextField txtId;
@@ -20,7 +20,7 @@ public class VistaModificarProducto extends JPanel {
     private JButton btnModificar;
 
     // Constructor 
-    public VistaModificarProducto(BaseFrame frame) {
+    public VistaModificarProducto(BaseFrameAdmin frame) {
 
         this.frame = frame;
         this.inventario = Inventario.getInstancia();

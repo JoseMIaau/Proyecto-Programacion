@@ -13,11 +13,11 @@ import java.awt.event.KeyEvent;
 // Vista principal
 // Muestra el banner con promociones, categorías, buscador el boton del carrito y el del login.
 public class VistaMenuPrincipal extends JPanel {
-    private final BaseFrame frame;
+    private final BaseFrameCliente frame;
     private int indicePromo = 0;
 
     // Constructor de la pantalla principal
-    public VistaMenuPrincipal(BaseFrame frame) {
+    public VistaMenuPrincipal(BaseFrameCliente frame) {
         this.frame = frame;
         setLayout(new BorderLayout());
         setBackground(EstilosUI.FONDO);

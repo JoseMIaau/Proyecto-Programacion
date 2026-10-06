@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 // Vista que muestra el catálogo de productos filtrar productos y agregarlos al carrito 
 public class VistaProductos extends JPanel {
-    private final BaseFrame frame;
+    private final BaseFrameCliente frame;
     private final JPanel grid;
     private final JLabel headerTitle;
     private final JTextField searchField;
@@ -25,7 +25,7 @@ public class VistaProductos extends JPanel {
     private Categorias categoriaActual = null;
 
     // Constructor
-    public VistaProductos(BaseFrame frame) {
+    public VistaProductos(BaseFrameCliente frame) {
         this.frame = frame;
         setLayout(new BorderLayout());
         setBackground(EstilosUI.FONDO);
@@ -388,14 +388,18 @@ public class VistaProductos extends JPanel {
             boolean agregado = Inventario.getInstancia().agregarAlCarrito(prod, cant);
 
             if (agregado) {
+
+                if (red.Cliente.getInstancia() != null) {
+                    System.out.println("[CLIENTE] enviando al socket: id=" + prod.getId() + ", cant=" + cant);
+                    red.Cliente.getInstancia().enviarDatos(prod.getId(), "AGREGAR:" + cant);
+                }else {
+                    System.err.println("[CLIENTE ERROR] red.Cliente.getInstancia() es null");
+                }
+
                 JOptionPane.showMessageDialog(dialog, "¡" + prod.getNombre() + " agregado al carrito!");
                 dialog.dispose();
                 //vuelve a renderizar
-                if (categoriaActual != null) {
-                    filtrarPorCategoria(categoriaActual);
-                } else {
-                    mostrarTodosLosProductos();
-                }
+                refrescarVistaActual();
                 
             } else {
                 JOptionPane.showMessageDialog(dialog, 
@@ -413,5 +417,13 @@ public class VistaProductos extends JPanel {
         body.add(btnConfirmar);
         dialog.add(body, BorderLayout.CENTER);
         dialog.setVisible(true);
+    }
+
+    public void refrescarVistaActual() {
+        if (categoriaActual != null) {
+            filtrarPorCategoria(categoriaActual);
+        } else {
+            mostrarTodosLosProductos();
+        }
     }
 }

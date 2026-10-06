@@ -11,14 +11,14 @@ import java.awt.*;
 public class VistaLogin extends JPanel {
 
     // Componentes para ingresar las credenciales del usuario
-    private BaseFrame frame; 
+    private BaseFrameAdmin frame; 
     private JTextField txtUsuario;
     private JPasswordField txtContrasena;
     private JButton btnIngresar;
     private JButton btnVolver;
 
     // Constructor
-    public VistaLogin(BaseFrame frame) {
+    public VistaLogin(BaseFrameAdmin frame) {
 
         this.frame = frame;
         setLayout(new GridBagLayout());
@@ -103,9 +103,9 @@ public class VistaLogin extends JPanel {
                 Color.GRAY,
                 Color.WHITE
         );
-
+        //NO SE SI DEJARLO ANTO ARREGLATELAS
         btnVolver.addActionListener(e -> {
-            this.frame.mostrarMenuPrincipal();
+            //this.frame.mostrarMenuPrincipal();
         });
 
         gbc.gridy = 7;

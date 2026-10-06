@@ -13,13 +13,13 @@ import java.util.List;
 
 // Vista que muestra los productos agregados al carrito, deja eliminar, calcular el total y pagar
 public class VistaCarrito extends JPanel {
-    private final BaseFrame frame;
+    private final BaseFrameCliente frame;
     private final JPanel leftPanel;
     private final JPanel rightPanel;
     private final JLabel totalLabel;
 
     // Constructor de la vista del carrito
-    public VistaCarrito(BaseFrame frame) {
+    public VistaCarrito(BaseFrameCliente frame) {
         this.frame = frame;
         setLayout(new BorderLayout());
         setBackground(EstilosUI.FONDO);

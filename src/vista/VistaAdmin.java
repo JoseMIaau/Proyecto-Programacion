@@ -12,7 +12,7 @@ import java.awt.*;
 public class VistaAdmin extends JPanel {
 
 // Inventario y componentes de la tabla
-    private final BaseFrame frame;
+    private final BaseFrameAdmin frame;
     private final Inventario inventario;
 
     private JTable tablaProductos;
@@ -25,7 +25,7 @@ public class VistaAdmin extends JPanel {
     private JButton btnEstadisticas;
 
 // Constructor
-    public VistaAdmin(BaseFrame frame) {
+    public VistaAdmin(BaseFrameAdmin frame) {
 
         this.frame = frame;
         this.inventario = Inventario.getInstancia();
