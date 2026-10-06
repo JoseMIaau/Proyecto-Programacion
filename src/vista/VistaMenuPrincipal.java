@@ -11,7 +11,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 // Vista principal
-// Muestra el banner con promociones, categorías, buscador el boton del carrito y el del login.
+// Muestra el banner con promociones, categorías, buscador el boton del carrito 
 public class VistaMenuPrincipal extends JPanel {
     private final BaseFrameCliente frame;
     private int indicePromo = 0;
@@ -148,7 +148,7 @@ center.add(Box.createVerticalStrut(25));
         add(center, BorderLayout.CENTER);
     }
 
-    // Crea el encabezado con buscador, carrito y acceso al login
+    // Crea el encabezado con buscador y el botón del carrito
     private JPanel createHeader() {
         JPanel header = new JPanel(new BorderLayout(20, 0));
         header.setBackground(EstilosUI.VERDE);
@@ -216,16 +216,11 @@ center.add(Box.createVerticalStrut(25));
         JButton carro = EstilosUI.iconButton("🛒");
         carro.addActionListener(e -> frame.mostrarVista("CARRO"));
 
-        //Boton para la visat del login del admin
-        JButton login = EstilosUI.iconButton("👤");
-        login.addActionListener(e -> frame.mostrarVista("LOGIN"));
-
         //contenedor para los botones
         JPanel contenedor = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
         contenedor.setOpaque(false);
 
         contenedor.add(carro);
-        contenedor.add(login);
 
         //Pone el contenedor en la derecha
         header.add(contenedor, BorderLayout.EAST);

@@ -21,7 +21,6 @@ public class VistaAdmin extends JPanel {
     private JButton btnEliminar;
     private JButton btnAgregar;
     private JButton btnModificar;
-    private JButton btnVolver;
     private JButton btnEstadisticas;
 
 // Constructor
@@ -45,7 +44,8 @@ public class VistaAdmin extends JPanel {
                 "Nombre",
                 "Precio",
                 "Stock",
-                "Categoría"
+                "Categoría",
+                "Imagen"
         };
 
         // Crea el modelo de la tabla, tambien impedir la edición directa de las celdas
@@ -73,198 +73,37 @@ public class VistaAdmin extends JPanel {
         btnModificar = new JButton("Modificar Producto");
         btnEliminar = new JButton("Eliminar Producto");
         btnEstadisticas = new JButton("Estadísticas");
-        btnVolver = new JButton("Volver al Menu Principal");
 
         pnlSur.add(btnAgregar);
         pnlSur.add(btnModificar);
         pnlSur.add(btnEliminar);
         pnlSur.add(btnEstadisticas);
-        pnlSur.add(btnVolver);
+
 
         add(pnlSur, BorderLayout.SOUTH);
 
-        // VOLVER AL MENÚ PRINCIPAL
-        btnVolver.addActionListener(e -> {
-            frame.mostrarVista("INICIO");
-        });
-
-        // AGREGAR PRODUCTO
+        // IR A LA VISTA AGREGAR PRODUCTO
         btnAgregar.addActionListener(e -> {
-            agregarProducto();
+            frame.mostrarVista("AGREGAR");
         });
 
         // IR A LA VISTA DE MODIFICAR PRODUCTO
-        btnModificar.addActionListener(e -> {
+        btnModificar.addActionListener(a -> {
             frame.mostrarVista("MODIFICAR");
         });
 
         // ELIMINAR PRODUCTO
-        btnEliminar.addActionListener(e -> {
+        btnEliminar.addActionListener(a -> {
             eliminarProducto();
         });
 
 
         //MOSTRAR LAS STATS DEL SUPERMERCADO (SE PERDIO ESTE ACTIONLISTENER AL RESOLVER EL MERGE)
-        btnEstadisticas.addActionListener(e -> {
+        btnEstadisticas.addActionListener(a -> {
         mostrarEstadisticas();
-        });
+});
     }
 
-    // Solicita los datos necesarios y crea un nuevo producto en el inventario
-    private void agregarProducto() {
-        // Campos para ingresar los datos
-        JTextField txtNombre = new JTextField();
-        JTextField txtPrecio = new JTextField();
-        JTextField txtStock = new JTextField();
-
-        JComboBox<Categorias> cmbCategoria =
-                new JComboBox<>(Categorias.values());
-
-        JPanel panel = new JPanel();
-
-        panel.setLayout(
-                new BoxLayout(
-                        panel,
-                        BoxLayout.Y_AXIS
-                )
-        );
-
-        panel.add(
-                new JLabel("Nombre:")
-        );
-        panel.add(txtNombre);
-
-        panel.add(
-                new JLabel("Precio:")
-        );
-        panel.add(txtPrecio);
-
-        panel.add(
-                new JLabel("Stock:")
-        );
-        panel.add(txtStock);
-
-        panel.add(
-                new JLabel("Categoría:")
-        );
-        panel.add(cmbCategoria);
-
-        // Mostrar formulario para ingresar los datos
-        int resultado =
-                JOptionPane.showConfirmDialog(
-                        this,
-                        panel,
-                        "Agregar Producto",
-                        JOptionPane.OK_CANCEL_OPTION,
-                        JOptionPane.PLAIN_MESSAGE
-                );
-
-        if (resultado != JOptionPane.OK_OPTION) {
-            return;
-        }
-
-        try { //convertimops los datos en los tipos que correspondan
-
-            String nombre =
-                    txtNombre.getText().trim();
-
-            double precio =
-                    Double.parseDouble(
-                            txtPrecio.getText().trim()
-                    );
-
-            int stock =
-                    Integer.parseInt(
-                            txtStock.getText().trim()
-                    );
-
-            Categorias categoria =
-                    (Categorias)
-                            cmbCategoria.getSelectedItem();
-
-        //Validamos que no hayan campos vacios o erroneos
-            if (nombre.isEmpty()) { 
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "El nombre del producto no puede estar vacío.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
-
-                return;
-            }
-
-            if (precio < 0) {
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "El precio no puede ser negativo.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
-
-                return;
-            }
-
-            if (stock < 0) {
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "El stock no puede ser negativo.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
-
-                return;
-            }
-
-            Producto producto =
-                    new Producto(
-                                0,
-                            nombre,
-                            precio,
-                            stock,
-                            categoria
-                    );
-
-        // Intentar registrar el producto en el inventario y confirmar cual sea el caso
-            boolean agregado =
-                    inventario.crearProducto(producto);
-
-            if (agregado) {
-
-                poblarTabla();
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Producto agregado correctamente.",
-                        "Éxito",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-
-            } else {
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "No se pudo agregar el producto.\n"
-                                + "El ID puede estar repetido.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
-            }
-
-        } catch (NumberFormatException ex) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "El ID y stock deben ser números enteros.\n"
-                            + "El precio debe ser un número válido.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
-    }
 
     // Elimina el producto seleccionado en la tabla
     private void eliminarProducto() {
