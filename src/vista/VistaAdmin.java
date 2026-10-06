@@ -21,8 +21,10 @@ public class VistaAdmin extends JPanel {
     private JButton btnEliminar;
     private JButton btnAgregar;
     private JButton btnModificar;
+    private JButton btnVaciarInventario;
     private JButton btnVolver;
     private JButton btnEstadisticas;
+
 
 // Constructor
     public VistaAdmin(BaseFrameAdmin frame) {
@@ -72,12 +74,14 @@ public class VistaAdmin extends JPanel {
         btnAgregar = new JButton("Agregar Producto");
         btnModificar = new JButton("Modificar Producto");
         btnEliminar = new JButton("Eliminar Producto");
+        btnVaciarInventario = new JButton("Vaciar Inventario");
         btnEstadisticas = new JButton("Estadísticas");
         btnVolver = new JButton("Volver al Menu Principal");
 
         pnlSur.add(btnAgregar);
         pnlSur.add(btnModificar);
         pnlSur.add(btnEliminar);
+        pnlSur.add(btnVaciarInventario);
         pnlSur.add(btnEstadisticas);
         pnlSur.add(btnVolver);
 
@@ -103,6 +107,11 @@ public class VistaAdmin extends JPanel {
             eliminarProducto();
         });
 
+        // VACIAR INVENTARIO COMPLETO
+        btnVaciarInventario.addActionListener(e -> {
+                vaciarInventario();
+
+        });
 
         //MOSTRAR LAS STATS DEL SUPERMERCADO (SE PERDIO ESTE ACTIONLISTENER AL RESOLVER EL MERGE)
         btnEstadisticas.addActionListener(e -> {
@@ -338,6 +347,20 @@ public class VistaAdmin extends JPanel {
         }
     }
 
+
+    //Vaciar Inventario
+    private void vaciarInventario(){
+        boolean Exito= inventario.vaciarInventario();
+
+        if (Exito){
+                System.out.println("Vaciado");
+                poblarTabla();
+                System.out.println("Esta Poblando la tabla");
+                JOptionPane.showMessageDialog(this,"Inventario Vaciado Correctamente" ,"exito", JOptionPane.INFORMATION_MESSAGE); 
+        }
+        
+    };
+
     private void mostrarEstadisticas() {
 
 
@@ -496,6 +519,7 @@ public class VistaAdmin extends JPanel {
 
             modeloTabla.addRow(
                     new Object[]{
+                        
                             p.getId(),
                             p.getNombre(),
                             p.getPrecio(),
