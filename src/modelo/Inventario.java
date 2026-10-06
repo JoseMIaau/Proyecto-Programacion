@@ -250,6 +250,17 @@ public class Inventario {
         return true;
     }
 
+    //Stock disponible despues que el cliente añade un producto al carrito.
+    public int obtenerStockDisponible(int idProducto){
+        Producto producto = buscarProducto(idProducto);
+        if(producto == null){
+            return -1;
+        }
+
+        return producto.getStock();
+    }
+
+
     // Vaciar el inventario 
     public boolean vaciarInventario(){
         if(productos.isEmpty()){
@@ -462,6 +473,20 @@ public class Inventario {
             item.getProducto().setStock(nuevoStock);
         }
         c.limpiar();
+    }
+
+    //Las cantidades se reservan dentro de carritosActivos
+    public double obtenerStockReservado(int idProducto) {
+        double reservado = 0;
+
+        for (Carrito carrito : carritosActivos.values()) {
+            for (ItemCarrito item : carrito.getItems()) {
+                if (item.getProducto().getId() == idProducto) {
+                    reservado += item.getCantidad();
+                }
+            }
+        }
+        return reservado;
     }
 
     //CALCULO DE SUBTOTAL
