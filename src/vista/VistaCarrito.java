@@ -169,10 +169,51 @@ public class VistaCarrito extends JPanel {
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
         actions.setOpaque(false);
 
-        JLabel price = new JLabel("$" + (int) item.getSubtotal());
-        price.setFont(EstilosUI.FONT_BOLD);
+        
 
         // Botón para eliminar
+        JTextField txtUnits = new JTextField("1", 4);
+        txtUnits.setHorizontalAlignment(JTextField.CENTER);
+        txtUnits.setEditable(true);
+        JButton botonMenos = new JButton("-");
+        JButton botonMas = new JButton("+");
+
+        botonMenos.setPreferredSize(new Dimension(20, 20));
+        botonMas.setPreferredSize(new Dimension(20, 20));
+
+        botonMenos.setFocusPainted(false);
+        botonMas.setFocusPainted(false);
+
+        //Boton menos 
+        botonMenos.addActionListener(click ->{
+            try {
+                int cantidadActual = Integer.parseInt(txtUnits.getText().trim());
+                if (cantidadActual > 1) {
+                    cantidadActual--; 
+                    txtUnits.setText(String.valueOf(cantidadActual));
+                    //Metodo para actualizar
+                }
+            } catch (NumberFormatException ex) {
+                txtUnits.setText(String.valueOf(item.getCantidad()));
+            }
+        });
+
+        //Boton mas
+        botonMas.addActionListener(click ->{
+            try {
+                int cantidadActual = Integer.parseInt(txtUnits.getText().trim());
+                if (cantidadActual < item.getProducto().getStock()) {
+                    cantidadActual++;
+                    txtUnits.setText(String.valueOf(cantidadActual));
+                    //Metodo para actualizar
+                } else {
+                    JOptionPane.showMessageDialog(null, "No hay más stock", "Stock insuficiente", JOptionPane.WARNING_MESSAGE);
+                }
+            } catch (NumberFormatException ex) {
+                txtUnits.setText(String.valueOf(item.getCantidad()));
+            }
+        });
+
         JButton trash = new JButton("🗑");
         trash.setFont(new Font("SansSerif", Font.PLAIN, 18));
         trash.setForeground(Color.RED);
@@ -183,10 +224,18 @@ public class VistaCarrito extends JPanel {
             Inventario.getInstancia().eliminarDelCarrito(item.getProducto().getId());
             actualizarCarrito();
         });
+        JLabel price = new JLabel("$" + (int) item.getSubtotal()*Integer.parseInt(txtUnits.getText().trim()));
+        price.setFont(EstilosUI.FONT_BOLD);
+        row.add(botonMenos);
+        row.add(txtUnits);
+        row.add(botonMas);
 
         actions.add(price);
+        actions.add(botonMenos);
+        actions.add(txtUnits);
+        actions.add(botonMas);
         actions.add(trash);
-
+        
         row.add(name, BorderLayout.WEST);
         row.add(actions, BorderLayout.EAST);
         return row;
