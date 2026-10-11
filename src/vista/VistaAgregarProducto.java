@@ -12,9 +12,10 @@ public class VistaAgregarProducto extends JPanel{
         private final BaseFrameAdmin frame;
         private final Inventario inventario;
 
-        private JTextField txtId;
+        private JTextField txtNombre;
         private JTextField txtPrecio;
         private JTextField txtStock;
+        private JComboBox<Categorias> cmbCategoria;
 
         private JButton btnAtras;
         private JButton btnAgregar;
@@ -45,7 +46,7 @@ public class VistaAgregarProducto extends JPanel{
         add(lblTitulo, BorderLayout.NORTH);
 
         JPanel pnlFormulario = new JPanel(
-                new GridLayout(3, 2, 10, 15)
+                new GridLayout(4, 2, 10, 15)
         );
 
         pnlFormulario.setBorder(
@@ -57,10 +58,15 @@ public class VistaAgregarProducto extends JPanel{
                 )
         );
 
+        txtNombre = new JTextField();
         txtPrecio = new JTextField();
         txtStock = new JTextField();
+        cmbCategoria = new JComboBox<>(Categorias.values());
 
-        pnlFormulario.add(txtId);
+        pnlFormulario.add(
+                new JLabel("Nombre:")
+        );
+        pnlFormulario.add(txtNombre);
 
         pnlFormulario.add(
                 new JLabel("Precio:")
@@ -71,6 +77,11 @@ public class VistaAgregarProducto extends JPanel{
                 new JLabel("Stock:")
         );
         pnlFormulario.add(txtStock);
+
+        pnlFormulario.add(
+                new JLabel("Categoría:")
+        );
+        pnlFormulario.add(cmbCategoria);
 
         add(pnlFormulario, BorderLayout.CENTER);
 
@@ -98,56 +109,6 @@ public class VistaAgregarProducto extends JPanel{
 
     // Solicita los datos necesarios y crea un nuevo producto en el inventario
     private void agregarProducto() {
-        // Campos para ingresar los datos
-        JTextField txtNombre = new JTextField();
-        JTextField txtPrecio = new JTextField();     //AQUIIIIIIIII
-        JTextField txtStock = new JTextField();
-
-        JComboBox<Categorias> cmbCategoria =
-                new JComboBox<>(Categorias.values());
-
-        JPanel panel = new JPanel();
-
-        panel.setLayout(
-                new BoxLayout(
-                        panel,
-                        BoxLayout.Y_AXIS
-                )
-        );
-
-        panel.add(
-                new JLabel("Nombre:")
-        );
-        panel.add(txtNombre);
-
-        panel.add(
-                new JLabel("Precio:")
-        );
-        panel.add(txtPrecio);
-
-        panel.add(
-                new JLabel("Stock:")
-        );
-        panel.add(txtStock);
-
-        panel.add(
-                new JLabel("Categoría:")
-        );
-        panel.add(cmbCategoria);
-
-        // Mostrar formulario para ingresar los datos
-        int resultado =
-                JOptionPane.showConfirmDialog(
-                        this,
-                        panel,
-                        "Agregar Producto",
-                        JOptionPane.OK_CANCEL_OPTION,
-                        JOptionPane.PLAIN_MESSAGE
-                );
-
-        if (resultado != JOptionPane.OK_OPTION) {
-            return;
-        }
 
         try { //convertimos los datos en los tipos que correspondan
 
@@ -227,6 +188,7 @@ public class VistaAgregarProducto extends JPanel{
                         "Éxito",
                         JOptionPane.INFORMATION_MESSAGE
                 );
+                limpiarFormulario();
 
             } else {
 
@@ -254,9 +216,10 @@ public class VistaAgregarProducto extends JPanel{
         // Vacía los campos después de agregar
     private void limpiarFormulario() {
 
-        txtId.setText("");
+        txtNombre.setText("");
         txtPrecio.setText("");
         txtStock.setText("");
+        cmbCategoria.setSelectedIndex(0);
     }
 
 }
