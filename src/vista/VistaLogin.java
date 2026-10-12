@@ -15,7 +15,6 @@ public class VistaLogin extends JPanel {
     private JTextField txtUsuario;
     private JPasswordField txtContrasena;
     private JButton btnIngresar;
-    private JButton btnVolver;
 
     // Constructor
     public VistaLogin(BaseFrameAdmin frame) {
@@ -93,27 +92,14 @@ public class VistaLogin extends JPanel {
             }
         });
 
+    txtUsuario.addActionListener(a -> btnIngresar.doClick());
+    txtContrasena.addActionListener(a -> btnIngresar.doClick());
+
         gbc.gridy = 6;
         gbc.insets = new Insets(20, 8, 8, 8);
         panel.add(btnIngresar, gbc);
 
-    // Botón para volver al menu
-        btnVolver = EstilosUI.roundedButton(
-                "Volver",
-                Color.GRAY,
-                Color.WHITE
-        );
-        //NO SE SI DEJARLO ANTO ARREGLATELAS
-        btnVolver.addActionListener(e -> {
-            //this.frame.mostrarMenuPrincipal();
-        });
-
-        gbc.gridy = 7;
-        gbc.insets = new Insets(8, 8, 8, 8);
-        panel.add(btnVolver, gbc);
-
         add(panel);
     }
 
-    
 }

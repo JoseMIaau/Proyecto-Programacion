@@ -10,6 +10,7 @@ public class BaseFrameAdmin extends JFrame {
     private VistaLogin vistaLogin;
     private VistaAdmin vistaAdmin;
     private VistaModificarProducto vistaModificarProducto;
+    private VistaAgregarProducto vistaAgregarProducto;
 
     public BaseFrameAdmin() {
         super("SuperCuricó - Servidor Administrador");
@@ -21,10 +22,12 @@ public class BaseFrameAdmin extends JFrame {
         vistaLogin = new VistaLogin(this);
         vistaAdmin = new VistaAdmin(this);
         vistaModificarProducto = new VistaModificarProducto(this);
+        vistaAgregarProducto = new VistaAgregarProducto(this);
 
         root.add(vistaLogin, "LOGIN");
         root.add(vistaAdmin, "ADMIN");
         root.add(vistaModificarProducto, "MODIFICAR");
+        root.add(vistaAgregarProducto, "AGREGAR");
 
         setContentPane(root);
         cardLayout.show(root, "LOGIN");
