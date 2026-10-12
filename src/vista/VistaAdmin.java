@@ -21,8 +21,8 @@ public class VistaAdmin extends JPanel {
     private JButton btnEliminar;
     private JButton btnAgregar;
     private JButton btnModificar;
-    private JButton btnVolver;
     private JButton btnEstadisticas;
+    private JButton btnVaciarInventario;
 
 
 // Constructor
