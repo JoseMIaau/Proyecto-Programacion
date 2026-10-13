@@ -6,6 +6,7 @@ public class Producto {
     private String nombre;
     private double precio;
     private int stock;
+    private int reservado;
     private Categorias categoria;
     private String rutaImagen;
 
@@ -14,6 +15,7 @@ public class Producto {
         this.nombre = nombre;
         this.precio = precio;
         this.stock = stock;
+        this.reservado = 0;
         this.categoria = categoria;
         this.rutaImagen = rutaImagen;
     }
@@ -62,6 +64,13 @@ public class Producto {
 
     public void setCategoria(Categorias categoria) {
         this.categoria = categoria;
+    }
+
+    public int getReservado(){ return reservado; }
+    public void setReservado(int reservado){ this.reservado = reservado; }
+
+    public int getStockTotalReal(){
+        return stock + reservado;
     }
     
     public void setRutaImagen(String rutaImagen) {

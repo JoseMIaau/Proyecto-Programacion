@@ -11,7 +11,7 @@ public class Inventario {
     private GestorArchivo gestorUsuario;
     private HashMap<String, Admin> usuariosAdmin;
     private Admin adminActual;
-    private final HashMap<String, Carrito> carritosActivos = new HashMap<>();
+    private Carrito carritoActual;
     //id unico para evitar error
     private String idClienteActual = "Cliente_" + java.util.UUID.randomUUID().toString().substring(0, 6);
 
@@ -22,6 +22,7 @@ public class Inventario {
         this.productos = gestorArchivo.cargarCatalogo();
         this.usuariosAdmin = gestorUsuario.cargarAdmins();
         this.adminActual = null;
+        this.carritoActual = new Carrito();
         inicializarDatosDemoSiVacio();
         inicializarAdminPorDefecto();
     }
@@ -400,31 +401,19 @@ public class Inventario {
 
 
     //---Carrito---
-    public Carrito obtenerCarrito(String idCliente) {
-        if (!carritosActivos.containsKey(idCliente)) {
-            carritosActivos.put(idCliente, new Carrito(idCliente));
-        }
-        return carritosActivos.get(idCliente);
-    }
-
     public void setSesionActual(String idCliente) {
         this.idClienteActual = idCliente;
     }
 
-    public HashMap<String, Carrito> getCarritosActivos() {
-        return carritosActivos;
-    }
-
     public List<ItemCarrito> getCarrito() {
-        return obtenerCarrito(idClienteActual).getItems();
+        return carritoActual.getItems();
     }
 
     public Carrito getCarritoActual() {
-        if (!carritosActivos.containsKey(idClienteActual)) {
-            carritosActivos.put(idClienteActual, new Carrito(idClienteActual));
-        }
-        return carritosActivos.get(idClienteActual);
+        return carritoActual;
     }
+
+
 
     //agrega uno o varios productos a el carrito
     public boolean agregarAlCarrito(Producto p, double cantidad) {
@@ -513,7 +502,6 @@ public class Inventario {
         if (c.estaVacio()) {
             return false;
         }
-        gestorArchivo.guardarCatalogo(productos);
         c.limpiar(); // Se vacía sin restaurar stock
         return true;
     }
