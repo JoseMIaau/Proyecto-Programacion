@@ -12,9 +12,6 @@ public class Inventario {
     private HashMap<String, Admin> usuariosAdmin;
     private Admin adminActual;
     private Carrito carritoActual;
-    //id unico para evitar error
-    private String idClienteActual = "Cliente_" + java.util.UUID.randomUUID().toString().substring(0, 6);
-
 
     private Inventario() {
         this.gestorArchivo = new GestorArchivo("inventario.csv");
@@ -401,10 +398,6 @@ public class Inventario {
 
 
     //---Carrito---
-    public void setSesionActual(String idCliente) {
-        this.idClienteActual = idCliente;
-    }
-
     public List<ItemCarrito> getCarrito() {
         return carritoActual.getItems();
     }
@@ -461,20 +454,6 @@ public class Inventario {
             item.getProducto().setStock(nuevoStock);
         }
         c.limpiar();
-    }
-
-    //Las cantidades se reservan dentro de carritosActivos
-    public double obtenerStockReservado(int idProducto) {
-        double reservado = 0;
-
-        for (Carrito carrito : carritosActivos.values()) {
-            for (ItemCarrito item : carrito.getItems()) {
-                if (item.getProducto().getId() == idProducto) {
-                    reservado += item.getCantidad();
-                }
-            }
-        }
-        return reservado;
     }
 
     //CALCULO DE SUBTOTAL
