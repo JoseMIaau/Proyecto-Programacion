@@ -7,13 +7,15 @@ public class Producto {
     private double precio;
     private int stock;
     private Categorias categoria;
+    private String rutaImagen;
 
-    public Producto(int id, String nombre, double precio, int stock, Categorias categoria) {
+    public Producto(int id, String nombre, double precio, int stock, Categorias categoria, String rutaImagen) {
         this.id = id;
         this.nombre = nombre;
         this.precio = precio;
         this.stock = stock;
         this.categoria = categoria;
+        this.rutaImagen = rutaImagen;
     }
     
     //Getters
@@ -37,6 +39,10 @@ public class Producto {
         return categoria;
     }
 
+    public String getRutaImagen() {
+        return rutaImagen;
+    }
+
     //Setters
     public void setId(int id) {
         this.id = id;
@@ -56,6 +62,10 @@ public class Producto {
 
     public void setCategoria(Categorias categoria) {
         this.categoria = categoria;
+    }
+    
+    public void setRutaImagen(String rutaImagen) {
+        this.rutaImagen = rutaImagen;
     }
     
     @Override
