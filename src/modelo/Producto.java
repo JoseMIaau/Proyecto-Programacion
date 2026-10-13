@@ -6,6 +6,7 @@ public class Producto {
     private String nombre;
     private double precio;
     private int stock;
+    private int reservado;
     private Categorias categoria;
 
     public Producto(int id, String nombre, double precio, int stock, Categorias categoria) {
@@ -13,6 +14,7 @@ public class Producto {
         this.nombre = nombre;
         this.precio = precio;
         this.stock = stock;
+        this.reservado = 0;
         this.categoria = categoria;
     }
     
@@ -56,6 +58,13 @@ public class Producto {
 
     public void setCategoria(Categorias categoria) {
         this.categoria = categoria;
+    }
+
+    public int getReservado(){ return reservado; }
+    public void setReservado(int reservado){ this.reservado = reservado; }
+
+    public int getStockTotalReal(){
+        return stock + reservado;
     }
     
     @Override

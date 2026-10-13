@@ -93,6 +93,11 @@ public class VistaCarrito extends JPanel {
                 );
 
                 if (confirmacion == JOptionPane.YES_OPTION) {
+                    for (ItemCarrito it : Inventario.getInstancia().getCarrito()) {
+                        if (red.Cliente.getInstancia() != null) {
+                            red.Cliente.getInstancia().enviarDatos(it.getProducto().getId(), "AGREGAR:-" + it.getCantidad());
+                        }
+                    }
                     Inventario.getInstancia().vaciarCarrito();
                     actualizarCarrito();
                 }
@@ -163,79 +168,112 @@ public class VistaCarrito extends JPanel {
                 new EmptyBorder(8, 12, 8, 12)
         ));
 
-        JLabel name = new JLabel(item.getProducto().getNombre() + " (x" + item.getCantidad() + ")");
+        JLabel name = new JLabel(item.getProducto().getNombre());
         name.setFont(EstilosUI.FONT_BOLD);
 
-        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
+        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         actions.setOpaque(false);
 
+        JLabel price = new JLabel("$" + (int) item.getSubtotal());
+        price.setFont(EstilosUI.FONT_BOLD);
+
+        //boton menos
+        JButton botonMenos = new JButton("-");
+        botonMenos.setFont(new Font("SansSerif", Font.BOLD, 15));
+        botonMenos.setPreferredSize(new Dimension(38, 28));
+        botonMenos.setMargin(new Insets(0, 0, 0, 0));
+        botonMenos.setFocusPainted(false);
+        botonMenos.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         
+        //cantidad actual
+        JTextField txtUnits = new JTextField(String.valueOf((int) item.getCantidad()), 3);
+        txtUnits.setHorizontalAlignment(JTextField.CENTER);
+        txtUnits.setFont(EstilosUI.FONT_BOLD);
+        txtUnits.setEditable(false);
+
+
+        // biton mas
+        JButton botonMas = new JButton("+");
+        botonMas.setFont(new Font("SansSerif", Font.BOLD, 15));
+        botonMas.setPreferredSize(new Dimension(38, 28));
+        botonMas.setMargin(new Insets(0, 0, 0, 0));
+        botonMas.setFocusPainted(false);
+        botonMas.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
 
         // Botón para eliminar
-        JTextField txtUnits = new JTextField("1", 4);
-        txtUnits.setHorizontalAlignment(JTextField.CENTER);
-        txtUnits.setEditable(true);
-        JButton botonMenos = new JButton("-");
-        JButton botonMas = new JButton("+");
-
-        botonMenos.setPreferredSize(new Dimension(20, 20));
-        botonMas.setPreferredSize(new Dimension(20, 20));
-
-        botonMenos.setFocusPainted(false);
-        botonMas.setFocusPainted(false);
-
-        //Boton menos 
-        botonMenos.addActionListener(click ->{
-            try {
-                int cantidadActual = Integer.parseInt(txtUnits.getText().trim());
-                if (cantidadActual > 1) {
-                    cantidadActual--; 
-                    txtUnits.setText(String.valueOf(cantidadActual));
-                    //Metodo para actualizar
-                }
-            } catch (NumberFormatException ex) {
-                txtUnits.setText(String.valueOf(item.getCantidad()));
-            }
-        });
-
-        //Boton mas
-        botonMas.addActionListener(click ->{
-            try {
-                int cantidadActual = Integer.parseInt(txtUnits.getText().trim());
-                if (cantidadActual < item.getProducto().getStock()) {
-                    cantidadActual++;
-                    txtUnits.setText(String.valueOf(cantidadActual));
-                    //Metodo para actualizar
-                } else {
-                    JOptionPane.showMessageDialog(null, "No hay más stock", "Stock insuficiente", JOptionPane.WARNING_MESSAGE);
-                }
-            } catch (NumberFormatException ex) {
-                txtUnits.setText(String.valueOf(item.getCantidad()));
-            }
-        });
-
         JButton trash = new JButton("🗑");
         trash.setFont(new Font("SansSerif", Font.PLAIN, 18));
         trash.setForeground(Color.RED);
         trash.setBorderPainted(false);
         trash.setContentAreaFilled(false);
+        trash.setFocusPainted(false);
         trash.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        trash.addActionListener(e -> { // Eliminar el producto seleccionado y actualizar
+
+ 
+
+       //restar cantidad
+        botonMenos.addActionListener(click -> {
+            if (item.getCantidad() > 1) {
+                item.getProducto().setStock(item.getProducto().getStock() + 1);
+                item.setCantidad(item.getCantidad() - 1);
+
+                if (red.Cliente.getInstancia() != null) {
+                    red.Cliente.getInstancia().enviarDatos(item.getProducto().getId(), "AGREGAR:-1");
+                }
+                actualizarCarrito();
+            } else {
+                int confirmacion = JOptionPane.showConfirmDialog(
+                        this,
+                        "¿Desea quitar " + item.getProducto().getNombre() + " del carrito?",
+                        "Quitar producto",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE
+                );
+                if (confirmacion == JOptionPane.YES_OPTION) {
+                    double cant = item.getCantidad();
+                    Inventario.getInstancia().eliminarDelCarrito(item.getProducto().getId());
+                    if (red.Cliente.getInstancia() != null) {
+                        red.Cliente.getInstancia().enviarDatos(item.getProducto().getId(), "AGREGAR:-" + cant);
+                    }
+                    actualizarCarrito();
+                }
+            }
+        });
+
+        //sumar cantidad
+        botonMas.addActionListener(click -> {
+            if (item.getProducto().getStock() >= 1) {
+                item.getProducto().setStock(item.getProducto().getStock() - 1);
+                item.setCantidad(item.getCantidad() + 1);
+
+                if (red.Cliente.getInstancia() != null) {
+                    red.Cliente.getInstancia().enviarDatos(item.getProducto().getId(), "AGREGAR:1");
+                }
+                actualizarCarrito();
+            } else {
+                JOptionPane.showMessageDialog(this, "No hay mas stock disponible de este producto.", "Stock insuficiente", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        //eliminar producto
+        trash.addActionListener(e -> {
+            double cant = item.getCantidad();
             Inventario.getInstancia().eliminarDelCarrito(item.getProducto().getId());
+            if (red.Cliente.getInstancia() != null) {
+                red.Cliente.getInstancia().enviarDatos(item.getProducto().getId(), "AGREGAR:-" + cant);
+            }
             actualizarCarrito();
         });
-        JLabel price = new JLabel("$" + (int) item.getSubtotal()*Integer.parseInt(txtUnits.getText().trim()));
-        price.setFont(EstilosUI.FONT_BOLD);
-        row.add(botonMenos);
-        row.add(txtUnits);
-        row.add(botonMas);
 
         actions.add(price);
+        actions.add(Box.createHorizontalStrut(10));
         actions.add(botonMenos);
         actions.add(txtUnits);
         actions.add(botonMas);
+        actions.add(Box.createHorizontalStrut(8));
         actions.add(trash);
-        
+
         row.add(name, BorderLayout.WEST);
         row.add(actions, BorderLayout.EAST);
         return row;

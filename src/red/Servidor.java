@@ -16,6 +16,7 @@ public class Servidor {
     private final List<ManejadorCliente> clientes = new ArrayList<>();
     private ServerSocket serverSocket;
     private final BaseFrameAdmin frameAdmin;
+    private int contadorClientes = 0;
 
     public Servidor(int puerto, BaseFrameAdmin frameAdmin) {
         this.puerto = puerto;
@@ -36,7 +37,8 @@ public class Servidor {
                 while (!serverSocket.isClosed()) {
                     Socket socket = serverSocket.accept();
                     System.out.println("[+] Nuevo cliente conectado desde: " + socket.getRemoteSocketAddress());
-                    ManejadorCliente cliente = new ManejadorCliente(socket);
+                    contadorClientes++;
+                    ManejadorCliente cliente = new ManejadorCliente(socket, contadorClientes);
                     synchronized (clientes) {
                         clientes.add(cliente);
                     }
@@ -60,9 +62,26 @@ public class Servidor {
         private final Socket socket;
         private BufferedReader in;
         private PrintWriter out;
+        private final String idCliente;
+        private final java.util.Map<Integer, Integer> miCarrito = new java.util.HashMap<>();
 
-        public ManejadorCliente(Socket socket) {
+        public ManejadorCliente(Socket socket, int numeroCliente) {
             this.socket = socket;
+            this.idCliente = "Cliente-" + numeroCliente;
+        }
+
+        public String getIdCliente() {
+            return idCliente;
+        }
+
+        public List<ManejadorCliente> getClientesActivos() {
+            synchronized (clientes) {
+                return new ArrayList<>(clientes);
+            }
+        }
+
+        public java.util.Map<Integer, Integer> getMiCarrito() {
+            return miCarrito;
         }
 
         @Override
@@ -85,26 +104,30 @@ public class Servidor {
                         System.out.println("[SERVIDOR] numero=" + numero + ", texto=" + texto);
 
                         if (texto.startsWith("AGREGAR:")) {
-                            double cant = Double.parseDouble(texto.substring(8));
+                            int cant = (int) Double.parseDouble(texto.substring(8));
                             Producto p = Inventario.getInstancia().buscarProducto(numero);
                             if (p != null) {
-                                boolean ok = Inventario.getInstancia().agregarAlCarrito(p, cant);
-                                System.out.println("[SERVIDOR] descuento en inventario: " + ok + ", nuevo stock=" + p.getStock());
-                                if (ok) {
-                                    difundir(Protocolo.createJsonData(p.getId(), "STOCK:" + p.getStock()));
-
-                                    if (frameAdmin != null) {
-                                        System.out.println("[SERVIDOR] refrescar tabla admin");
-                                        SwingUtilities.invokeLater(() -> {
-                                            frameAdmin.refrescarTablaAdmin();
-                                        });
-                                    }else {
-                                        System.err.println("[SERVIDOR ERROR] frameAdmin es null");
-                                    }
+                                if (cant > 0 && p.getStock() >= cant) {
+                                p.setStock(p.getStock() - cant);
+                                p.setReservado(p.getReservado() + cant);
+                                miCarrito.put(numero, miCarrito.getOrDefault(numero, 0) + cant);
+                            } else if (cant < 0) {
+                                int dev = Math.abs(cant);
+                                p.setStock(p.getStock() + dev);
+                                p.setReservado(Math.max(0, p.getReservado() - dev));
+                                
+                                int cantEnCarro = miCarrito.getOrDefault(numero, 0);
+                                if (cantEnCarro <= dev) {
+                                    miCarrito.remove(numero);
+                                } else {
+                                    miCarrito.put(numero, cantEnCarro - dev);
                                 }
+                            }
                             }else {
                                 System.err.println("[SERVIDOR ERROR] producto id " + numero + " no encontrado");
                             }
+                            difundir(Protocolo.createJsonData(p.getId(), "STOCK:" + p.getStock()));
+
                         }
                     } else if (Protocolo.TYPE_MESSAGE.equals(type)) {
                         String content = Protocolo.extractJsonField(line, "content");
