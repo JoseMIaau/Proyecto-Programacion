@@ -1,18 +1,18 @@
-1,Plátano Granel (kg),1290.0,45,FRUTAS_Y_VERDURAS
-2,Manzana fancy (kg),1490.0,30,FRUTAS_Y_VERDURAS
-3,Papas (kg),990.0,80,FRUTAS_Y_VERDURAS
-4,Leche Entera 1L,1050.0,60,LACTEOS
-5,Yogurt Batido Frutilla,350.0,100,LACTEOS
-6,Queso Laminado Mantecoso 250g,2890.0,25,LACTEOS
-7,Marraqueta (kg),1990.0,40,PANADERIA
-8,Pan Hallulla (kg),1990.0,35,PANADERIA
-9,Pan de Molde Blanco,2390.0,20,PANADERIA
-10,Pechuga de Pollo Deshuezada (kg),4990.0,15,CARNICERIA
-11,Carnde de Vacuno Filete (kg),16990.0,10,CARNICERIA
-12,Costillar de Cerdo (kg),6790.0,12,CARNICERIA
-13,Pepsi zero 2.5L,2000.0,50,BEBIDAS
-14,Jugo Néctar Durazno 1.5L,1390.0,30,BEBIDAS
-15,Agua Mineral Sin Gas 1.5L,890.0,45,BEBIDAS
-16,Detergente Líquido 3L,7490.0,18,LIMPIEZA
-17,Cloro Gel 900ml,1690.0,40,LIMPIEZA
-18,Lavaloza Limón 750ml,2190.0,28,LIMPIEZA
+1,Plátano Granel (kg),1290.0,45,FRUTAS_Y_VERDURAS,null
+2,Manzana fancy (kg),1490.0,30,FRUTAS_Y_VERDURAS,null
+3,Papas (kg),990.0,80,FRUTAS_Y_VERDURAS,null
+4,Leche Entera 1L,1050.0,60,LACTEOS,null
+5,Yogurt Batido Frutilla,350.0,100,LACTEOS,null
+6,Queso Laminado Mantecoso 250g,2890.0,25,LACTEOS,null
+7,Marraqueta (kg),1990.0,40,PANADERIA,null
+8,Pan Hallulla (kg),1990.0,35,PANADERIA,null
+9,Pan de Molde Blanco,2390.0,20,PANADERIA,null
+10,Pechuga de Pollo Deshuezada (kg),4990.0,15,CARNICERIA,null
+11,Carnde de Vacuno Filete (kg),16990.0,10,CARNICERIA,null
+12,Costillar de Cerdo (kg),6790.0,12,CARNICERIA,null
+13,Pepsi zero 2.5L,2000.0,50,BEBIDAS,null
+14,Jugo Néctar Durazno 1.5L,1390.0,30,BEBIDAS,null
+15,Agua Mineral Sin Gas 1.5L,890.0,45,BEBIDAS,null
+16,Detergente Líquido 3L,7490.0,18,LIMPIEZA,null
+17,Cloro Gel 900ml,1690.0,40,LIMPIEZA,null
+18,Lavaloza Limón 750ml,2190.0,28,LIMPIEZA,null

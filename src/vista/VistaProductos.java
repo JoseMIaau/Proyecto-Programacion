@@ -256,11 +256,35 @@ public class VistaProductos extends JPanel {
                 new EmptyBorder(12, 12, 12, 12)
         ));
 
-        JPanel boxColor = new JPanel();
-        boxColor.setBackground(EstilosUI.getColorPorCategoria(prod.getCategoria()));
+        JPanel boxColor = new JPanel(new BorderLayout());
+
+        boxColor.setBackground(
+            EstilosUI.getColorPorCategoria(prod.getCategoria())
+        );
+
         boxColor.setMaximumSize(new Dimension(140, 80));
         boxColor.setPreferredSize(new Dimension(140, 80));
         boxColor.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Obtener la ruta de la imagen
+        String ruta = prod.getRutaImagen();
+
+        if (ruta != null && !ruta.isEmpty()) {
+
+            ImageIcon icono = new ImageIcon(ruta);
+
+            if (icono.getIconWidth() > 0) {
+
+                Image imagen = icono.getImage().getScaledInstance(
+                    140, 80, Image.SCALE_SMOOTH
+                );
+
+                JLabel lblImagen = new JLabel(new ImageIcon(imagen));
+                lblImagen.setHorizontalAlignment(SwingConstants.CENTER);
+
+                boxColor.add(lblImagen, BorderLayout.CENTER);
+            }
+        }
 
         JLabel nameLabel = new JLabel(prod.getNombre());
         nameLabel.setFont(EstilosUI.FONT_BOLD);

@@ -24,12 +24,13 @@ public class GestorArchivo {
     public void guardarCatalogo(List<Producto> productos){
         //buffered writer por optimizacion
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(rutaArchivo))){
-            for (Producto p : productos){//formato: id,nombre,precio,stock,categoria
+            for (Producto p : productos){//formato: id,nombre,precio,stock,categoria,rutaImagen
                 String linea = p.getId()+separador+
                                 p.getNombre()+separador+
                                 p.getPrecio()+separador+
                                 p.getStock()+separador+
-                                p.getCategoria().name();;//convierte a string
+                                p.getCategoria().name()+separador+  
+                                p.getRutaImagen();
                 bw.write(linea);
                 bw.newLine();//salto de linea       
             }
@@ -54,14 +55,15 @@ public class GestorArchivo {
                 if (linea.trim().isEmpty()) continue;// ignora alguna linea vacia que se haya colado
                 //separa la fila por comas en el arreglo
                 String[] p = linea.split(separador);
-                if (p.length == 5) {//si estan los 5 datos, convierte cada texto en su tipo correspondiente
+                if (p.length == 6) {//si estan los 6 datos, convierte cada texto en su tipo correspondiente
                     int id = Integer.parseInt(p[0].trim());
                     String nombre = p[1].trim();
                     double precio = Double.parseDouble(p[2].trim());
                     int stock = Integer.parseInt(p[3].trim());
                     Categorias categoria = Categorias.valueOf(p[4].trim().toUpperCase());
+                    String rutaImagen = p[5].trim();
                     //crea el objeto y se guarda en la lista
-                    productos.add(new Producto(id, nombre, precio, stock, categoria));
+                    productos.add(new Producto(id, nombre, precio, stock, categoria, rutaImagen));
                 }
             }
         }   catch (IOException | NumberFormatException e) {

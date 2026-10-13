@@ -6,6 +6,8 @@ import modelo.Inventario;
 import modelo.Producto;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 import java.awt.*;
 
 public class VistaAgregarProducto extends JPanel{
@@ -16,9 +18,11 @@ public class VistaAgregarProducto extends JPanel{
         private JTextField txtPrecio;
         private JTextField txtStock;
         private JComboBox<Categorias> cmbCategoria;
+        private String rutaImagen;
 
         private JButton btnAtras;
         private JButton btnAgregar;
+        private JButton btnSeleccionarImagen;
 
     // Constructor
     public VistaAgregarProducto(BaseFrameAdmin frame) {
@@ -29,7 +33,20 @@ public class VistaAgregarProducto extends JPanel{
         inicializarComponentes();
         
     }
+    private void btnSeleccionarImagenActionPerformed(java.awt.event.ActionEvent evt) {                                                  
+        JFileChooser fileChooser = new JFileChooser();
 
+        fileChooser.setDialogTitle("Seleccionar Imagen producto:");
+        
+        fileChooser.setFileFilter(new FileNameExtensionFilter("imagen", "jpg", "jpeg", "png", "gif"));
+        
+        int resultado = fileChooser.showOpenDialog(this);
+
+        if (resultado == JFileChooser.APPROVE_OPTION) {
+            rutaImagen = fileChooser.getSelectedFile().getAbsolutePath();
+            System.out.println("Imagen seleccionada: " + rutaImagen);
+        }
+    }
     private void inicializarComponentes() {
 
         setLayout(new BorderLayout(15, 15));
@@ -46,7 +63,7 @@ public class VistaAgregarProducto extends JPanel{
         add(lblTitulo, BorderLayout.NORTH);
 
         JPanel pnlFormulario = new JPanel(
-                new GridLayout(4, 2, 10, 15)
+                new GridLayout(5, 2, 10, 15)
         );
 
         pnlFormulario.setBorder(
@@ -82,6 +99,13 @@ public class VistaAgregarProducto extends JPanel{
                 new JLabel("Categoría:")
         );
         pnlFormulario.add(cmbCategoria);
+
+        btnSeleccionarImagen = new JButton("Seleccionar Imagen");
+
+        pnlFormulario.add(new JLabel("Imagen:"));
+        pnlFormulario.add(btnSeleccionarImagen);
+
+        btnSeleccionarImagen.addActionListener(e-> {btnSeleccionarImagenActionPerformed(e);});
 
         add(pnlFormulario, BorderLayout.CENTER);
 
@@ -172,8 +196,10 @@ public class VistaAgregarProducto extends JPanel{
                             nombre,
                             precio,
                             stock,
-                            categoria
+                            categoria,
+                            rutaImagen
                     );
+        producto.setRutaImagen(rutaImagen); // Asignamos la ruta de la imagen al producto
 
         // Intentar registrar el producto en el inventario y confirmar cual sea el caso
             boolean agregado =
