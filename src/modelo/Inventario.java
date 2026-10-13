@@ -160,6 +160,21 @@ public class Inventario {
         return true;
     }
     
+    // Verifica que no exista otro producto con el mismo nombre
+    public boolean productoExistente(String nombre){
+        if(nombre == null){
+            return false;
+        }
+        for(Producto producto : productos){
+            if(producto.getNombre().trim().equalsIgnoreCase(nombre.trim())){
+                return true;
+            }
+        }
+        if(productoExistente(producto.getNombre()));  //REVISARR esta malo no se por que, perdon Javi
+
+        return false;
+}
+
     // Busca el producto
     public Producto buscarProducto(int id){
         for(Producto p:productos){
