@@ -336,6 +336,9 @@ public class VistaCarrito extends JPanel {
             }
             boolean exito = Inventario.getInstancia().procesarCompra();
             if (exito) {
+                if (red.Cliente.getInstancia() != null) {//había compras fantasmas, había error al actualizar en el stock
+                    red.Cliente.getInstancia().enviarDatos(0, "COMPRAR"); 
+                }
                 JOptionPane.showMessageDialog(dialog, "¡Pago procesado con éxito! Gracias por su compra en SuperCuricó.");
                 actualizarCarrito(); // Deja la tabla visual vacía y en $0
                 dialog.dispose();

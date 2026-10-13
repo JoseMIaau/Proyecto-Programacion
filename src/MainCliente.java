@@ -14,7 +14,7 @@ public class MainCliente {
             frame.setVisible(true);
 
             //MODIFICAR AQUI PARA CONECTARSE CON LA IP
-            Cliente cliente = new Cliente("10.68.4.69", 65432);
+            Cliente cliente = new Cliente("192.168.1.4", 65432);
             cliente.setOnStockUpdateCallback(() -> {
                 SwingUtilities.invokeLater(() -> frame.getVistaProductos().refrescarVistaActual());
             });
