@@ -1,28 +1,24 @@
+
 package modelo;
 
 public class ClienteRegistrado {
+    private final String run;
+    private String nombre;
 
-private String run;
-private String nombreCompleto;
+    public ClienteRegistrado(String run, String nombre) {
+        this.run = run == null ? "" : run.trim();
+        this.nombre = nombre == null ? "" : nombre.trim();
+    }
 
-public ClienteRegistrado(String run, String nombreCompleto) {
-this.run = run;
-this.nombreCompleto = nombreCompleto;
-}
+    public String getRun() {
+        return run;
+    }
 
-public String getRun() {
-return run;
-}
+    public String getNombre() {
+        return nombre;
+    }
 
-public void setRun(String run) {
-this.run = run;
-}
-
-public String getNombreCompleto() {
-return nombreCompleto;
-}
-
-public void setNombreCompleto(String nombreCompleto) {
-this.nombreCompleto = nombreCompleto;
-}
+    public void setNombre(String nombre) {
+        this.nombre = nombre == null ? "" : nombre.trim();
+    }
 }
