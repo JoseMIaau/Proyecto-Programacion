@@ -151,6 +151,10 @@ public class Inventario {
             return false;
         }
 
+        if(productoExistente(producto.getNombre())){
+            return false;
+        }
+
         if (producto.getId() <= 0 || buscarProducto(producto.getId()) != null) {
             producto.setId(generarId());
         }
@@ -170,10 +174,9 @@ public class Inventario {
                 return true;
             }
         }
-        if(productoExistente(producto.getNombre()));  //REVISARR esta malo no se por que, perdon Javi
 
         return false;
-}
+    }
 
     // Busca el producto
     public Producto buscarProducto(int id){
