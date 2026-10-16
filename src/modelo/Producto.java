@@ -6,14 +6,18 @@ public class Producto {
     private String nombre;
     private double precio;
     private int stock;
+    private int reservado;
     private Categorias categoria;
+    private String rutaImagen;
 
-    public Producto(int id, String nombre, double precio, int stock, Categorias categoria) {
+    public Producto(int id, String nombre, double precio, int stock, Categorias categoria, String rutaImagen) {
         this.id = id;
         this.nombre = nombre;
         this.precio = precio;
         this.stock = stock;
+        this.reservado = 0;
         this.categoria = categoria;
+        this.rutaImagen = rutaImagen;
     }
     
     //Getters
@@ -37,9 +41,19 @@ public class Producto {
         return categoria;
     }
 
+    public String getRutaImagen() {
+        return rutaImagen;
+    }
+
+    public int getReservado(){ return reservado; }
+
     //Setters
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getStockTotalReal(){
+        return stock + reservado;
     }
 
     public void setNombre(String nombre) {
@@ -56,6 +70,12 @@ public class Producto {
 
     public void setCategoria(Categorias categoria) {
         this.categoria = categoria;
+    }
+
+    public void setReservado(int reservado){ this.reservado = reservado; }
+    
+    public void setRutaImagen(String rutaImagen) {
+        this.rutaImagen = rutaImagen;
     }
     
     @Override

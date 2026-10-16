@@ -9,19 +9,13 @@ public class Admin {
         this.contrasena = contrasena;
     }
 
-    public String getUsuario() {
-        return usuario;
-    }
-
-    public String getContrasena() {
-        return contrasena;
-    }
-
-    // Validar el inicio de sesion en el login.
-    public boolean validarCredenciales(String usuarioIngresado, String contrasenaIngresada){
-        if (usuarioIngresado == null || contrasenaIngresada == null){
+    public boolean validarCredenciales(String usuarioIngresado, String contrasenaIngresada) {
+        if (usuarioIngresado == null || contrasenaIngresada == null) {
             return false;
         }
         return usuario.equals(usuarioIngresado) && contrasena.equals(contrasenaIngresada);
     }
+
+    public String getUsuario() { return usuario; }
+    public String getContrasena() { return contrasena; }
 }

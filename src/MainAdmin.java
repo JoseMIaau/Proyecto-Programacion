@@ -11,8 +11,9 @@ public class MainAdmin {
             } catch (Exception ignored) {}
             
             BaseFrameAdmin frame = new BaseFrameAdmin();
-            new Servidor(65432, frame).iniciar();
-            
+            Servidor servidor = new Servidor(65432, frame);
+            servidor.iniciar();
+            frame.setServidor(servidor);
             frame.setVisible(true);
         });
     }
