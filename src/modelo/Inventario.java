@@ -109,6 +109,12 @@ public class Inventario {
 
     public Admin getAdminActual() { return adminActual; }
     public List<Venta> getHistorialVentas() { return new ArrayList<>(historialVentas);}
+    public Venta getUltimaVenta() {
+    if (historialVentas.isEmpty()) {
+        return null;
+    }
+    return historialVentas.get(historialVentas.size() - 1);
+}
 
     // --- METODOS CRUD ---
 
@@ -126,6 +132,11 @@ public class Inventario {
         if (producto == null || producto.getPrecio() < 0 || producto.getStock() < 0) {
             return false;
         }
+
+         if(productoExistente(producto.getNombre())){
+            return false;
+        }
+
         if (producto.getId() <= 0 || buscarProducto(producto.getId()) != null) {
             producto.setId(generarId());
         }
@@ -134,6 +145,19 @@ public class Inventario {
         gestorArchivo.guardarCatalogo(productos);
         return true;
     }
+
+        // Verifica que no exista otro producto con el mismo nombre
+    public boolean productoExistente(String nombre){
+        if(nombre == null){
+            return false;
+        }
+        for(Producto producto : productos){
+            if(producto.getNombre().trim().equalsIgnoreCase(nombre.trim())){
+                return true;
+            }
+        }
+        return false;
+}
     
     public Producto buscarProducto(int id) {
         for (Producto p : productos) {

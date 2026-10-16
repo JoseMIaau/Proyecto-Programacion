@@ -2,6 +2,7 @@ package vista;
 
 import modelo.Inventario;
 import modelo.ItemCarrito;
+import modelo.Venta;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -287,6 +288,7 @@ public class VistaCarrito extends JPanel {
 
         JButton btnConfirmar = EstilosUI.roundedButton("PAGAR AHORA", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
         btnConfirmar.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         btnConfirmar.addActionListener(e -> {
             if (txtNombre.getText().trim().isEmpty() || txtDireccion.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, "Complete todos los campos obligatorios.", "Aviso", JOptionPane.WARNING_MESSAGE);
@@ -294,17 +296,21 @@ public class VistaCarrito extends JPanel {
             }
             if (Inventario.getInstancia().procesarCompra()) {
                 if (red.Cliente.getInstancia() != null) {
-                    red.Cliente.getInstancia().enviarDatos(0, "COMPRAR"); 
+                    red.Cliente.getInstancia().enviarDatos(0, "COMPRAR");
                 }
-                JOptionPane.showMessageDialog(dialog, "¡Pago procesado con éxito! Gracias por su compra en SuperCuricó.");
-                actualizarCarrito(); 
+                Venta ultimaVenta = Inventario.getInstancia().getUltimaVenta();
+                if (ultimaVenta != null) { 
+                    JOptionPane.showMessageDialog(dialog, ultimaVenta.generarComprobante(), "Comprobante de venta", JOptionPane.INFORMATION_MESSAGE);
+                }
+
+                actualizarCarrito();
                 dialog.dispose();
-                frame.mostrarVista("INICIO"); 
+                frame.mostrarVista("INICIO");
+
             } else {
-                JOptionPane.showMessageDialog(dialog, "Error al procesar el pago: uno o más productos ya no cuentan con stock suficiente.", "Error de Stock", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, "Error al procesar el pago.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
-
         body.add(btnConfirmar);
         dialog.add(body, BorderLayout.CENTER);
         dialog.setVisible(true);
