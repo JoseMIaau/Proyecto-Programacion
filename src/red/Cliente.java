@@ -14,6 +14,7 @@ public class Cliente {
     private PrintWriter out;
     private BufferedReader in;
     private Runnable onStockUpdateCallback;
+    private java.util.function.Consumer<String> alRecibirMensaje;
 
     public Cliente(String host, int puerto) {
         this.host = host;
@@ -27,6 +28,10 @@ public class Cliente {
 
     public void setOnStockUpdateCallback(Runnable callback) {
         this.onStockUpdateCallback = callback;
+    }
+
+    public void setAlRecibirMensaje(java.util.function.Consumer<String> notificador) {
+        this.alRecibirMensaje = notificador;
     }
 
     public void conectar() {
@@ -55,8 +60,13 @@ public class Cliente {
                                 }
                             }
                         }
+                    }else if (Protocolo.TYPE_MESSAGE.equals(type)) {
+                        String contenido = Protocolo.extractJsonField(line, "content"); 
+                        if (alRecibirMensaje != null && contenido != null) {
+                            javax.swing.SwingUtilities.invokeLater(() -> alRecibirMensaje.accept(contenido));
+                        }
                     }
-                }
+                } 
             } catch (IOException e) {
                 System.err.println("[!] error cliente socket: " + e.getMessage());
             }

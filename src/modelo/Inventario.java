@@ -12,6 +12,7 @@ public class Inventario {
     private HashMap<String, Admin> usuariosAdmin;
     private Admin adminActual;
     private Carrito carritoActual;
+    private List<Venta> historialVentas = new ArrayList<>();
 
     private Inventario() {
         this.gestorArchivo = new GestorArchivo("inventario.csv");
@@ -19,7 +20,7 @@ public class Inventario {
         this.productos = gestorArchivo.cargarCatalogo();
         this.usuariosAdmin = gestorUsuario.cargarAdmins();
         this.adminActual = null;
-        this.carritoActual = new Carrito();
+        this.carritoActual = new Carrito();     
         inicializarDatosDemoSiVacio();
         inicializarAdminPorDefecto();
     }
@@ -121,6 +122,10 @@ public class Inventario {
 
     public Admin getAdminActual() {
         return adminActual;
+    }
+
+    public List<Venta> getHistorialVentas() {
+        return new ArrayList<>(historialVentas);
     }
 
     //Metodos CRUD
@@ -481,7 +486,20 @@ public class Inventario {
         if (c.estaVacio()) {
             return false;
         }
-        c.limpiar(); // Se vacía sin restaurar stock
+
+        Venta nuevaVenta = new Venta(
+            historialVentas.size() + 1,
+            java.time.LocalDateTime.now(),
+            "Invitado",
+            c.getItems(),
+            calcularSubtotal(),
+            calcularIVA(),
+            calcularTotalCarrito()
+        );
+        historialVentas.add(nuevaVenta);
+        nuevaVenta.imprimirVenta();
+
+        c.limpiar();
         return true;
     }
 }

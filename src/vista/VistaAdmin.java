@@ -23,6 +23,8 @@ public class VistaAdmin extends JPanel {
     private JButton btnModificar;
     private JButton btnEstadisticas;
     private JButton btnVaciarInventario;
+    private JButton btnChat;
+    private red.Servidor servidor;
 
 
 // Constructor
@@ -33,6 +35,16 @@ public class VistaAdmin extends JPanel {
 
         inicializarComponentes();
         poblarTabla();
+    }
+
+    public void setServidor(red.Servidor servidor) {
+        this.servidor = servidor;
+        this.servidor.setAlRecibirMensajeAdmin(mensaje -> {
+            if (areaChat != null) {
+                areaChat.append(mensaje + "\n");
+                areaChat.setCaretPosition(areaChat.getDocument().getLength()); 
+            }
+        });
     }
 
     // Crea y configura los componentes gráficos de la vista
@@ -76,6 +88,8 @@ public class VistaAdmin extends JPanel {
         btnEliminar = new JButton("Eliminar Producto");
         btnVaciarInventario = new JButton("Vaciar Inventario");
         btnEstadisticas = new JButton("Estadísticas");
+        
+        
 
         pnlSur.add(btnAgregar);
         pnlSur.add(btnModificar);
@@ -83,6 +97,10 @@ public class VistaAdmin extends JPanel {
         pnlSur.add(btnVaciarInventario);
         pnlSur.add(btnEstadisticas);
 
+
+        btnChat = new JButton("Chat de Soporte");
+        pnlSur.add(btnChat);
+        btnChat.addActionListener(e -> abrirChatAdmin());
 
         add(pnlSur, BorderLayout.SOUTH);
 
@@ -387,4 +405,48 @@ public class VistaAdmin extends JPanel {
             );
         }
     }
+
+    private JDialog ventanaChat;
+    private JTextArea areaChat;
+    private void abrirChatAdmin() {
+        if (ventanaChat != null && ventanaChat.isVisible()) {
+            ventanaChat.toFront();
+            return;
+        }
+
+        ventanaChat = new JDialog();
+        ventanaChat.setTitle("Soporte a Clientes (Admin)");
+        ventanaChat.setSize(350, 450);
+        ventanaChat.setLayout(new BorderLayout());
+
+        areaChat = new JTextArea();
+        areaChat.setEditable(false);
+        areaChat.setLineWrap(true);
+
+        JTextField campoMensaje = new JTextField();
+        JButton btnEnviar = new JButton("Enviar");
+
+        btnEnviar.addActionListener(e -> {
+            String texto = campoMensaje.getText().trim();
+            if (!texto.isEmpty() && servidor != null) {
+                areaChat.append("Tú (Admin): " + texto + "\n"); 
+                servidor.difundir(red.Protocolo.createJsonMessage("Admin: " + texto)); 
+                campoMensaje.setText(""); 
+            }
+        });
+        campoMensaje.addActionListener(e -> btnEnviar.doClick());
+
+
+        JPanel panelAbajo = new JPanel(new BorderLayout());
+        panelAbajo.add(campoMensaje, BorderLayout.CENTER);
+        panelAbajo.add(btnEnviar, BorderLayout.EAST);
+
+        ventanaChat.add(new JScrollPane(areaChat), BorderLayout.CENTER);
+        ventanaChat.add(panelAbajo, BorderLayout.SOUTH);
+        ventanaChat.setLocationRelativeTo(this);
+        
+        ventanaChat.setVisible(true);
+        campoMensaje.requestFocusInWindow();
+    }
+
 }

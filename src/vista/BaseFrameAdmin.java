@@ -47,4 +47,10 @@ public class BaseFrameAdmin extends JFrame {
         }
     }
 
+    public void setServidor(red.Servidor servidor) {
+        if (vistaAdmin != null) {
+            vistaAdmin.setServidor(servidor);
+        }
+    }
+
 }

@@ -16,6 +16,7 @@ public class Servidor {
     private ServerSocket serverSocket;
     private final BaseFrameAdmin frameAdmin;
     private int contadorClientes = 0;
+    private java.util.function.Consumer<String> alRecibirMensajeAdmin;
 
     public Servidor(int puerto, BaseFrameAdmin frameAdmin) {
         this.puerto = puerto;
@@ -61,6 +62,10 @@ public class Servidor {
         synchronized (clientes) {
             return new ArrayList<>(clientes);
         }
+    }
+
+    public void setAlRecibirMensajeAdmin(java.util.function.Consumer<String> notificador) {
+        this.alRecibirMensajeAdmin = notificador;
     }
 
     public class ManejadorCliente extends Thread {
@@ -142,7 +147,9 @@ public class Servidor {
                         }
                     } else if (Protocolo.TYPE_MESSAGE.equals(type)) {
                         String content = Protocolo.extractJsonField(line, "content");
-                        difundir(Protocolo.createJsonMessage(content));
+                        if (alRecibirMensajeAdmin != null && content != null) {
+                            SwingUtilities.invokeLater(() -> alRecibirMensajeAdmin.accept(idCliente + " : " + content));
+                        }
                     }
                 }
             } catch (IOException e) {

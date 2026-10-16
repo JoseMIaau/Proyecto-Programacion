@@ -15,6 +15,7 @@ import java.awt.event.KeyEvent;
 public class VistaMenuPrincipal extends JPanel {
     private final BaseFrameCliente frame;
     private int indicePromo = 0;
+    
 
     // Constructor de la pantalla principal
     public VistaMenuPrincipal(BaseFrameCliente frame) {
@@ -308,37 +309,55 @@ center.add(Box.createVerticalStrut(25));
 
     return p;
 }
-private void abrirChat(){
 
-JDialog ventanaChat = new JDialog();
-ventanaChat.setTitle("Chat");
-ventanaChat.setSize(300, 400);
-ventanaChat.setLayout(new BorderLayout());
+private JDialog ventanaChat;
+private JTextArea areaChat;
+   private void abrirChat(){       
+        if (ventanaChat != null && ventanaChat.isVisible()) {
+            ventanaChat.toFront();
+            return;
+        }
+        ventanaChat = new JDialog();
+        ventanaChat.setTitle("Chat Global");
+        ventanaChat.setSize(350, 450);
+        ventanaChat.setLayout(new BorderLayout());
 
-JTextArea chat = new JTextArea();
-chat.setEditable(false);
+        areaChat = new JTextArea();
+        areaChat.setEditable(false);
+        areaChat.setLineWrap(true);
+        areaChat.setWrapStyleWord(true);
 
-JTextField mensaje = new JTextField();
+        JTextField campoMensaje = new JTextField();
+        JButton btnEnviar = new JButton("Enviar");
 
-JButton enviar = new JButton("Enviar");
+        JPanel panelAbajo = new JPanel(new BorderLayout());
+        panelAbajo.add(campoMensaje, BorderLayout.CENTER);
+        panelAbajo.add(btnEnviar, BorderLayout.EAST);
 
-JPanel abajo = new JPanel(new BorderLayout());
+        ventanaChat.add(new JScrollPane(areaChat), BorderLayout.CENTER);
+        ventanaChat.add(panelAbajo, BorderLayout.SOUTH);
 
-abajo.add(mensaje, BorderLayout.CENTER);
-abajo.add(enviar, BorderLayout.EAST);
+        ventanaChat.setLocationRelativeTo(frame);
 
-ventanaChat.add(new JScrollPane(chat), BorderLayout.CENTER 
-);
+        btnEnviar.addActionListener(e -> {
+            String texto = campoMensaje.getText().trim();
+            if (!texto.isEmpty() && red.Cliente.getInstancia() != null) {
+                areaChat.append("Tú: " + texto + "\n");
+                red.Cliente.getInstancia().enviarMensaje(texto);
+                campoMensaje.setText(""); 
+            }
+        });
 
-ventanaChat.add(abajo, BorderLayout.SOUTH
-);
-
-ventanaChat.setLocationRelativeTo(frame);
-enviar.addActionListener(e-> {
-        String texto = mensaje.getText();
-});
-
-
-ventanaChat.setVisible(true);
-}
+        campoMensaje.addActionListener(e -> btnEnviar.doClick());
+        if (red.Cliente.getInstancia() != null) {
+            red.Cliente.getInstancia().setAlRecibirMensaje(mensajeRecibido -> {
+                if (areaChat != null) {
+                    areaChat.append(mensajeRecibido + "\n");
+                    areaChat.setCaretPosition(areaChat.getDocument().getLength()); 
+                }
+            });
+        }
+        ventanaChat.setVisible(true);
+        campoMensaje.requestFocusInWindow();
+        }
 }
