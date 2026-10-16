@@ -292,11 +292,18 @@ public class VistaCarrito extends JPanel {
         JButton btnConfirmar = EstilosUI.roundedButton("PAGAR AHORA", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
         btnConfirmar.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnConfirmar.addActionListener(e -> {
-            if (txtNombre.getText().trim().isEmpty() || txtRun.getText().trim().isEmpty() || txtDireccion.getText().trim().isEmpty()) {
+            String nombre = txtNombre.getText().trim();
+            String run = txtRun.getText().trim();
+            String direccion = txtDireccion.getText().trim();
+
+            if (nombre.isEmpty() || run.isEmpty() || direccion.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, "Complete todos los campos obligatorios.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            if (Inventario.getInstancia().procesarCompra()) {
+
+            boolean exito = Inventario.getInstancia().procesarCompra(run, nombre);
+
+            if (exito) {
                 if (red.Cliente.getInstancia() != null) {
                     red.Cliente.getInstancia().enviarDatos(0, "COMPRAR"); 
                 }
@@ -305,7 +312,7 @@ public class VistaCarrito extends JPanel {
                 dialog.dispose();
                 frame.mostrarVista("INICIO"); 
             } else {
-                JOptionPane.showMessageDialog(dialog, "Error al procesar el pago: uno o más productos ya no cuentan con stock suficiente.", "Error de Stock", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, "Error al procesar el pago. Por favor revise su carrito.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 

@@ -1,9 +1,12 @@
 package modelo;
 
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.List;
 import persistencia.GestorArchivo;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * Clase principal del modelo Singleton
@@ -11,28 +14,36 @@ import persistencia.GestorArchivo;
  */
 public class Inventario {
     private static Inventario instancia;
-    
+    private List<Producto> productos;
     private GestorArchivo gestorArchivo;
     private GestorArchivo gestorUsuario;
-    
-    private List<Producto> productos;
+
+    // Historial y Clientes Mauri y Javi
+    private GestorArchivo gestorClientes;
+    private GestorArchivo gestorCompras;
+    private final LinkedHashMap<String, ClienteRegistrado> clientesRegistrados = new LinkedHashMap<>();
+    private final List<Compra> historialCompras = new ArrayList<>();
+
     private HashMap<String, Admin> usuariosAdmin;
-    private List<Venta> historialVentas;
-    
     private Admin adminActual;
-    private Carrito carritoActual;
+    //Multicarrito
+    private final HashMap<String, Carrito> carritosActivos = new HashMap<>();
+    private String idClienteActual = "Cliente_" + java.util.UUID.randomUUID().toString().substring(0, 6);
 
     private Inventario() {
         this.gestorArchivo = new GestorArchivo("inventario.csv");
         this.gestorUsuario = new GestorArchivo("usuarios.csv");
-        
         this.productos = gestorArchivo.cargarCatalogo();
         this.usuariosAdmin = gestorUsuario.cargarAdmins();
-        this.historialVentas = new ArrayList<>(); // TEMPORAL | HAY QUE CARGARLO DESDE UN CSV
         
+        this.gestorClientes = new GestorArchivo("clientes.csv");
+        this.gestorCompras = new GestorArchivo("compras.csv");
+
+        for (ClienteRegistrado cliente : gestorClientes.cargarClientes()) {
+            clientesRegistrados.put(cliente.getRun(), cliente);
+        }
+        historialCompras.addAll(gestorCompras.cargarCompras());
         this.adminActual = null;
-        this.carritoActual = new Carrito();     
-        
         inicializarDatosDemoSiVacio();
         inicializarAdminPorDefecto();
     }
@@ -108,7 +119,13 @@ public class Inventario {
     }
 
     public Admin getAdminActual() { return adminActual; }
-    public List<Venta> getHistorialVentas() { return new ArrayList<>(historialVentas);}
+    public List<ClienteRegistrado> obtenerClientesRegistrados() {
+        return new ArrayList<>(clientesRegistrados.values());
+    }
+
+    public List<Compra> obtenerHistorialCompras() {
+        return new ArrayList<>(historialCompras);
+    }
 
     // --- METODOS CRUD ---
 
@@ -343,8 +360,20 @@ public class Inventario {
 
     // --- METODOS DE COMPRA Y CARRITO ---
 
-    public Carrito getCarritoActual() { return carritoActual; }
-    public List<ItemCarrito> getCarrito() { return carritoActual.getItems(); }
+    public void setSesionActual(String idCliente) {
+        this.idClienteActual = idCliente;
+    }
+
+    public Carrito getCarritoActual() {
+        if (!carritosActivos.containsKey(idClienteActual)) {
+            carritosActivos.put(idClienteActual, new Carrito(idClienteActual));
+        }
+        return carritosActivos.get(idClienteActual);
+    }
+    
+    public List<ItemCarrito> getCarrito() {
+        return getCarritoActual().getItems();
+    }
 
     /**
      * Agrega un producto al carrito y actualiza el stock de forma temporal
@@ -354,24 +383,24 @@ public class Inventario {
         if (p == null || cantidad <= 0 || p.getStock() < cantidad) return false;
 
         p.setStock((int) (p.getStock() - cantidad));
-        boolean existe = false;
+        Carrito c = getCarritoActual();
+        boolean existe = false; 
         
-        for (ItemCarrito item : carritoActual.getItems()) {
+        for (ItemCarrito item : c.getItems()) {
             if (item.getProducto().getId() == p.getId()) {
                 item.setCantidad(item.getCantidad() + cantidad);
                 existe = true;
                 break;
             }
         }
-        if (!existe) {
-            carritoActual.getItems().add(new ItemCarrito(p, cantidad));
-        }
+        if (!existe) c.getItems().add(new ItemCarrito(p, cantidad));
         return true;
     }
     
     public void eliminarDelCarrito(int idProducto) {
+        Carrito c = getCarritoActual();
         ItemCarrito aEliminar = null;
-        for (ItemCarrito item : carritoActual.getItems()) {
+        for (ItemCarrito item : c.getItems()) {
             if (item.getProducto().getId() == idProducto) {
                 aEliminar = item;
                 break;
@@ -380,21 +409,22 @@ public class Inventario {
         if (aEliminar != null) {
             int nuevoStock = (int) (aEliminar.getProducto().getStock() + aEliminar.getCantidad());
             aEliminar.getProducto().setStock(nuevoStock);
-            carritoActual.getItems().remove(aEliminar);
+            c.getItems().remove(aEliminar);
         }
     }
 
     public void vaciarCarrito() {
-        for (ItemCarrito item : carritoActual.getItems()) {
+        Carrito c = getCarritoActual();
+        for (ItemCarrito item : c.getItems()) {
             int nuevoStock = (int) (item.getProducto().getStock() + item.getCantidad());
             item.getProducto().setStock(nuevoStock);
         }
-        carritoActual.limpiar();
+        c.limpiar();
     }
 
     public double calcularSubtotal() {
         double subtotal = 0.0;
-        for (ItemCarrito item : carritoActual.getItems()) {
+        for (ItemCarrito item : getCarritoActual().getItems()) {
             subtotal += item.getSubtotal();
         }
         return subtotal;
@@ -407,22 +437,43 @@ public class Inventario {
      * Finaliza la transaccion, crea la instancia de Venta para el historial
      * y limpia el carrito actual.
      */
-    public boolean procesarCompra() {
-        if (carritoActual.estaVacio()) return false;
+    public boolean procesarCompra(String run, String nombre) {
+        Carrito c = getCarritoActual();
+        if (c.estaVacio()) return false;
 
-        Venta nuevaVenta = new Venta(
-            historialVentas.size() + 1,
-            java.time.LocalDateTime.now(),
-            "Invitado",
-            carritoActual.getItems(),
-            calcularSubtotal(),
-            calcularIVA(),
-            calcularTotalCarrito()
-        );
-        
-        historialVentas.add(nuevaVenta);
-        nuevaVenta.imprimirVenta(); // TEMPORAL | impresion en consola
-        carritoActual.limpiar();
+        run = run == null ? "" : run.trim().toUpperCase();
+        nombre = nombre == null ? "" : nombre.trim();
+
+        if (run.isEmpty() || nombre.isEmpty()) return false;
+
+        ClienteRegistrado cliente = clientesRegistrados.get(run);
+        if (cliente == null) {
+            cliente = new ClienteRegistrado(run, nombre);
+            clientesRegistrados.put(run, cliente);
+        } else {
+            cliente.setNombre(nombre);
+        }
+        gestorClientes.guardarClientes(clientesRegistrados.values());
+
+        List<DetalleCompra> detalles = new ArrayList<>();
+        for (ItemCarrito item : c.getItems()) {
+            detalles.add(new DetalleCompra(
+                item.getProducto().getId(), 
+                item.getProducto().getNombre(), 
+                item.getCantidad(), 
+                item.getProducto().getPrecio(), 
+                item.getSubtotal()
+            ));
+        }
+
+        String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
+        Compra compra = new Compra(run, nombre, fecha, calcularSubtotal(), calcularIVA(), calcularTotalCarrito(), detalles);
+
+        historialCompras.add(compra);
+        gestorCompras.guardarCompras(historialCompras);
+
+        gestorArchivo.guardarCatalogo(productos);
+        c.limpiar(); 
         return true;
     }
 }

@@ -16,8 +16,8 @@ public class Compra {
     private final List<DetalleCompra> detalles;
 
     public Compra(String runCliente, String nombreCliente, String fecha,
-                  double subtotal, double iva, double total,
-                  List<DetalleCompra> detalles) {
+                double subtotal, double iva, double total,
+                List<DetalleCompra> detalles) {
         this.runCliente = runCliente == null ? "" : runCliente.trim();
         this.nombreCliente = nombreCliente == null ? "" : nombreCliente.trim();
         this.fecha = fecha == null ? "" : fecha;

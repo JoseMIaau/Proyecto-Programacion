@@ -18,10 +18,10 @@ public class Protocolo {
 
     public static String escapeJson(String text) {
         return text.replace("\\", "\\\\")
-                   .replace("\"", "\\\"")
-                   .replace("\n", "\\n")
-                   .replace("\r", "\\r")
-                   .replace("\t", "\\t");
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
     }
 
     public static String extractJsonField(String json, String fieldName) {
@@ -41,9 +41,9 @@ public class Protocolo {
 
     public static String unescapeJson(String text) {
         return text.replace("\\\"", "\"")
-                   .replace("\\\\", "\\")
-                   .replace("\\n", "\n")
-                   .replace("\\r", "\r")
-                   .replace("\\t", "\t");
+                .replace("\\\\", "\\")
+                .replace("\\n", "\n")
+                .replace("\\r", "\r")
+                .replace("\\t", "\t");
     }
 }
