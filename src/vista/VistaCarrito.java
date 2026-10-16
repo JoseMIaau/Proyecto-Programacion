@@ -2,6 +2,7 @@ package vista;
 
 import modelo.Inventario;
 import modelo.ItemCarrito;
+import modelo.Venta;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -291,6 +292,7 @@ public class VistaCarrito extends JPanel {
 
         JButton btnConfirmar = EstilosUI.roundedButton("PAGAR AHORA", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
         btnConfirmar.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         btnConfirmar.addActionListener(e -> {
             String nombre = txtNombre.getText().trim();
             String run = txtRun.getText().trim();
@@ -305,17 +307,21 @@ public class VistaCarrito extends JPanel {
 
             if (exito) {
                 if (red.Cliente.getInstancia() != null) {
-                    red.Cliente.getInstancia().enviarDatos(0, "COMPRAR"); 
+                    red.Cliente.getInstancia().enviarDatos(0, "COMPRAR");
                 }
-                JOptionPane.showMessageDialog(dialog, "¡Pago procesado con éxito! Gracias por su compra en SuperCuricó.");
-                actualizarCarrito(); 
+                Venta ultimaVenta = Inventario.getInstancia().getUltimaVenta();
+                if (ultimaVenta != null) { 
+                    JOptionPane.showMessageDialog(dialog, ultimaVenta.generarComprobante(), "Comprobante de venta", JOptionPane.INFORMATION_MESSAGE);
+                }
+
+                actualizarCarrito();
                 dialog.dispose();
-                frame.mostrarVista("INICIO"); 
+                frame.mostrarVista("INICIO");
+
             } else {
-                JOptionPane.showMessageDialog(dialog, "Error al procesar el pago. Por favor revise su carrito.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, "Error al procesar el pago.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
-
         body.add(btnConfirmar);
         dialog.add(body, BorderLayout.CENTER);
         dialog.setVisible(true);
