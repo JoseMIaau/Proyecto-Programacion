@@ -3,12 +3,21 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import persistencia.GestorArchivo;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Inventario {
     private static Inventario instancia;
     private List<Producto> productos;
     private GestorArchivo gestorArchivo;
     private GestorArchivo gestorUsuario;
+    //PARA HISTORIAL DE CLIENTES
+    private GestorArchivo gestorClientes;
+    private GestorArchivo gestorCompras;
+    private final LinkedHashMap<String, ClienteRegistrado> clientesRegistrados = new LinkedHashMap<>();
+    private final List<Compra> historialCompras = new ArrayList<>();
+
     private HashMap<String, Admin> usuariosAdmin;
     private Admin adminActual;
     private final HashMap<String, Carrito> carritosActivos = new HashMap<>();
@@ -21,6 +30,15 @@ public class Inventario {
         this.gestorUsuario = new GestorArchivo("usuarios.csv");
         this.productos = gestorArchivo.cargarCatalogo();
         this.usuariosAdmin = gestorUsuario.cargarAdmins();
+        //Cargar historiales
+        this.gestorClientes = new GestorArchivo("clientes.csv");
+        this.gestorCompras = new GestorArchivo("compras.csv");
+
+        for (ClienteRegistrado cliente : gestorClientes.cargarClientes()) {
+         clientesRegistrados.put(cliente.getRun(), cliente);
+    }
+        historialCompras.addAll(gestorCompras.cargarCompras());
+
         this.adminActual = null;
         inicializarDatosDemoSiVacio();
         inicializarAdminPorDefecto();
@@ -493,4 +511,115 @@ public class Inventario {
         c.limpiar(); // Se vacía sin restaurar stock
         return true;
     }
+
+    
+    //registro de cliente
+    public boolean registrarCliente(String run, String nombre) {
+        if (run == null || nombre == null) {
+            return false;
+        }
+
+        run = run.trim().toUpperCase();
+        nombre = nombre.trim();
+
+        if (run.isEmpty() || nombre.isEmpty()) {
+            return false;
+        }
+
+        ClienteRegistrado cliente = clientesRegistrados.get(run);
+
+        if (cliente == null) {
+            cliente = new ClienteRegistrado(run, nombre);
+            clientesRegistrados.put(run, cliente);
+        } else {
+            cliente.setNombre(nombre);
+        }
+
+        gestorClientes.guardarClientes(clientesRegistrados.values());
+        return true;
+    }
+
+    //PARTE NUEVA - OBTENER CLIENTES REGISTRADOS
+    public List<ClienteRegistrado> obtenerClientesRegistrados() {
+        return new ArrayList<>(clientesRegistrados.values());
+    }
+
+    //PARTE NUEVA - BUSCAR CLIENTE POR RUN
+    public ClienteRegistrado buscarClientePorRun(String run) {
+        if (run == null) {
+            return null;
+        }
+
+        return clientesRegistrados.get(run.trim().toUpperCase());
+    }
+
+    //PARTE NUEVA - REGISTRAR COMPRA EN EL HISTORIAL
+    public boolean registrarCompraEnHistorial(String run, String nombre) {
+        if (getCarritoActual().estaVacio()) {
+            return false;
+        }
+
+        if (!registrarCliente(run, nombre)) {
+            return false;
+        }
+
+        List<DetalleCompra> detalles = new ArrayList<>();
+
+        for (ItemCarrito item : getCarritoActual().getItems()) {
+            Producto producto = item.getProducto();
+
+            detalles.add(new DetalleCompra(
+                    producto.getId(),
+                    producto.getNombre(),
+                    item.getCantidad(),
+                    producto.getPrecio(),
+                    item.getSubtotal()
+            ));
+        }
+
+        String fecha = LocalDateTime.now().format(
+                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+        );
+
+        Compra compra = new Compra(
+                run.trim().toUpperCase(),
+                nombre.trim(),
+                fecha,
+                calcularSubtotal(),
+                calcularIVA(),
+                calcularTotalCarrito(),
+                detalles
+        );
+
+        historialCompras.add(compra);
+        gestorCompras.guardarCompras(historialCompras);
+
+        return true;
+    }
+
+    //lista para obtener el historial completo
+    public List<Compra> obtenerHistorialCompras() {
+        return new ArrayList<>(historialCompras);
+    }
+
+    //buscar por run
+    public List<Compra> buscarComprasPorRun(String run) {
+        List<Compra> resultado = new ArrayList<>();
+
+        if (run == null) {
+            return resultado;
+        }
+
+        String runBuscado = run.trim().toUpperCase();
+
+        for (Compra compra : historialCompras) {
+            if (compra.getRunCliente().equalsIgnoreCase(runBuscado)) {
+                resultado.add(compra);
+            }
+        }
+
+        return resultado;
+    }
+
+
 }

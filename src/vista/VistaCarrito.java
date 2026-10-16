@@ -211,7 +211,7 @@ public class VistaCarrito extends JPanel {
     // Muestra la ventana con los datos para finalizar la compra
     private void showCheckoutDialog() {
         JDialog dialog = new JDialog(frame, "Finalizar Pago", true);
-        dialog.setSize(480, 360);
+        dialog.setSize(480, 420);
         dialog.setLocationRelativeTo(frame);
         dialog.setLayout(new BorderLayout());
 
@@ -226,11 +226,15 @@ public class VistaCarrito extends JPanel {
         JTextField txtNombre = new JTextField();
         JTextField txtDireccion = new JTextField();
         JTextField txtTarjeta = new JTextField();
+        JTextField txtRun = new JTextField();
 
         body.add(totalTxt);
         body.add(Box.createVerticalStrut(15));
         body.add(new JLabel("Nombre Completo:"));
         body.add(txtNombre);
+        body.add(Box.createVerticalStrut(8));
+        body.add(new JLabel("RUN del cliente:"));
+        body.add(txtRun);
         body.add(Box.createVerticalStrut(8));
         body.add(new JLabel("Direccion de entrega:"));
         body.add(txtDireccion);
@@ -243,16 +247,37 @@ public class VistaCarrito extends JPanel {
         JButton btnConfirmar = EstilosUI.roundedButton("PAGAR AHORA", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
         btnConfirmar.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnConfirmar.addActionListener(e -> {
-            if (txtNombre.getText().trim().isEmpty() || txtDireccion.getText().trim().isEmpty()) {
+            if (txtNombre.getText().trim().isEmpty() || txtRun.getText().trim().isEmpty() || txtDireccion.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, "Complete todos los campos obligatorios.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            boolean exito = Inventario.getInstancia().procesarCompra();
+
+            //Guardar el cliente y su historial
+        Inventario inventario = Inventario.getInstancia();
+
+        boolean historialGuardado = inventario.registrarCompraEnHistorial(
+        txtRun.getText().trim(),
+        txtNombre.getText().trim()
+        );
+
+        if (!historialGuardado) {
+        JOptionPane.showMessageDialog(
+            dialog,
+            "No se pudo registrar la compra en el historial.",
+            "Error",
+            JOptionPane.ERROR_MESSAGE
+         );
+            return;
+        }
+            // Procesa la compra
+            boolean exito = inventario.procesarCompra();
+
             if (exito) {
                 JOptionPane.showMessageDialog(dialog, "¡Pago procesado con éxito! Gracias por su compra en SuperCuricó.");
-                actualizarCarrito(); // Deja la tabla visual vacía y en $0
+                //deja la tabla en 0
+                actualizarCarrito(); 
                 dialog.dispose();
-                frame.mostrarVista("INICIO"); // Redirige al menú principal
+                frame.mostrarVista("INICIO");
             }else {
                 JOptionPane.showMessageDialog(dialog, 
                     "Error al procesar el pago: uno o más productos ya no cuentan con stock suficiente.", 
@@ -266,5 +291,3 @@ public class VistaCarrito extends JPanel {
         dialog.setVisible(true);
     }
 }
-
-//texto para que me deje hacer el commit y merge
