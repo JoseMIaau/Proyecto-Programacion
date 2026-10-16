@@ -2,23 +2,17 @@ package vista;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-
 import modelo.Inventario;
-
 import java.awt.*;
 
-// Vista de inicio de sesión para acceder a admin
 public class VistaLogin extends JPanel {
 
-    // Componentes para ingresar las credenciales del usuario
     private BaseFrameAdmin frame; 
     private JTextField txtUsuario;
     private JPasswordField txtContrasena;
     private JButton btnIngresar;
 
-    // Constructor
     public VistaLogin(BaseFrameAdmin frame) {
-
         this.frame = frame;
         setLayout(new GridBagLayout());
         setBackground(EstilosUI.FONDO);
@@ -36,49 +30,36 @@ public class VistaLogin extends JPanel {
         titulo.setFont(EstilosUI.FONT_TITLE);
         titulo.setForeground(EstilosUI.VERDE);
         titulo.setHorizontalAlignment(SwingConstants.CENTER);
-
         gbc.gridy = 0;
         panel.add(titulo, gbc);
 
         JLabel subtitulo = new JLabel("Iniciar sesión");
         subtitulo.setFont(EstilosUI.FONT_BOLD);
-
         gbc.gridy = 1;
         panel.add(subtitulo, gbc);
 
-        //Campo para ingresar el usuario
+        // Campos de texto
         JLabel lblUsuario = new JLabel("Usuario");
         lblUsuario.setFont(EstilosUI.FONT_NORMAL);
-
         gbc.gridy = 2;
         panel.add(lblUsuario, gbc);
 
         txtUsuario = new JTextField(20);
         txtUsuario.setFont(EstilosUI.FONT_NORMAL);
-
         gbc.gridy = 3;
         panel.add(txtUsuario, gbc);
 
-        //Campo para ingresar la contraseña
         JLabel lblContrasena = new JLabel("Contraseña");
         lblContrasena.setFont(EstilosUI.FONT_NORMAL);
-
         gbc.gridy = 4;
         panel.add(lblContrasena, gbc);
 
         txtContrasena = new JPasswordField(20);
         txtContrasena.setFont(EstilosUI.FONT_NORMAL);
-
         gbc.gridy = 5;
         panel.add(txtContrasena, gbc);
 
-        // Botón para ir al admin
-        btnIngresar = EstilosUI.roundedButton(
-                "Ingresar",
-                EstilosUI.VERDE,
-                Color.WHITE
-        );
-
+        btnIngresar = EstilosUI.roundedButton("Ingresar", EstilosUI.VERDE, Color.WHITE);
         btnIngresar.addActionListener(e -> {
             String user = txtUsuario.getText().trim();
             String pass = new String(txtContrasena.getPassword()).trim();
@@ -87,13 +68,13 @@ public class VistaLogin extends JPanel {
                 txtUsuario.setText("");
                 txtContrasena.setText("");
                 this.frame.mostrarVista("ADMIN");
-            }else {
+            } else {
                 JOptionPane.showMessageDialog(this, "Correo o contraseña incorrectos.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-    txtUsuario.addActionListener(a -> btnIngresar.doClick());
-    txtContrasena.addActionListener(a -> btnIngresar.doClick());
+        txtUsuario.addActionListener(a -> btnIngresar.doClick());
+        txtContrasena.addActionListener(a -> btnIngresar.doClick());
 
         gbc.gridy = 6;
         gbc.insets = new Insets(20, 8, 8, 8);
@@ -101,5 +82,4 @@ public class VistaLogin extends JPanel {
 
         add(panel);
     }
-
 }

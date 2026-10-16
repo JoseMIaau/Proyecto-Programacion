@@ -15,10 +15,11 @@ public class ItemCarrito {
     public double getCantidad() {
         return cantidad;
     }
-    public void setCantidad(double cantidad) { 
-        this.cantidad = cantidad; 
-    }
     public double getSubtotal() { 
         return producto.getPrecio() * cantidad; 
     }
+    public void setCantidad(double cantidad) { 
+        this.cantidad = cantidad; 
+    }
+    
 }

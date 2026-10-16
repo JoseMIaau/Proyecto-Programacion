@@ -16,10 +16,6 @@ public class Carrito {
         this.items = new ArrayList<>();
     }
 
-    public List<ItemCarrito> getItems() {
-        return items;
-    }
-
     public boolean estaVacio() {
         return items.isEmpty();
     }
@@ -36,7 +32,6 @@ public class Carrito {
         return total;
     }
 
-    public String getIdCliente() {
-        return idCliente;
-    }
+    public List<ItemCarrito> getItems() { return items; }
+    public String getIdCliente() { return idCliente; }
 }

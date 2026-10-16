@@ -1,11 +1,11 @@
 package red;
 
+import java.io.*;
+import java.net.*;
 import modelo.Inventario;
 import modelo.Producto;
 
-import java.io.*;
-import java.net.*;
-
+//Maneja la conexion socket desde la aplicacion del Cliente hacia el Servidor Admin.
 public class Cliente {
     private static Cliente instancia;
     private final String host;
@@ -13,7 +13,8 @@ public class Cliente {
     private Socket socket;
     private PrintWriter out;
     private BufferedReader in;
-    private Runnable onStockUpdateCallback;
+    
+    private Runnable onStockUpdateCallback;//Notificar a swing
     private java.util.function.Consumer<String> alRecibirMensaje;
 
     public Cliente(String host, int puerto) {
@@ -22,18 +23,12 @@ public class Cliente {
         instancia = this;
     }
 
-    public static Cliente getInstancia() {
-        return instancia;
-    }
+    public static Cliente getInstancia() { return instancia; }
 
-    public void setOnStockUpdateCallback(Runnable callback) {
-        this.onStockUpdateCallback = callback;
-    }
+    public void setOnStockUpdateCallback(Runnable callback) { this.onStockUpdateCallback = callback; }
+    public void setAlRecibirMensaje(java.util.function.Consumer<String> notificador) { this.alRecibirMensaje = notificador; }
 
-    public void setAlRecibirMensaje(java.util.function.Consumer<String> notificador) {
-        this.alRecibirMensaje = notificador;
-    }
-
+    //Inicia un hilo secundario para escuchar mensajes del servidor sin que se congele la ventana.
     public void conectar() {
         new Thread(() -> {
             try {
@@ -55,12 +50,11 @@ public class Cliente {
                             Producto p = Inventario.getInstancia().buscarProducto(idProd);
                             if (p != null) {
                                 p.setStock(nuevoStock);
-                                if (onStockUpdateCallback != null) {
-                                    onStockUpdateCallback.run();
-                                }
+                                if (onStockUpdateCallback != null) onStockUpdateCallback.run();
                             }
                         }
-                    }else if (Protocolo.TYPE_MESSAGE.equals(type)) {
+                    } else if (Protocolo.TYPE_MESSAGE.equals(type)) {
+                        //procesar mensaje del chat 
                         String contenido = Protocolo.extractJsonField(line, "content"); 
                         if (alRecibirMensaje != null && contenido != null) {
                             javax.swing.SwingUtilities.invokeLater(() -> alRecibirMensaje.accept(contenido));
@@ -74,14 +68,10 @@ public class Cliente {
     }
 
     public void enviarDatos(int numero, String texto) {
-        if (out != null) {
-            out.println(Protocolo.createJsonData(numero, texto));
-        }
+        if (out != null) out.println(Protocolo.createJsonData(numero, texto));
     }
 
     public void enviarMensaje(String msg) {
-        if (out != null) {
-            out.println(Protocolo.createJsonMessage(msg));
-        }
+        if (out != null) out.println(Protocolo.createJsonMessage(msg));
     }
 }

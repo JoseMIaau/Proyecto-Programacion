@@ -45,9 +45,15 @@ public class Producto {
         return rutaImagen;
     }
 
+    public int getReservado(){ return reservado; }
+
     //Setters
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getStockTotalReal(){
+        return stock + reservado;
     }
 
     public void setNombre(String nombre) {
@@ -66,12 +72,7 @@ public class Producto {
         this.categoria = categoria;
     }
 
-    public int getReservado(){ return reservado; }
     public void setReservado(int reservado){ this.reservado = reservado; }
-
-    public int getStockTotalReal(){
-        return stock + reservado;
-    }
     
     public void setRutaImagen(String rutaImagen) {
         this.rutaImagen = rutaImagen;
