@@ -119,7 +119,13 @@ public class Inventario {
     }
 
     public Admin getAdminActual() { return adminActual; }
-    
+    public List<ClienteRegistrado> obtenerClientesRegistrados() {
+        return new ArrayList<>(clientesRegistrados.values());
+    }
+
+    public List<Compra> obtenerHistorialCompras() {
+        return new ArrayList<>(historialCompras);
+    }
 
     // --- METODOS CRUD ---
 
