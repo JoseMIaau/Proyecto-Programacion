@@ -55,18 +55,6 @@ public class Venta {
         return total;
     }
 
-    public String generarComprobante(){
-        return "----- COMPROBANTE DE VENTA -----\n" +
-           "ID Venta: " + idVenta + "\n" +
-           "Fecha: " + getFecha() + "\n" +
-           "Cliente: " + idCliente + "\n" +
-           "Productos: " + detalleProductos + "\n" +
-           "Subtotal: $" + (int)subtotal + "\n" +
-           "IVA: $" + (int)iva + "\n" +
-           "Total: $" + (int)total + "\n" +
-           "-------------------------------";
-    }
-
     public void imprimirVenta() {
         System.out.println("\n----- NUEVA VENTA REGISTRADA -----");
         System.out.println("ID Venta: " + idVenta);

@@ -57,6 +57,42 @@ public class Compra {
         return new ArrayList<>(detalles);
     }
 
+    public String generarComprobante(){
+        StringBuilder comprobante = new StringBuilder();
+        comprobante.append("===== COMPROBANTE DE COMPRA =====\n\n");
+        comprobante.append("Fecha: ").append(fecha).append("\n");
+        comprobante.append("RUN: ").append(runCliente).append("\n");
+        comprobante.append("Cliente: ").append(nombreCliente).append("\n\n");
+
+        comprobante.append("Productos:\n");
+        comprobante.append("---------------------------------\n");
+
+        for (DetalleCompra detalle : detalles) {
+            comprobante.append((int) detalle.getCantidad())
+                    .append("x ")
+                    .append(detalle.getNombreProducto())
+                    .append("\n");
+
+            comprobante.append("   Precio unitario: $")
+                    .append((int) detalle.getPrecioUnitario())
+                    .append("\n");
+
+            comprobante.append("   Subtotal: $")
+                    .append((int) detalle.getSubtotal())
+                    .append("\n\n");
+        }
+
+        comprobante.append("---------------------------------\n");
+        comprobante.append("Subtotal: $").append((int) subtotal).append("\n");
+        comprobante.append("IVA (19%): $").append((int) iva).append("\n");
+        comprobante.append("TOTAL: $").append((int) total).append("\n");
+        comprobante.append("---------------------------------\n");
+        comprobante.append("Gracias por comprar en SuperCuricó");
+
+        return comprobante.toString();
+    }
+    
+
     private static String codificar(String valor) {
         return Base64.getEncoder().encodeToString(
                 valor.getBytes(StandardCharsets.UTF_8)

@@ -2,7 +2,7 @@ package vista;
 
 import modelo.Inventario;
 import modelo.ItemCarrito;
-import modelo.Venta;
+import modelo.Compra;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -305,18 +305,31 @@ public class VistaCarrito extends JPanel {
             boolean exito = Inventario.getInstancia().procesarCompra(run, nombre);
 
             if (exito) {
-                if (red.Cliente.getInstancia() != null) {
-                    red.Cliente.getInstancia().enviarDatos(0, "COMPRAR"); 
+                Compra ultimaCompra = Inventario.getInstancia().obtenerUltimaCompra();
+                if(ultimaCompra != null){
+                    if(red.Cliente.getInstancia() != null){
+                        red.Cliente.getInstancia().enviarDatos(0, ultimaCompra.serializarParaRed());
+                    }
+                    JTextArea areaComprobante = new JTextArea(ultimaCompra.generarComprobante());
+
+                    areaComprobante.setEditable(false);
+                    areaComprobante.setFont(new Font ("Monospaced", Font.PLAIN, 14));
+                    areaComprobante.setBackground(Color.WHITE);
+                    areaComprobante.setCaretPosition(0);
+
+                    JScrollPane scrollComprobante = new JScrollPane(areaComprobante);
+                    scrollComprobante.setPreferredSize(new Dimension(450, 350));
+                    
+                    JOptionPane.showMessageDialog(dialog, scrollComprobante, "Comprobante de compra", JOptionPane.INFORMATION_MESSAGE);
                 }
-                JOptionPane.showMessageDialog(dialog, "¡Pago procesado con éxito! Gracias por su compra en SuperCuricó.");
-                actualizarCarrito(); 
+                actualizarCarrito();
                 dialog.dispose();
-                frame.mostrarVista("INICIO"); 
+                frame.mostrarVista("INICIO");
+
             } else {
                 JOptionPane.showMessageDialog(dialog, "Error al procesar el pago. Por favor revise su carrito.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
-
         body.add(btnConfirmar);
         dialog.add(body, BorderLayout.CENTER);
         dialog.setVisible(true);

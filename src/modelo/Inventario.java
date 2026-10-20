@@ -127,6 +127,13 @@ public class Inventario {
         return new ArrayList<>(historialCompras);
     }
 
+    public Compra obtenerUltimaCompra(){
+        if(historialCompras.isEmpty()){
+            return null;
+        }
+        return historialCompras.get(historialCompras.size() - 1);
+    }
+
     // --- METODOS CRUD ---
 
     public int generarId() {
