@@ -8,6 +8,13 @@ import modelo.Producto;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+//Imports para manejo de imagenes
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import java.awt.*;
 
 public class VistaAgregarProducto extends JPanel{
@@ -38,13 +45,33 @@ public class VistaAgregarProducto extends JPanel{
 
         fileChooser.setDialogTitle("Seleccionar Imagen producto:");
         
-        fileChooser.setFileFilter(new FileNameExtensionFilter("imagen", "jpg", "jpeg", "png", "gif"));
+        fileChooser.setFileFilter(new FileNameExtensionFilter("JPG & JPEG & PNG", "imagen", "jpg", "jpeg", "png", "gif"));
         
         int resultado = fileChooser.showOpenDialog(this);
 
         if (resultado == JFileChooser.APPROVE_OPTION) {
-            rutaImagen = fileChooser.getSelectedFile().getAbsolutePath();
-            System.out.println("Imagen seleccionada: " + rutaImagen);
+            try{
+            File archivo = fileChooser.getSelectedFile();
+
+            Path carpeta = Paths.get( "src", "imagenes", "ImagenesProductos");
+
+            String nombreNuevo = archivo.getName();
+
+            //Definir la ruta
+            Path destino = carpeta.resolve(nombreNuevo);
+
+            Files.copy(archivo.toPath(),destino);
+
+            rutaImagen = destino.toString();
+
+            System.out.println("Imagen guardada en: " + rutaImagen);
+
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Error al guardar la imagen: " + ex.getMessage()
+            );
+            }
         }
     }
     private void inicializarComponentes() {
