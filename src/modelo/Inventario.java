@@ -76,7 +76,7 @@ public class Inventario {
 
             // CARNICERIA
             productos.add(new Producto(10, "Pechuga de Pollo Deshuezada (kg)", 4990.0, 15, Categorias.CARNICERIA, null));
-            productos.add(new Producto(11, "Carnde de Vacuno Filete (kg)", 16990.0, 10, Categorias.CARNICERIA, null));
+            productos.add(new Producto(11, "Carne de Vacuno Filete (kg)", 16990.0, 10, Categorias.CARNICERIA, null));
             productos.add(new Producto(12, "Costillar de Cerdo (kg)", 6790.0, 12, Categorias.CARNICERIA, null));
 
             // BEBIDAS
