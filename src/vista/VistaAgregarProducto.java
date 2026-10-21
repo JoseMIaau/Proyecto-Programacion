@@ -8,6 +8,13 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 
+//Imports para manejo de imagenes
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 public class VistaAgregarProducto extends JPanel {
     private final BaseFrameAdmin frame;
     private final Inventario inventario;
