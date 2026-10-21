@@ -501,4 +501,38 @@ public class Inventario {
         c.limpiar(); 
         return true;
     }
+    
+
+    // Busca un cliente registrado mediante su RUN
+    public ClienteRegistrado buscarClientePorRun(String run) {
+        if (run == null) {
+            return null;
+        }
+
+        String runBuscado = run.trim().toUpperCase();
+
+        return clientesRegistrados.get(runBuscado);
+    }
+
+    // Busca todas las compras realizadas por un cliente según su RUN
+    public List<Compra> buscarComprasPorRun(String run) {
+        List<Compra> comprasCliente = new ArrayList<>();
+
+        if (run == null || run.trim().isEmpty()) {
+            return comprasCliente;
+        }
+
+        String runBuscado = run.trim().toUpperCase();
+
+        for (Compra compra : historialCompras) {
+            if (compra.getRunCliente().equalsIgnoreCase(runBuscado)) {
+                comprasCliente.add(compra);
+            }
+        }
+
+        return comprasCliente;
+    }
+
+
+
 }
