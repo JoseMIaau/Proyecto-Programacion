@@ -11,6 +11,7 @@ public class BaseFrameAdmin extends JFrame {
     private VistaAdmin vistaAdmin;
     private VistaModificarProducto vistaModificarProducto;
     private VistaAgregarProducto vistaAgregarProducto;
+    private VistaCarritosActivos vistaCarritosActivos;
 
     public BaseFrameAdmin() {
         super("SuperCuricó - Servidor Administrador");
@@ -48,9 +49,14 @@ public class BaseFrameAdmin extends JFrame {
     }
 
     public void setServidor(red.Servidor servidor) {
+
         if (vistaAdmin != null) {
             vistaAdmin.setServidor(servidor);
         }
+
+        vistaCarritosActivos = new VistaCarritosActivos(servidor, this);
+
+        root.add(vistaCarritosActivos, "CARROS");
     }
 
 }

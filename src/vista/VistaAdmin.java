@@ -20,7 +20,7 @@ public class VistaAdmin extends JPanel {
     private JTable tablaProductos;
     private DefaultTableModel modeloTabla;
 
-    private JButton btnEliminar, btnAgregar, btnModificar, btnEstadisticas, btnVaciarInventario, btnChat, btnHistorial;
+    private JButton btnEliminar, btnAgregar, btnModificar, btnEstadisticas, btnVaciarInventario, btnChat, btnHistorial, btnCarritosActivos;
 
     private red.Servidor servidor;
     private JDialog ventanaChat;
@@ -47,7 +47,7 @@ public class VistaAdmin extends JPanel {
     private void inicializarComponentes() {
         setLayout(new BorderLayout(5, 5));
 
-        String[] columnas = { "ID", "Nombre", "Precio", "Stock", "Categoría", "Imagen" };
+        String[] columnas = { "ID", "Nombre", "Precio", "Stock Total", "Stock Reservado", "Categoría" };
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -67,7 +67,7 @@ public class VistaAdmin extends JPanel {
         btnEstadisticas = new JButton("Estadísticas");
         btnChat = new JButton("Chat de Soporte");
         btnHistorial = new JButton("Gestion de Historial");
-
+        btnCarritosActivos = new JButton("Carritos Activos");
         pnlSur.add(btnAgregar);
         pnlSur.add(btnModificar);
         pnlSur.add(btnEliminar);
@@ -75,6 +75,7 @@ public class VistaAdmin extends JPanel {
         pnlSur.add(btnEstadisticas);
         pnlSur.add(btnChat);
         pnlSur.add(btnHistorial);
+        pnlSur.add(btnCarritosActivos);
 
         add(pnlSur, BorderLayout.SOUTH);
 
@@ -85,7 +86,13 @@ public class VistaAdmin extends JPanel {
         btnVaciarInventario.addActionListener(e -> vaciarInventario());
         btnEstadisticas.addActionListener(e -> mostrarEstadisticas());
         btnChat.addActionListener(e -> abrirChatAdmin());
-        btnHistorial.addActionListener(e -> { mostrarHistorialClientes();
+        btnHistorial.addActionListener(e -> { mostrarHistorialClientes(); });
+        btnCarritosActivos.addActionListener(e -> {
+            if (servidor != null) {
+                frame.mostrarVista("CARROS");
+            } else {
+                JOptionPane.showMessageDialog(this, "El servidor no está activo. No se pueden mostrar los carritos activos.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
 
         });
     }
@@ -96,7 +103,7 @@ public class VistaAdmin extends JPanel {
         modeloTabla.setRowCount(0);
         for (Producto p : inventario.leerProductos()) {
             modeloTabla.addRow(new Object[] {
-                    p.getId(), p.getNombre(), p.getPrecio(), p.getStock(), p.getCategoria()
+                    p.getId(), p.getNombre(), p.getPrecio(), p.getStock(), p.getReservado(), p.getCategoria()
             });
         }
     }
