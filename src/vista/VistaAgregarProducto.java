@@ -83,19 +83,21 @@ private void btnSeleccionarImagenActionPerformed(java.awt.event.ActionEvent evt)
         int resultado = fileChooser.showOpenDialog(this);
         if (resultado == JFileChooser.APPROVE_OPTION) {
             try{
-            File archivo = fileChooser.getSelectedFile();
-            Path carpeta = Paths.get( "src", "imagenes", "ImagenesProductos");
-            String nombreNuevo = archivo.getName();
-            //Definir la ruta
-            Path destino = carpeta.resolve(nombreNuevo);
-            Files.copy(archivo.toPath(),destino);
-            rutaImagen = destino.toString();
-            System.out.println("Imagen guardada en: " + rutaImagen);
+            java.io.File archivoOriginal = fileChooser.getSelectedFile();
+            String subCarpeta = "src/imagenes/ImagenesProductos";
+            java.io.File directorioDestino = new java.io.File(subCarpeta);
+            if (!directorioDestino.exists()) directorioDestino.mkdirs();
+            //me dio error con nombres iguales asi que nunca mas
+            String nombreUnico = System.currentTimeMillis() + "_" + archivoOriginal.getName();
+            java.io.File archivoDestino = new java.io.File(directorioDestino, nombreUnico);
+            
+            java.nio.file.Files.copy(archivoOriginal.toPath(), archivoDestino.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            rutaImagen = "src/imagenes/ImagenesProductos/" + nombreUnico;
+            
+            JOptionPane.showMessageDialog(this, "Imagen cargada correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(
-                this,
-                "Error al guardar la imagen: " + ex.getMessage()
-            );
+            JOptionPane.showMessageDialog(this, "Error al cargar la imagen: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                rutaImagen = null;
             }
         }
     }

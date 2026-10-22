@@ -150,7 +150,8 @@ public class GestorArchivo {
             for (Compra compra : compras) {
                 StringBuilder linea = new StringBuilder();
 
-                linea.append(compra.getRunCliente()).append("|")
+                linea.append(compra.getidCompra()).append("|")
+                    .append(compra.getRunCliente()).append("|")
                     .append(compra.getNombreCliente()).append("|")
                     .append(compra.getFecha()).append("|")
                     .append(compra.getSubtotal()).append("|")
@@ -187,18 +188,19 @@ public class GestorArchivo {
             while ((linea = br.readLine()) != null) {
                 if (linea.trim().isEmpty()) continue;
                 String[] p = linea.split("\\|", -1);
-                if (p.length < 7) continue; //si no tiene totales y al menos 1 producto, saltar
+                if (p.length < 8) continue; //si no tiene totales y al menos 1 producto, saltar
 
-                String run = p[0].trim();
-                String nombre = p[1].trim();
-                String fecha = p[2].trim();
-                double subtotal = Double.parseDouble(p[3]);
-                double iva = Double.parseDouble(p[4]);
-                double total = Double.parseDouble(p[5]);
+                int idCompra = Integer.parseInt(p[0].trim());
+                String run = p[1].trim();
+                String nombre = p[2].trim();
+                String fecha = p[3].trim();
+                double subtotal = Double.parseDouble(p[4]);
+                double iva = Double.parseDouble(p[5]);
+                double total = Double.parseDouble(p[6]);
 
                 List<DetalleCompra> detalles = new ArrayList<>();
 
-                for (int i = 6; i < p.length; i++) {
+                for (int i = 7; i < p.length; i++) {
                     if (p[i].isEmpty()) continue;
                     String[] d = p[i].split(",", -1);
                     if (d.length != 5) continue;
@@ -212,7 +214,7 @@ public class GestorArchivo {
                     ));
                 }
 
-                compras.add(new Compra(run, nombre, fecha, subtotal, iva, total, detalles));
+                compras.add(new Compra(idCompra, run, nombre, fecha, subtotal, iva, total, detalles));
             }
         } catch (IOException | NumberFormatException e) {
             System.err.println("Error al cargar compras: " + e.getMessage());

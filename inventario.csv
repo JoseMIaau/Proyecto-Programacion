@@ -1,18 +1,19 @@
-1,Plátano Granel (kg),1290.0,45,FRUTAS_Y_VERDURAS,src/imagenes/ImagenesProductos/Plátano.Granel.(kg).png
-2,Manzana fancy (kg),1490.0,30,FRUTAS_Y_VERDURAS,src/imagenes/ImagenesProductos/Manzana.fancy.(kg).png
-3,Papas (kg),990.0,80,FRUTAS_Y_VERDURAS,null
-4,Leche Entera 1L,1050.0,60,LACTEOS,null
-5,Yogurt Batido Frutilla,350.0,100,LACTEOS,null
-6,Queso Laminado Mantecoso 250g,2890.0,25,LACTEOS,null
-7,Marraqueta (kg),1990.0,40,PANADERIA,src/imagenes/ImagenesProductos/Marraqueta.(kg).png
-8,Pan Hallulla (kg),1990.0,35,PANADERIA,null
-9,Pan de Molde Blanco,2390.0,20,PANADERIA,null
-10,Pechuga de Pollo Deshuezada (kg),4990.0,15,CARNICERIA,null
-11,Carnde de Vacuno Filete (kg),16990.0,10,CARNICERIA,null
-12,Costillar de Cerdo (kg),6790.0,12,CARNICERIA,null
-13,Pepsi zero 2.5L,2000.0,50,BEBIDAS,null
-14,Jugo Néctar Durazno 1.5L,1390.0,30,BEBIDAS,null
-15,Agua Mineral Sin Gas 1.5L,890.0,45,BEBIDAS,null
-16,Detergente Líquido 3L,7490.0,18,LIMPIEZA,null
-17,Cloro Gel 900ml,1690.0,40,LIMPIEZA,null
-18,Lavaloza Limón 750ml,2190.0,28,LIMPIEZA,null
+1,Plátano Granel (kg),1290.0,45,FRUTAS_Y_VERDURAS,src/imagenes/ImagenesProductos/platano_granel.png
+2,Manzana fancy (kg),1490.0,30,FRUTAS_Y_VERDURAS,src/imagenes/ImagenesProductos/manzana_fancy.png
+3,Papas (kg),990.0,80,FRUTAS_Y_VERDURAS,src/imagenes/ImagenesProductos/papas.png
+4,Leche Entera 1L,1050.0,60,LACTEOS,src/imagenes/ImagenesProductos/leche_entera.png
+5,Yogurt Batido Frutilla,350.0,100,LACTEOS,src/imagenes/ImagenesProductos/yogurt_batido_frutilla.png
+6,Queso Laminado Mantecoso 250g,2890.0,25,LACTEOS,src/imagenes/ImagenesProductos/queso_laminado_250.png
+7,Marraqueta (kg),1990.0,40,PANADERIA,src/imagenes/ImagenesProductos/marraqueta.png
+8,Pan Hallulla (kg),1990.0,35,PANADERIA,src/imagenes/ImagenesProductos/hallula.png
+9,Pan de Molde Blanco,2390.0,20,PANADERIA,src/imagenes/ImagenesProductos/pan_molde_blanco.png
+10,Pechuga de Pollo Deshuezada (kg),4990.0,15,CARNICERIA,src/imagenes/ImagenesProductos/pechuga_pollo_deshuezada.png
+11,Carne de Vacuno Filete (kg),16990.0,10,CARNICERIA,src/imagenes/ImagenesProductos/filete_vacuno.png
+12,Costillar de Cerdo (kg),6790.0,12,CARNICERIA,src/imagenes/ImagenesProductos/costillar_cerdo.png
+13,Pepsi zero 2.5L,2000.0,50,BEBIDAS,src/imagenes/ImagenesProductos/pepsi_zero.png
+14,Jugo Néctar Durazno 1.5L,1390.0,30,BEBIDAS,src/imagenes/ImagenesProductos/jugo_durazno.png
+15,Agua Mineral Sin Gas 1.6L,890.0,45,BEBIDAS,src/imagenes/ImagenesProductos/mineral_sin_gas.png
+16,Detergente Líquido 3L,7490.0,18,LIMPIEZA,src/imagenes/ImagenesProductos/detergente_liquido.png
+17,Cloro Gel 900ml,1690.0,40,LIMPIEZA,src/imagenes/ImagenesProductos/clorogel.png
+18,Lavaloza Limón 750ml,2190.0,28,LIMPIEZA,src/imagenes/ImagenesProductos/lavaloza.png
+19,prueba,111111.0,1,ABARROTES,src/imagenes/ImagenesProductos/1792632646829_images.jpg

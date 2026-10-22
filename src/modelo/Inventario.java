@@ -60,34 +60,34 @@ public class Inventario {
     private void inicializarDatosDemoSiVacio() {
         if (productos.isEmpty()) {
             // FRUTAS Y VERDURAS
-            productos.add(new Producto(1, "Plátano Granel (kg)", 1290.0, 45, Categorias.FRUTAS_Y_VERDURAS, null));
-            productos.add(new Producto(2, "Manzana fancy (kg)", 1490.0, 30, Categorias.FRUTAS_Y_VERDURAS, null));
-            productos.add(new Producto(3, "Papas (kg)", 990.0, 80, Categorias.FRUTAS_Y_VERDURAS, null));
+            productos.add(new Producto(1, "Plátano Granel (kg)", 1290.0, 45, Categorias.FRUTAS_Y_VERDURAS, "src/imagenes/ImagenesProductos/platano_granel.png"));
+            productos.add(new Producto(2, "Manzana fancy (kg)", 1490.0, 30, Categorias.FRUTAS_Y_VERDURAS, "src/imagenes/ImagenesProductos/manzana_fancy.png"));
+            productos.add(new Producto(3, "Papas (kg)", 990.0, 80, Categorias.FRUTAS_Y_VERDURAS, "src/imagenes/ImagenesProductos/papas.png"));
 
             // LACTEOS
-            productos.add(new Producto(4, "Leche Entera 1L", 1050.0, 60, Categorias.LACTEOS, null));
-            productos.add(new Producto(5, "Yogurt Batido Frutilla", 350.0, 100, Categorias.LACTEOS, null));
-            productos.add(new Producto(6, "Queso Laminado Mantecoso 250g", 2890.0, 25, Categorias.LACTEOS, null));
+            productos.add(new Producto(4, "Leche Entera 1L", 1050.0, 60, Categorias.LACTEOS, "src/imagenes/ImagenesProductos/leche_entera.png"));
+            productos.add(new Producto(5, "Yogurt Batido Frutilla", 350.0, 100, Categorias.LACTEOS, "src/imagenes/ImagenesProductos/yogurt_batido_frutilla.png"));
+            productos.add(new Producto(6, "Queso Laminado Mantecoso 250g", 2890.0, 25, Categorias.LACTEOS, "src/imagenes/ImagenesProductos/queso_laminado_250.png"));
 
             // PANADERIA
-            productos.add(new Producto(7, "Marraqueta (kg)", 1990.0, 40, Categorias.PANADERIA, null));
-            productos.add(new Producto(8, "Pan Hallulla (kg)", 1990.0, 35, Categorias.PANADERIA, null));
-            productos.add(new Producto(9, "Pan de Molde Blanco", 2390.0, 20, Categorias.PANADERIA, null));
+            productos.add(new Producto(7, "Marraqueta (kg)", 1990.0, 40, Categorias.PANADERIA, "src/imagenes/ImagenesProductos/marraqueta.png"));
+            productos.add(new Producto(8, "Pan Hallulla (kg)", 1990.0, 35, Categorias.PANADERIA, "src/imagenes/ImagenesProductos/hallula.png"));
+            productos.add(new Producto(9, "Pan de Molde Blanco", 2390.0, 20, Categorias.PANADERIA, "src/imagenes/ImagenesProductos/pan_molde_blanco.png"));
 
             // CARNICERIA
-            productos.add(new Producto(10, "Pechuga de Pollo Deshuezada (kg)", 4990.0, 15, Categorias.CARNICERIA, null));
-            productos.add(new Producto(11, "Carne de Vacuno Filete (kg)", 16990.0, 10, Categorias.CARNICERIA, null));
-            productos.add(new Producto(12, "Costillar de Cerdo (kg)", 6790.0, 12, Categorias.CARNICERIA, null));
+            productos.add(new Producto(10, "Pechuga de Pollo Deshuezada (kg)", 4990.0, 15, Categorias.CARNICERIA, "src/imagenes/ImagenesProductos/pechuga_pollo_deshuezada.png"));
+            productos.add(new Producto(11, "Carne de Vacuno Filete (kg)", 16990.0, 10, Categorias.CARNICERIA, "src/imagenes/ImagenesProductos/filete_vacuno.png"));
+            productos.add(new Producto(12, "Costillar de Cerdo (kg)", 6790.0, 12, Categorias.CARNICERIA, "src/imagenes/ImagenesProductos/costillar_cerdo.png"));
 
             // BEBIDAS
-            productos.add(new Producto(13, "Pepsi zero 2.5L", 2000.0, 50, Categorias.BEBIDAS, null));
-            productos.add(new Producto(14, "Jugo Néctar Durazno 1.5L", 1390.0, 30, Categorias.BEBIDAS, null));
-            productos.add(new Producto(15, "Agua Mineral Sin Gas 1.5L", 890.0, 45, Categorias.BEBIDAS, null));
+            productos.add(new Producto(13, "Pepsi zero 2.5L", 2000.0, 50, Categorias.BEBIDAS, "src/imagenes/ImagenesProductos/pepsi_zero.png"));
+            productos.add(new Producto(14, "Jugo Néctar Durazno 1.5L", 1390.0, 30, Categorias.BEBIDAS, "src/imagenes/ImagenesProductos/jugo_durazno.png"));
+            productos.add(new Producto(15, "Agua Mineral Sin Gas 1.6L", 890.0, 45, Categorias.BEBIDAS, "src/imagenes/ImagenesProductos/mineral_sin_gas.png"));
 
             // LIMPIEZA
-            productos.add(new Producto(16, "Detergente Líquido 3L", 7490.0, 18, Categorias.LIMPIEZA, null));
-            productos.add(new Producto(17, "Cloro Gel 900ml", 1690.0, 40, Categorias.LIMPIEZA, null));
-            productos.add(new Producto(18, "Lavaloza Limón 750ml", 2190.0, 28, Categorias.LIMPIEZA, null));
+            productos.add(new Producto(16, "Detergente Líquido 3L", 7490.0, 18, Categorias.LIMPIEZA, "src/imagenes/ImagenesProductos/detergente_liquido.png"));
+            productos.add(new Producto(17, "Cloro Gel 900ml", 1690.0, 40, Categorias.LIMPIEZA, "src/imagenes/ImagenesProductos/clorogel.png"));
+            productos.add(new Producto(18, "Lavaloza Limón 750ml", 2190.0, 28, Categorias.LIMPIEZA, "src/imagenes/ImagenesProductos/lavaloza.png"));
 
             gestorArchivo.guardarCatalogo(productos);
         }
@@ -119,20 +119,6 @@ public class Inventario {
     }
 
     public Admin getAdminActual() { return adminActual; }
-    public List<ClienteRegistrado> obtenerClientesRegistrados() {
-        return new ArrayList<>(clientesRegistrados.values());
-    }
-
-    public List<Compra> obtenerHistorialCompras() {
-        return new ArrayList<>(historialCompras);
-    }
-
-    public Compra obtenerUltimaCompra(){
-        if(historialCompras.isEmpty()){
-            return null;
-        }
-        return historialCompras.get(historialCompras.size() - 1);
-    }
 
     // --- METODOS CRUD ---
 
@@ -151,7 +137,7 @@ public class Inventario {
             return false;
         }
 
-         if(productoExistente(producto.getNombre())){
+        if(productoExistente(producto.getNombre())){
             return false;
         }
 
@@ -492,7 +478,8 @@ public class Inventario {
         }
 
         String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
-        Compra compra = new Compra(run, nombre, fecha, calcularSubtotal(), calcularIVA(), calcularTotalCarrito(), detalles);
+        int nuevoIdCompra = historialCompras.size() + 1;
+        Compra compra = new Compra(nuevoIdCompra, run, nombre, fecha, calcularSubtotal(), calcularIVA(), calcularTotalCarrito(), detalles);
 
         historialCompras.add(compra);
         gestorCompras.guardarCompras(historialCompras);
@@ -502,20 +489,47 @@ public class Inventario {
         return true;
     }
     
+    // --- METODOS DE HISTORIAL ---
+    private void sincronizarHistoriales() {
+        clientesRegistrados.clear();
+        for (ClienteRegistrado cliente : gestorClientes.cargarClientes()) {
+            clientesRegistrados.put(cliente.getRun(), cliente);
+        }
+        historialCompras.clear();
+        historialCompras.addAll(gestorCompras.cargarCompras());
+    }
+
+    public List<ClienteRegistrado> obtenerClientesRegistrados() {
+        sincronizarHistoriales();
+        return new ArrayList<>(clientesRegistrados.values());
+    }
+
+    public List<Compra> obtenerHistorialCompras() {
+        sincronizarHistoriales();
+        return new ArrayList<>(historialCompras);
+    }
+
+    public Compra obtenerUltimaCompra(){
+        sincronizarHistoriales();
+        if(historialCompras.isEmpty()){
+            return null;
+        }
+        return historialCompras.get(historialCompras.size() - 1);
+    }
 
     // Busca un cliente registrado mediante su RUN
     public ClienteRegistrado buscarClientePorRun(String run) {
+        sincronizarHistoriales();
         if (run == null) {
             return null;
         }
 
-        String runBuscado = run.trim().toUpperCase();
-
-        return clientesRegistrados.get(runBuscado);
+        return clientesRegistrados.get(run.trim().toUpperCase());
     }
 
     // Busca todas las compras realizadas por un cliente según su RUN
     public List<Compra> buscarComprasPorRun(String run) {
+        sincronizarHistoriales();
         List<Compra> comprasCliente = new ArrayList<>();
 
         if (run == null || run.trim().isEmpty()) {

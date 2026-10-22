@@ -308,7 +308,7 @@ public class VistaCarrito extends JPanel {
                 Compra ultimaCompra = Inventario.getInstancia().obtenerUltimaCompra();
                 if(ultimaCompra != null){
                     if(red.Cliente.getInstancia() != null){
-                        red.Cliente.getInstancia().enviarDatos(0, ultimaCompra.serializarParaRed());
+                        red.Cliente.getInstancia().enviarDatos(0, "COMPRAR");
                     }
                     JTextArea areaComprobante = new JTextArea(ultimaCompra.generarComprobante());
 
