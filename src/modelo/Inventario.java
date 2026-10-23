@@ -433,16 +433,17 @@ public class Inventario {
         c.limpiar();
     }
 
-    public double calcularSubtotal() {
-        double subtotal = 0.0;
-        for (ItemCarrito item : getCarritoActual().getItems()) {
-            subtotal += item.getSubtotal();
-        }
-        return subtotal;
-    }
+    public double calcularIVA() { return calcularTotalCarrito() - calcularSubtotal();}
 
-    public double calcularIVA() { return calcularSubtotal() * 0.19; }
-    public double calcularTotalCarrito() { return calcularSubtotal() + calcularIVA(); }
+    public double calcularSubtotal() { return calcularTotalCarrito() / 1.19;}
+
+    public double calcularTotalCarrito() {
+        double total = 0.0;
+        for (ItemCarrito item : getCarritoActual().getItems()) {
+            total += item.getSubtotal();
+        }
+        return total;
+    }
 
     /**
      * Finaliza la transaccion, crea la instancia de Venta para el historial
