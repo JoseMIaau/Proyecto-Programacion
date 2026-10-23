@@ -56,9 +56,10 @@ public class VistaAdmin extends JPanel {
         };
 
         tablaProductos = new JTable(modeloTabla);
-        add(new JScrollPane(tablaProductos), BorderLayout.CENTER);
 
-        JPanel pnlSur = new JPanel(new FlowLayout());
+        JPanel panelLateral = new JPanel();
+        panelLateral.setLayout(new GridLayout(8, 1, 10, 10));
+        panelLateral.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
 
         btnAgregar = new JButton("Agregar Producto");
         btnModificar = new JButton("Modificar Producto");
@@ -68,17 +69,27 @@ public class VistaAdmin extends JPanel {
         btnChat = new JButton("Chat de Soporte");
         btnHistorial = new JButton("Gestion de Historial");
         btnCarritosActivos = new JButton("Carritos Activos");
-        pnlSur.add(btnAgregar);
-        pnlSur.add(btnModificar);
-        pnlSur.add(btnEliminar);
-        pnlSur.add(btnVaciarInventario);
-        pnlSur.add(btnEstadisticas);
-        pnlSur.add(btnChat);
-        pnlSur.add(btnHistorial);
-        pnlSur.add(btnCarritosActivos);
+        panelLateral.add(btnAgregar);
+        panelLateral.add(btnModificar);
+        panelLateral.add(btnEliminar);
+        panelLateral.add(btnVaciarInventario);
+        panelLateral.add(btnEstadisticas);
+        panelLateral.add(btnChat);
+        panelLateral.add(btnHistorial);
+        panelLateral.add(btnCarritosActivos);
 
-        add(pnlSur, BorderLayout.SOUTH);
+      JSplitPane division = new JSplitPane(
+    JSplitPane.HORIZONTAL_SPLIT,
+    panelLateral,
+    new JScrollPane(tablaProductos)
+);
 
+        division.setResizeWeight(1.0 / 3.0);
+        division.setDividerSize(5);
+        add(division, BorderLayout.CENTER);
+        SwingUtilities.invokeLater(() ->
+            division.setDividerLocation(1.0 / 3.0)
+);
         // Listeners de botones
         btnAgregar.addActionListener(e -> frame.mostrarVista("AGREGAR"));
         btnModificar.addActionListener(e -> frame.mostrarVista("MODIFICAR"));
