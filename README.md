@@ -35,16 +35,10 @@ Requisitos del sistema
 
 ## Instrucciones de Ejecución 
 
-### 1. Configuración de Red 
-Dado que el sistema utiliza Sockets para conectar múltiples clientes, es necesario configurar la IP:
-1. Abra el código fuente en su editor (ej. VS Code).
-2. Diríjase al archivo `MainCliente.java`.
-3. Busque la línea `Cliente cliente = new Cliente("192.168.0.236", 65432);` y reemplace la IP por la dirección IPv4 actual del computador que ejecutará el programa del Administrador(Por defecto si se ejecuta 'MainAdmin.java', en la terminal aparecera la ip).
-
-### 2. Orden de Inicialización
+### Orden de Inicialización
 Para evitar errores de conexión (Connection Refused), los programas deben iniciarse estrictamente en este orden:
-1. **Ejecutar Primero:** `MainAdmin.java` (Servidor). La consola mostrará la confirmación de que el servidor está escuchando.
-2. **Ejecutar Segundo:** `MainCliente.java` (Cliente). Puede ejecutar este archivo múltiples veces en distintos computadores para simular varios clientes armando carritos simultáneamente.
+1. **Ejecutar Primero:** `ServidorAdmin.jar` (Servidor). La consola mostrará la confirmación de que el servidor está escuchando.
+2. **Ejecutar Segundo:** `AplicacionCliente.jar` (Cliente). Puede ejecutar este archivo múltiples veces en distintos computadores para simular varios clientes armando carritos simultáneamente, al iniciarse se abrirá una ventana emergente solicitando la ip, se debe ingresar la ipv4 de donde se ejecuta 'ServidorAdmin.jar'.
 
 ### Credenciales por defecto(para administracion): 
 
