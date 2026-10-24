@@ -1,7 +1,7 @@
 # Proyecto-Programacion
 
-
-SuperCuricó - Sistema de Gestión de Supermercado
+## Descripción del Proyecto
+Sistema de tienda online desarrollado íntegramente en Java puro, utilizando una arquitectura Cliente-Servidor mediante Sockets. El proyecto cumple con todos los requisitos del Hito 2, sin utilizar librerías externas ni bases de datos de terceros (persistencia mediante archivos CSV).
 
 Backend
 
@@ -33,20 +33,20 @@ Requisitos del sistema
 
 -Este programa no posee librerias externas, por lo que con las librerias nativas de java basta para ejecutarlo.
 
-Instrucciones de ejecucion:
+## Instrucciones de Ejecución 
 
--Doble clic sobre el archivo `SuperCurico.jar` o ejecutar desde la terminal escribiendo: java -jar SuperCurico.jar
+### 1. Configuración de Red 
+Dado que el sistema utiliza Sockets para conectar múltiples clientes, es necesario configurar la IP:
+1. Abra el código fuente en su editor (ej. VS Code).
+2. Diríjase al archivo `MainCliente.java`.
+3. Busque la línea `Cliente cliente = new Cliente("192.168.0.236", 65432);` y reemplace la IP por la dirección IPv4 actual del computador que ejecutará el programa del Administrador(Por defecto si se ejecuta 'MainAdmin.java', en la terminal aparecera la ip).
 
--Si se desea recompilar el proyecto manualmente, entonces realizar los siguientes pasos en la terminal:
+### 2. Orden de Inicialización
+Para evitar errores de conexión (Connection Refused), los programas deben iniciarse estrictamente en este orden:
+1. **Ejecutar Primero:** `MainAdmin.java` (Servidor). La consola mostrará la confirmación de que el servidor está escuchando.
+2. **Ejecutar Segundo:** `MainCliente.java` (Cliente). Puede ejecutar este archivo múltiples veces en distintos computadores para simular varios clientes armando carritos simultáneamente.
 
-mkdir bin
-javac -encoding UTF-8 -d bin src/modelo/*.java src/persistencia/*.java src/vista/*.java src/Main.java
-
-Copy-Item -Recurse -Force src\imagenes bin\       esto es en linux/macos cp -r src/imagenes bin/
-
-java -cp bin Main
-
-Credenciales por defecto(para administracion): 
+### Credenciales por defecto(para administracion): 
 
 -Usuario: admin@supercurico.cl
 
