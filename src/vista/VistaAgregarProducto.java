@@ -7,6 +7,8 @@ import modelo.Producto;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.io.IOException;
+
 
 public class VistaAgregarProducto extends JPanel {
     private final BaseFrameAdmin frame;
@@ -24,7 +26,6 @@ public class VistaAgregarProducto extends JPanel {
         inicializarComponentes();
     }
 
-    // --- INICIALIZACION UI ---
     private void inicializarComponentes() {
         setLayout(new BorderLayout(15, 15));
 
@@ -70,17 +71,32 @@ public class VistaAgregarProducto extends JPanel {
 
     // --- ACCIONES Y VALIDACION ---
 
-    private void btnSeleccionarImagenActionPerformed(java.awt.event.ActionEvent evt) {
+private void btnSeleccionarImagenActionPerformed(java.awt.event.ActionEvent evt) {                                                  
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Seleccionar Imagen producto:");
-        fileChooser.setFileFilter(new FileNameExtensionFilter("imagen", "jpg", "jpeg", "png", "gif"));
-
+        fileChooser.setFileFilter(new FileNameExtensionFilter("JPG & JPEG & PNG", "imagen", "jpg", "jpeg", "png", "gif"));
         int resultado = fileChooser.showOpenDialog(this);
         if (resultado == JFileChooser.APPROVE_OPTION) {
-            rutaImagen = fileChooser.getSelectedFile().getAbsolutePath();
-            System.out.println("Imagen seleccionada: " + rutaImagen);
+            try{
+            java.io.File archivoOriginal = fileChooser.getSelectedFile();
+            String subCarpeta = "src/imagenes/ImagenesProductos";
+            java.io.File directorioDestino = new java.io.File(subCarpeta);
+            if (!directorioDestino.exists()) directorioDestino.mkdirs();
+            //me dio error con nombres iguales asi que nunca mas
+            String nombreUnico = System.currentTimeMillis() + "_" + archivoOriginal.getName();
+            java.io.File archivoDestino = new java.io.File(directorioDestino, nombreUnico);
+            
+            java.nio.file.Files.copy(archivoOriginal.toPath(), archivoDestino.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            rutaImagen = "src/imagenes/ImagenesProductos/" + nombreUnico;
+            
+            JOptionPane.showMessageDialog(this, "Imagen cargada correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Error al cargar la imagen: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                rutaImagen = null;
+            }
         }
     }
+
 
     private void agregarProducto() {
         try {

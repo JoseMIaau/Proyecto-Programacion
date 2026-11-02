@@ -1,12 +1,16 @@
 package vista;
 
 import modelo.Categorias;
+import modelo.ClienteRegistrado;
+import modelo.Compra;
+import modelo.DetalleCompra;
 import modelo.Inventario;
 import modelo.Producto;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
 public class VistaAdmin extends JPanel {
 
@@ -16,7 +20,7 @@ public class VistaAdmin extends JPanel {
     private JTable tablaProductos;
     private DefaultTableModel modeloTabla;
 
-    private JButton btnEliminar, btnAgregar, btnModificar, btnEstadisticas, btnVaciarInventario, btnChat;
+    private JButton btnEliminar, btnAgregar, btnModificar, btnEstadisticas, btnVaciarInventario, btnChat, btnHistorial, btnCarritosActivos;
 
     private red.Servidor servidor;
     private JDialog ventanaChat;
@@ -43,7 +47,7 @@ public class VistaAdmin extends JPanel {
     private void inicializarComponentes() {
         setLayout(new BorderLayout(5, 5));
 
-        String[] columnas = { "ID", "Nombre", "Precio", "Stock", "Categoría", "Imagen" };
+        String[] columnas = { "ID", "Nombre", "Precio", "Stock Total", "Stock Reservado", "Categoría" };
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -52,9 +56,10 @@ public class VistaAdmin extends JPanel {
         };
 
         tablaProductos = new JTable(modeloTabla);
-        add(new JScrollPane(tablaProductos), BorderLayout.CENTER);
 
-        JPanel pnlSur = new JPanel(new FlowLayout());
+        JPanel panelLateral = new JPanel();
+        panelLateral.setLayout(new GridLayout(8, 1, 10, 10));
+        panelLateral.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
 
         btnAgregar = new JButton("Agregar Producto");
         btnModificar = new JButton("Modificar Producto");
@@ -62,16 +67,29 @@ public class VistaAdmin extends JPanel {
         btnVaciarInventario = new JButton("Vaciar Inventario");
         btnEstadisticas = new JButton("Estadísticas");
         btnChat = new JButton("Chat de Soporte");
+        btnHistorial = new JButton("Gestion de Historial");
+        btnCarritosActivos = new JButton("Carritos Activos");
+        panelLateral.add(btnAgregar);
+        panelLateral.add(btnModificar);
+        panelLateral.add(btnEliminar);
+        panelLateral.add(btnVaciarInventario);
+        panelLateral.add(btnEstadisticas);
+        panelLateral.add(btnChat);
+        panelLateral.add(btnHistorial);
+        panelLateral.add(btnCarritosActivos);
 
-        pnlSur.add(btnAgregar);
-        pnlSur.add(btnModificar);
-        pnlSur.add(btnEliminar);
-        pnlSur.add(btnVaciarInventario);
-        pnlSur.add(btnEstadisticas);
-        pnlSur.add(btnChat);
+      JSplitPane division = new JSplitPane(
+    JSplitPane.HORIZONTAL_SPLIT,
+    panelLateral,
+    new JScrollPane(tablaProductos)
+);
 
-        add(pnlSur, BorderLayout.SOUTH);
-
+        division.setResizeWeight(1.0 / 3.0);
+        division.setDividerSize(5);
+        add(division, BorderLayout.CENTER);
+        SwingUtilities.invokeLater(() ->
+            division.setDividerLocation(1.0 / 3.0)
+);
         // Listeners de botones
         btnAgregar.addActionListener(e -> frame.mostrarVista("AGREGAR"));
         btnModificar.addActionListener(e -> frame.mostrarVista("MODIFICAR"));
@@ -79,6 +97,15 @@ public class VistaAdmin extends JPanel {
         btnVaciarInventario.addActionListener(e -> vaciarInventario());
         btnEstadisticas.addActionListener(e -> mostrarEstadisticas());
         btnChat.addActionListener(e -> abrirChatAdmin());
+        btnHistorial.addActionListener(e -> { mostrarHistorialClientes(); });
+        btnCarritosActivos.addActionListener(e -> {
+            if (servidor != null) {
+                frame.mostrarVista("CARROS");
+            } else {
+                JOptionPane.showMessageDialog(this, "El servidor no está activo. No se pueden mostrar los carritos activos.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+        });
     }
 
     // --- ACCIONES DE TABLA E INVENTARIO ---
@@ -87,7 +114,7 @@ public class VistaAdmin extends JPanel {
         modeloTabla.setRowCount(0);
         for (Producto p : inventario.leerProductos()) {
             modeloTabla.addRow(new Object[] {
-                    p.getId(), p.getNombre(), p.getPrecio(), p.getStock(), p.getCategoria()
+                    p.getId(), p.getNombre(), p.getPrecio(), p.getStock(), p.getReservado(), p.getCategoria()
             });
         }
     }
@@ -240,4 +267,177 @@ public class VistaAdmin extends JPanel {
         ventanaChat.setVisible(true);
         campoMensaje.requestFocusInWindow();
     }
+    
+    //Mostrar Clientes
+    private void mostrarHistorialClientes() {
+        List<ClienteRegistrado> clientes = inventario.obtenerClientesRegistrados();
+
+        if (clientes.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Todavía no existen clientes registrados.",
+                    "Historial de Clientes",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+            return;
+        }
+
+        String[] columnas = {"RUN", "Nombre Completo"};
+
+        DefaultTableModel modeloClientes = new DefaultTableModel(columnas, 0) {
+            @Override
+            public boolean isCellEditable(int fila, int columna) {
+                return false;
+            }
+        };
+
+        for (ClienteRegistrado cliente : clientes) {
+            modeloClientes.addRow(new Object[]{
+                    cliente.getRun(),
+                    cliente.getNombre()
+            });
+        }
+
+        JTable tablaClientes = new JTable(modeloClientes);
+        tablaClientes.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        JScrollPane scroll = new JScrollPane(tablaClientes);
+        scroll.setPreferredSize(new Dimension(620, 300));
+
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+
+        JTextField txtBuscarRun = new JTextField();
+
+        JPanel panelBusqueda = new JPanel(new BorderLayout(8, 0));
+        panelBusqueda.add(new JLabel("Buscar por RUN:"), BorderLayout.WEST);
+        panelBusqueda.add(txtBuscarRun, BorderLayout.CENTER);
+
+        panel.add(panelBusqueda, BorderLayout.NORTH);
+        panel.add(scroll, BorderLayout.CENTER);
+
+        Object[] opciones = {"Ver Historial", "Cerrar"};
+
+        while (true) {
+            int opcion = JOptionPane.showOptionDialog(
+                    this,
+                    panel,
+                    "Clientes Registrados",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    opciones,
+                    opciones[0]
+            );
+
+            if (opcion != 0) {
+                break;
+            }
+
+            String run = txtBuscarRun.getText().trim();
+
+            if (run.isEmpty()) {
+                int fila = tablaClientes.getSelectedRow();
+
+                if (fila == -1) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Seleccione un cliente o ingrese su RUN.",
+                            "Aviso",
+                            JOptionPane.WARNING_MESSAGE
+                    );
+                    continue;
+                }
+
+                run = tablaClientes.getValueAt(fila, 0).toString();
+            }
+
+            ClienteRegistrado cliente = inventario.buscarClientePorRun(run);
+
+            if (cliente == null) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "El Run ingresado no se encuentra ingresado",
+                        "Cliente no encontrado",
+                        JOptionPane.WARNING_MESSAGE
+                );
+                continue;
+            }
+
+            mostrarComprasCliente(cliente);
+        }
+    }
+
+    //PARTE NUEVA - MOSTRAR COMPRAS DE UN CLIENTE
+    private void mostrarComprasCliente(ClienteRegistrado cliente) {
+        List<Compra> compras = inventario.buscarComprasPorRun(cliente.getRun());
+
+        if (compras.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "El cliente no tiene compras registradas.",
+                    "Historial de Compras",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+            return;
+        }
+
+        StringBuilder historial = new StringBuilder();
+
+        historial.append("CLIENTE: ").append(cliente.getNombre()).append("\n");
+        historial.append("RUN: ").append(cliente.getRun()).append("\n");
+        historial.append("====================================\n\n");
+
+        int numeroCompra = 1;
+
+        for (Compra compra : compras) {
+            historial.append("COMPRA N° ").append(numeroCompra++).append("\n");
+            historial.append("Fecha: ").append(compra.getFecha()).append("\n\n");
+
+            for (DetalleCompra detalle : compra.getDetalles()) {
+                historial.append("Producto: ")
+                        .append(detalle.getNombreProducto()).append("\n");
+
+                historial.append("Cantidad: ")
+                        .append(detalle.getCantidad()).append("\n");
+
+                historial.append("Precio unitario: ")
+                        .append(EstilosUI.formatearCLP(detalle.getPrecioUnitario()))
+                        .append("\n");
+
+                historial.append("Subtotal producto: ")
+                        .append(EstilosUI.formatearCLP(detalle.getSubtotal()))
+                        .append("\n\n");
+            }
+
+            historial.append("Subtotal: ")
+                    .append(EstilosUI.formatearCLP(compra.getSubtotal()))
+                    .append("\n");
+
+            historial.append("IVA (19%): ")
+                    .append(EstilosUI.formatearCLP(compra.getIva()))
+                    .append("\n");
+
+            historial.append("TOTAL: ")
+                    .append(EstilosUI.formatearCLP(compra.getTotal()))
+                    .append("\n");
+
+            historial.append("------------------------------------\n\n");
+        }
+
+        JTextArea areaHistorial = new JTextArea(historial.toString());
+        areaHistorial.setEditable(false);
+        areaHistorial.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        areaHistorial.setCaretPosition(0);
+
+        JScrollPane scroll = new JScrollPane(areaHistorial);
+        scroll.setPreferredSize(new Dimension(650, 450));
+
+        JOptionPane.showMessageDialog(
+                this,
+                scroll,
+                "Historial de Compras - " + cliente.getNombre(),
+                JOptionPane.INFORMATION_MESSAGE
+        );
+    }
+
 }

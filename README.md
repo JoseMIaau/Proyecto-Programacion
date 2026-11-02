@@ -1,7 +1,7 @@
 # Proyecto-Programacion
 
-
-SuperCuricó - Sistema de Gestión de Supermercado
+## Descripción del Proyecto
+Sistema de tienda online desarrollado íntegramente en Java puro, utilizando una arquitectura Cliente-Servidor mediante Sockets. El proyecto cumple con todos los requisitos del Hito 2, sin utilizar librerías externas ni bases de datos de terceros (persistencia mediante archivos CSV).
 
 Backend
 
@@ -33,20 +33,14 @@ Requisitos del sistema
 
 -Este programa no posee librerias externas, por lo que con las librerias nativas de java basta para ejecutarlo.
 
-Instrucciones de ejecucion:
+## Instrucciones de Ejecución 
 
--Doble clic sobre el archivo `SuperCurico.jar` o ejecutar desde la terminal escribiendo: java -jar SuperCurico.jar
+### Orden de Inicialización
+Para evitar errores de conexión (Connection Refused), los programas deben iniciarse estrictamente en este orden:
+1. **Ejecutar Primero:** `ServidorAdmin.jar` (Servidor). La consola mostrará la confirmación de que el servidor está escuchando.
+2. **Ejecutar Segundo:** `AplicacionCliente.jar` (Cliente). Puede ejecutar este archivo múltiples veces en distintos computadores para simular varios clientes armando carritos simultáneamente, al iniciarse se abrirá una ventana emergente solicitando la ip, se debe ingresar la ipv4 de donde se ejecuta 'ServidorAdmin.jar'.
 
--Si se desea recompilar el proyecto manualmente, entonces realizar los siguientes pasos en la terminal:
-
-mkdir bin
-javac -encoding UTF-8 -d bin src/modelo/*.java src/persistencia/*.java src/vista/*.java src/Main.java
-
-Copy-Item -Recurse -Force src\imagenes bin\       esto es en linux/macos cp -r src/imagenes bin/
-
-java -cp bin Main
-
-Credenciales por defecto(para administracion): 
+### Credenciales por defecto(para administracion): 
 
 -Usuario: admin@supercurico.cl
 

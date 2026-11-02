@@ -1,6 +1,4 @@
-
 package modelo;
-
 public class DetalleCompra {
     private final int idProducto;
     private final String nombreProducto;
@@ -9,8 +7,8 @@ public class DetalleCompra {
     private final double subtotal;
 
     public DetalleCompra(int idProducto, String nombreProducto,
-                         double cantidad, double precioUnitario,
-                         double subtotal) {
+                        double cantidad, double precioUnitario,
+                        double subtotal) {
         this.idProducto = idProducto;
         this.nombreProducto = nombreProducto == null ? "" : nombreProducto;
         this.cantidad = cantidad;
