@@ -2,7 +2,6 @@ package red;
 
 import modelo.Inventario;
 import modelo.Producto;
-import modelo.Compra;
 import vista.BaseFrameAdmin;
 
 import java.io.*;
@@ -106,22 +105,6 @@ public class Servidor {
                         int numero = Integer.parseInt(Protocolo.extractJsonField(line, "numero"));
                         String texto = Protocolo.extractJsonField(line, "texto");
 
-                        if (texto != null && texto.startsWith("COMPRA")){
-                            Compra compraRecibida = Compra.desdeMensajeRed(texto);
-
-                            if (compraRecibida != null){
-                                System.out.println( "[SERVIDOR] COMPRA RECIBIDA");
-                                System.out.println("RUN: " + compraRecibida.getRunCliente());
-                                System.out.println("Cliente: " + compraRecibida.getNombreCliente());
-                                System.out.println("fecha: " + compraRecibida.getFecha());
-                                System.out.println("Total: " + compraRecibida.getTotal());
-                                miCarrito.clear();
-                            } else{
-                                System.err.println("[SERVIDOR ERROR] COMPRA INVÁLIDA");
-                            }
-                            continue;
-                        }
-
                         if (texto != null && texto.startsWith("AGREGAR:")) {
                             int cant = (int) Double.parseDouble(texto.substring(8));
                             Producto p = Inventario.getInstancia().buscarProducto(numero);
@@ -155,7 +138,10 @@ public class Servidor {
                                         SwingUtilities.invokeLater(() -> frameAdmin.refrescarTablaAdmin());
                                     }
                                 }
-                            } else {
+                            }else if (texto != null && texto.equals("COMPRAR")) {
+                                miCarrito.clear();
+                                System.out.println("[SERVIDOR] Compra finalizada por " + idCliente + ". Stock confirmado.");
+                            }else {
                                 System.err.println("[SERVIDOR ERROR] producto id " + numero + " no encontrado");
                             }
                         }
