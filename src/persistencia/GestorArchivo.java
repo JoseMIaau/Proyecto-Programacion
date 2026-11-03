@@ -156,6 +156,7 @@ public class GestorArchivo {
                     .append(compra.getFecha()).append("|")
                     .append(compra.getSubtotal()).append("|")
                     .append(compra.getIva()).append("|")
+                    .append(compra.getCostoEnvio()).append("|")
                     .append(compra.getTotal()).append("|");
 
                 boolean primero = true;
@@ -197,10 +198,10 @@ public class GestorArchivo {
                 double subtotal = Double.parseDouble(p[4]);
                 double iva = Double.parseDouble(p[5]);
                 double total = Double.parseDouble(p[6]);
-
+                int Envio = Integer.parseInt(p[7]);
                 List<DetalleCompra> detalles = new ArrayList<>();
 
-                for (int i = 7; i < p.length; i++) {
+                for (int i = 8; i < p.length; i++) {
                     if (p[i].isEmpty()) continue;
                     String[] d = p[i].split(",", -1);
                     if (d.length != 5) continue;
@@ -210,11 +211,10 @@ public class GestorArchivo {
                             d[1].trim(),
                             Double.parseDouble(d[2]),
                             Double.parseDouble(d[3]),
-                            Double.parseDouble(d[4])
-                    ));
+                            Double.parseDouble(d[4])));
                 }
 
-                compras.add(new Compra(idCompra, run, nombre, fecha, subtotal, iva, total, detalles));
+                compras.add(new Compra(idCompra, run, nombre, fecha, subtotal, iva, Envio, total, detalles));
             }
         } catch (IOException | NumberFormatException e) {
             System.err.println("Error al cargar compras: " + e.getMessage());

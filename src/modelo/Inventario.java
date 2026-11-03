@@ -434,7 +434,7 @@ public class Inventario {
     }
 
     public double calcularIVA() { return calcularTotalCarrito() - calcularSubtotal();}
-
+    public int CostoEnvio(double total) { return getCarritoActual().CostoEnvio();}
     public double calcularSubtotal() { return calcularTotalCarrito() / 1.19;}
 
     public double calcularTotalCarrito() {
@@ -480,7 +480,7 @@ public class Inventario {
 
         String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
         int nuevoIdCompra = historialCompras.size() + 1;
-        Compra compra = new Compra(nuevoIdCompra, run, nombre, fecha, calcularSubtotal(), calcularIVA(), calcularTotalCarrito(), detalles);
+        Compra compra = new Compra(nuevoIdCompra, run, nombre, fecha, calcularSubtotal(), calcularIVA(), c.CostoEnvio(), calcularTotalCarrito(), detalles);
 
         historialCompras.add(compra);
         gestorCompras.guardarCompras(historialCompras);

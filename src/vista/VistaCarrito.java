@@ -101,12 +101,15 @@ public class VistaCarrito extends JPanel {
         
         double subtotal = Inventario.getInstancia().calcularSubtotal();
         double iva = Inventario.getInstancia().calcularIVA();
+        int envio = Inventario.getInstancia().CostoEnvio(Inventario.getInstancia().calcularTotalCarrito());
         double total = Inventario.getInstancia().calcularTotalCarrito();
         
         rightPanel.add(summaryLine("Subtotal", "$" + (int) subtotal));
         rightPanel.add(Box.createVerticalStrut(8));
         rightPanel.add(summaryLine("IVA (19%)", "$" + (int) iva));
         rightPanel.add(Box.createVerticalStrut(8));
+        rightPanel.add(summaryLine("Costo de Envío", "$" + envio));
+        rightPanel.add(Box.createVerticalStrut(15));
 
         totalLabel.setText("Total: $" + (int) total);
         rightPanel.add(totalLabel);
@@ -274,6 +277,7 @@ public class VistaCarrito extends JPanel {
         JTextField txtDireccion = new JTextField();
         JTextField txtTarjeta = new JTextField();
         JTextField txtRun = new JTextField();
+        
 
         body.add(totalTxt);
         body.add(Box.createVerticalStrut(15));
@@ -283,6 +287,7 @@ public class VistaCarrito extends JPanel {
         body.add(new JLabel("RUN del cliente:"));
         body.add(txtRun);
         body.add(Box.createVerticalStrut(8));
+        body.add(#) /////////
         body.add(new JLabel("Direccion de entrega:"));
         body.add(txtDireccion);
         body.add(Box.createVerticalStrut(8));

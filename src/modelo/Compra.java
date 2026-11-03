@@ -12,17 +12,19 @@ public class Compra {
     private final double subtotal;
     private final double iva;
     private final double total;
+    private final int Envio;
     private final List<DetalleCompra> detalles;
 
     public Compra(int idCompra, String runCliente, String nombreCliente, String fecha,
-                double subtotal, double iva, double total, List<DetalleCompra> detalles) {
+                double subtotal, double iva, int Envio, double total, List<DetalleCompra> detalles) {
         this.idCompra = idCompra;
         this.runCliente = runCliente == null ? "" : runCliente.trim();
         this.nombreCliente = nombreCliente == null ? "" : nombreCliente.trim();
         this.fecha = fecha == null ? "" : fecha;
         this.subtotal = subtotal;
         this.iva = iva;
-        this.total = total;
+        this.Envio = Envio;
+        this.total = total + Envio;
         this.detalles = new ArrayList<>(
                 detalles == null ? List.of() : detalles
         );
@@ -50,6 +52,10 @@ public class Compra {
 
     public double getIva() {
         return iva;
+    }
+
+    public int getCostoEnvio() {
+        return Envio;
     }
 
     public double getTotal() {
@@ -88,6 +94,7 @@ public class Compra {
         comprobante.append("---------------------------------\n");
         comprobante.append("Subtotal: $").append((int) subtotal).append("\n");
         comprobante.append("IVA (19%): $").append((int) iva).append("\n");
+        comprobante.append("Costo de Envío: $").append((int) Envio).append("\n");
         comprobante.append("TOTAL: $").append((int) total).append("\n");
         comprobante.append("---------------------------------\n");
         comprobante.append("Gracias por comprar en SuperCuricó");
