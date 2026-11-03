@@ -31,6 +31,7 @@ public class MainCliente {
             Cliente cliente = new Cliente(ipServidor.trim(), 65432);
             cliente.setOnStockUpdateCallback(() -> {
                 SwingUtilities.invokeLater(() -> frame.getVistaProductos().refrescarVistaActual());
+                frame.getVistaCarrito().actualizarCarrito();
             });
             cliente.conectar();
         });

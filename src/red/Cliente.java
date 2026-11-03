@@ -53,6 +53,22 @@ public class Cliente {
                                 if (onStockUpdateCallback != null) onStockUpdateCallback.run();
                             }
                         }
+                        else if (texto.startsWith("ALERTA_CARRITO:")) {
+                            String mensaje = texto.substring(15);
+                            javax.swing.SwingUtilities.invokeLater(() -> 
+                                javax.swing.JOptionPane.showMessageDialog(null, mensaje, "Aviso de Inactividad", javax.swing.JOptionPane.WARNING_MESSAGE)
+                            );
+                        }
+                        else if (texto.startsWith("EXPIRADO:")) {
+                            String mensaje = texto.substring(9);
+                            Inventario.getInstancia().vaciarCarrito();
+                            javax.swing.SwingUtilities.invokeLater(() -> {
+                                javax.swing.JOptionPane.showMessageDialog(null, mensaje, "Carrito Expirado", javax.swing.JOptionPane.ERROR_MESSAGE);
+                                if (onStockUpdateCallback != null) onStockUpdateCallback.run();
+                            });
+                        }
+
+
                     } else if (Protocolo.TYPE_MESSAGE.equals(type)) {
                         //procesar mensaje del chat 
                         String contenido = Protocolo.extractJsonField(line, "content"); 
@@ -60,6 +76,7 @@ public class Cliente {
                             javax.swing.SwingUtilities.invokeLater(() -> alRecibirMensaje.accept(contenido));
                         }
                     }
+                    
                 } 
             } catch (IOException e) {
                 System.err.println("[!] error cliente socket: " + e.getMessage());
