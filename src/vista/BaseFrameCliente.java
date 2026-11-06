@@ -58,4 +58,8 @@ public class BaseFrameCliente extends JFrame {
     public VistaProductos getVistaProductos() {
         return vistaProductos;
     }
+
+    public VistaCarrito getVistaCarrito() {
+        return vistaCarrito;
+    }
 }

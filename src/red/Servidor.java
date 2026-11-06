@@ -17,6 +17,10 @@ public class Servidor {
     private final BaseFrameAdmin frameAdmin;
     private int contadorClientes = 0;
     private java.util.function.Consumer<String> alRecibirMensajeAdmin;
+    private boolean corriendo = false;
+    //valores de prueba, estan en ms
+    private static final long TIEMPO_AVISO_MS = 30000; //30 segundos
+    private static final long TIEMPO_EXPIRACION_MS = 601000; //1 minuto
 
     public Servidor(int puerto, BaseFrameAdmin frameAdmin) {
         this.puerto = puerto;
@@ -24,6 +28,9 @@ public class Servidor {
     }
 
     public void iniciar() {
+        corriendo = true;
+        iniciarHiloVigia();
+
         new Thread(() -> {
             try {
                 serverSocket = new ServerSocket(puerto);
@@ -46,6 +53,53 @@ public class Servidor {
                 }
             } catch (IOException e) {
                 System.err.println("[!] Servidor cerrado: " + e.getMessage());
+            }
+        }).start();
+    }
+
+    private void iniciarHiloVigia() {
+        new Thread(() -> {
+            while (corriendo) {
+                try {
+                    Thread.sleep(2000); 
+                    long tiempoActual = System.currentTimeMillis();
+                    
+                    synchronized (clientes) {
+                        for (ManejadorCliente c : clientes) {
+                            if (c.getMiCarrito().isEmpty()) continue;
+
+                            long tiempoInactivo = tiempoActual - c.ultimoAcceso;
+
+                            if (tiempoInactivo >= TIEMPO_AVISO_MS && !c.avisoEnviado && tiempoInactivo < TIEMPO_EXPIRACION_MS) {
+                                c.enviar(Protocolo.createJsonData(0, "ALERTA_CARRITO:Su carrito expirará por inactividad pronto."));
+                                c.avisoEnviado = true;
+                                System.out.println("[SERVIDOR] Aviso de expiración enviado a " + c.getIdCliente());
+                            }
+
+                            if (tiempoInactivo >= TIEMPO_EXPIRACION_MS) {
+                                System.out.println("[SERVIDOR] Carrito de " + c.getIdCliente() + " expirado por inactividad.");
+                                c.enviar(Protocolo.createJsonData(0, "EXPIRADO:Su carrito ha expirado y los productos fueron liberados."));
+                                
+                                for (java.util.Map.Entry<Integer, Integer> entry : c.getMiCarrito().entrySet()) {
+                                    Producto p = Inventario.getInstancia().buscarProducto(entry.getKey());
+                                    if (p != null) {
+                                        p.setStock(p.getStock() + entry.getValue());
+                                        p.setReservado(Math.max(0, p.getReservado() - entry.getValue()));
+                                        difundir(Protocolo.createJsonData(p.getId(), "STOCK:" + p.getStock()));
+                                    }
+                                }
+                                c.getMiCarrito().clear();
+                                c.renovarReserva(); 
+                                
+                                if (frameAdmin != null) {
+                                    SwingUtilities.invokeLater(() -> frameAdmin.refrescarTablaAdmin());
+                                }
+                            }
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
             }
         }).start();
     }
@@ -74,7 +128,9 @@ public class Servidor {
         private PrintWriter out;
         private final String idCliente;
         private final java.util.Map<Integer, Integer> miCarrito = new java.util.HashMap<>();
-
+        public long ultimoAcceso = System.currentTimeMillis();
+        public boolean avisoEnviado = false;
+        
         public ManejadorCliente(Socket socket, int numeroCliente) {
             this.socket = socket;
             this.idCliente = "Cliente-" + numeroCliente;
@@ -88,6 +144,11 @@ public class Servidor {
             return miCarrito;
         }
 
+        public void renovarReserva() {
+            this.ultimoAcceso = System.currentTimeMillis();
+            this.avisoEnviado = false;
+        }
+
         @Override
         public void run() {
             try {
@@ -98,6 +159,7 @@ public class Servidor {
                 while ((line = in.readLine()) != null) {
                     if (line.trim().isEmpty()) continue;
 
+                    renovarReserva();
                     System.out.println("[SERVIDOR RECIBIÓ] " + line);
                     String type = Protocolo.extractJsonField(line, "type");
 

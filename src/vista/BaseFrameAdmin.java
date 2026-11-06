@@ -46,6 +46,9 @@ public class BaseFrameAdmin extends JFrame {
         if (vistaAdmin != null) {
             vistaAdmin.poblarTabla();
         }
+        if (vistaCarritosActivos != null) { 
+            vistaCarritosActivos.actualizarCarritos();
+        }
     }
 
     public void setServidor(red.Servidor servidor) {

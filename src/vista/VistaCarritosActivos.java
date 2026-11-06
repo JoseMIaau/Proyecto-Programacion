@@ -43,7 +43,7 @@ public class VistaCarritosActivos extends JPanel {
         actualizarCarritos();
     }
 
-    private void actualizarCarritos() {
+    public void actualizarCarritos() {
 
         panelCarritos.removeAll();
 
