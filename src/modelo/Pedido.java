@@ -29,7 +29,7 @@ public class Pedido {
         return estado;
     }
 
-    public String getidCliente(){
+    public String getIdCliente(){
         return idCliente;
     }
     
@@ -58,5 +58,17 @@ public class Pedido {
         }
         return false;
     }
-    //VER COMO CANCELAR PEDIDO 
+    
+    public boolean puedeCancelarse(){
+        return estado == EstadoPedido.PENDIENTE || estado == EstadoPedido.EN_PREPARACION;
+    }
+
+    public boolean marcarComoCancelado(){
+        if(!puedeCancelarse()){
+            return false;
+        }
+
+        estado=EstadoPedido.CANCELADO;
+        return true;
+    }
 }
