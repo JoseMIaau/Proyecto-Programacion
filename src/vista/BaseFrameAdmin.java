@@ -3,10 +3,11 @@ package vista;
 import javax.swing.*;
 import java.awt.*;
 
+
 public class BaseFrameAdmin extends JFrame {
     private final CardLayout cardLayout = new CardLayout();
     private final JPanel root = new JPanel(cardLayout);
-
+    private red.Servidor servidor;
     private VistaLogin vistaLogin;
     private VistaAdmin vistaAdmin;
     private VistaModificarProducto vistaModificarProducto;
@@ -52,7 +53,7 @@ public class BaseFrameAdmin extends JFrame {
     }
 
     public void setServidor(red.Servidor servidor) {
-
+        this.servidor = servidor;
         if (vistaAdmin != null) {
             vistaAdmin.setServidor(servidor);
         }
@@ -60,6 +61,10 @@ public class BaseFrameAdmin extends JFrame {
         vistaCarritosActivos = new VistaCarritosActivos(servidor, this);
 
         root.add(vistaCarritosActivos, "CARROS");
+    }
+
+    public red.Servidor getServidor() { 
+        return servidor;
     }
 
 }

@@ -59,6 +59,15 @@ public class Cliente {
                                 javax.swing.JOptionPane.showMessageDialog(null, mensaje, "Aviso de Inactividad", javax.swing.JOptionPane.WARNING_MESSAGE)
                             );
                         }
+                        else if (texto.startsWith("NOTIFICACION:")) {
+                            String mensaje = texto.substring(13);
+                            javax.swing.SwingUtilities.invokeLater(() -> 
+                                javax.swing.JOptionPane.showMessageDialog(null, 
+                                    mensaje, 
+                                    "Nueva Notificación", 
+                                    javax.swing.JOptionPane.INFORMATION_MESSAGE)
+                            );
+                        }
                         else if (texto.startsWith("EXPIRADO:")) {
                             String mensaje = texto.substring(9);
                             Inventario.getInstancia().vaciarCarrito();

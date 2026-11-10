@@ -112,6 +112,38 @@ public class Servidor {
         }
     }
 
+    public void enviarNotificacionACliente(String idClienteObjetivo, String mensaje) {
+        synchronized (clientes) {
+            for (ManejadorCliente c : clientes) {
+                if (c.getIdCliente().equals(idClienteObjetivo)) {
+                    c.enviar(Protocolo.createJsonData(0, "NOTIFICACION:" + mensaje));
+                    System.out.println("[SERVIDOR] Notificación enviada a " + idClienteObjetivo);
+                    break;
+                }
+            }
+        }
+    }
+
+    public void difundirNotificacionReposicion(int idProducto, String nombreProducto) {
+        synchronized (clientes) {
+            for (ManejadorCliente c : clientes) {
+                if (c.deseaProducto(idProducto)) {
+                    enviarNotificacionACliente(c.getIdCliente(), nombreProducto + "' ya tiene stock disponible.");
+                }
+            }
+        }
+    }
+
+    public void difundirNotificacionBajaPrecio(int idProducto, String nombreProducto, double precioAntiguo, double precioNuevo) {
+        synchronized (clientes) {
+            for (ManejadorCliente c : clientes) {
+                if (c.deseaProducto(idProducto)) {
+                    enviarNotificacionACliente(c.getIdCliente(), nombreProducto + "' bajó de precio!\nAntes: $" + (int)precioAntiguo + " | Ahora: $" + (int)precioNuevo);
+                }
+            }
+        }
+    }
+
     public List<ManejadorCliente> getClientesActivos() {
         synchronized (clientes) {
             return new ArrayList<>(clientes);
@@ -130,6 +162,7 @@ public class Servidor {
         private final java.util.Map<Integer, Integer> miCarrito = new java.util.HashMap<>();
         public long ultimoAcceso = System.currentTimeMillis();
         public boolean avisoEnviado = false;
+        private final java.util.List<Integer> listaDeseos = new java.util.ArrayList<>();
         
         public ManejadorCliente(Socket socket, int numeroCliente) {
             this.socket = socket;
@@ -142,6 +175,16 @@ public class Servidor {
 
         public java.util.Map<Integer, Integer> getMiCarrito() {
             return miCarrito;
+        }
+
+        public void agregarListaDeseos(int idProducto) {
+            if (!listaDeseos.contains(idProducto)) {
+                listaDeseos.add(idProducto);
+            }
+        }
+
+        public boolean deseaProducto(int idProducto) {
+            return listaDeseos.contains(idProducto);
         }
 
         public void renovarReserva() {
@@ -166,6 +209,12 @@ public class Servidor {
                     if (Protocolo.TYPE_DATA.equals(type)) {
                         int numero = Integer.parseInt(Protocolo.extractJsonField(line, "numero"));
                         String texto = Protocolo.extractJsonField(line, "texto");
+
+                        if (texto != null && texto.startsWith("AGREGAR_DESEO:")) {
+                            agregarListaDeseos(numero);
+                            System.out.println("[SERVIDOR] Cliente " + idCliente + " suscrito a producto ID: " + numero);
+                            continue;
+                        }
 
                         if (texto != null && texto.startsWith("AGREGAR:")) {
                             int cant = (int) Double.parseDouble(texto.substring(8));
@@ -209,7 +258,26 @@ public class Servidor {
                         }
                     } else if (Protocolo.TYPE_MESSAGE.equals(type)) {
                         String content = Protocolo.extractJsonField(line, "content");
-                        if (alRecibirMensajeAdmin != null && content != null) {
+                        
+                        if (content.startsWith("!deseo ")) {
+                                try {
+                                    int idProd = Integer.parseInt(content.substring(7).trim());
+                                    Producto p = Inventario.getInstancia().buscarProducto(idProd);
+                                    
+                                    if (p != null) {
+                                        agregarListaDeseos(idProd);
+                                        System.out.println("[SERVIDOR] " + idCliente + " añadió a lista deseados: " + p.getNombre());
+                                        enviar(Protocolo.createJsonMessage("SISTEMA: Añadiste '" + p.getNombre() + "' a tu lista de deseados."));
+                                    } else {
+                                        enviar(Protocolo.createJsonMessage("SISTEMA: El ID " + idProd + " no existe."));
+                                    }
+                                } catch (NumberFormatException ex) {
+                                    enviar(Protocolo.createJsonMessage("SISTEMA: Error. Usa el formato '!deseo ID' (Ej: !deseo 2)"));
+                                }
+                                continue; 
+                            }
+                        
+                        if (alRecibirMensajeAdmin != null) {
                             SwingUtilities.invokeLater(() -> alRecibirMensajeAdmin.accept(idCliente + " : " + content));
                         }
                     }

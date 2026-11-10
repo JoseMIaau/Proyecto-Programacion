@@ -97,7 +97,19 @@ public class VistaModificarProducto extends JPanel {
                     "Confirmar modificación", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
             if (confirmacion == JOptionPane.YES_OPTION) {
+                double precioAntiguo = producto.getPrecio();
+                int stockAntiguo = producto.getStock();
                 if (inventario.actualizarProducto(id, nuevoPrecio, nuevoStock)) {
+                    if (frame.getServidor() != null) {
+                        if (stockAntiguo == 0 && nuevoStock > 0) {
+                            frame.getServidor().difundirNotificacionReposicion(id, producto.getNombre());
+                        }
+                        if (nuevoPrecio < precioAntiguo) {
+                            frame.getServidor().difundirNotificacionBajaPrecio(id, producto.getNombre(), precioAntiguo, nuevoPrecio);
+                        }
+                    }
+                    
+                    
                     JOptionPane.showMessageDialog(this, "Producto modificado correctamente.", "Éxito",
                             JOptionPane.INFORMATION_MESSAGE);
                     limpiarFormulario();
