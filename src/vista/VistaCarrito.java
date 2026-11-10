@@ -124,8 +124,8 @@ public class VistaCarrito extends JPanel {
         });
         rightPanel.add(btnPagar);
 
-        revalidate();
-        repaint();
+        this.revalidate();
+        this.repaint();
     }
 
     // --- CONSTRUCCION UI ---

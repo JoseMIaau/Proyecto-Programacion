@@ -100,6 +100,7 @@ public class VistaModificarProducto extends JPanel {
                 double precioAntiguo = producto.getPrecio();
                 int stockAntiguo = producto.getStock();
                 if (inventario.actualizarProducto(id, nuevoPrecio, nuevoStock)) {
+                    frame.getServidor().difundir(red.Protocolo.createJsonData(id, "STOCK:" + nuevoStock));
                     if (frame.getServidor() != null) {
                         if (stockAntiguo == 0 && nuevoStock > 0) {
                             frame.getServidor().difundirNotificacionReposicion(id, producto.getNombre());

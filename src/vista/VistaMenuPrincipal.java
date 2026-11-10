@@ -92,6 +92,9 @@ public class VistaMenuPrincipal extends JPanel {
         });
 
         header.add(search, BorderLayout.CENTER);
+        //lista deseados
+        JButton btnDeseos = EstilosUI.iconButton("🗿");
+        btnDeseos.addActionListener(e -> frame.mostrarVista("DESEOS"));
 
         // Carrito
         JButton carro = EstilosUI.iconButton("🛒");
@@ -99,6 +102,7 @@ public class VistaMenuPrincipal extends JPanel {
 
         JPanel contenedor = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
         contenedor.setOpaque(false);
+        contenedor.add(btnDeseos);
         contenedor.add(carro);
         header.add(contenedor, BorderLayout.EAST);
 

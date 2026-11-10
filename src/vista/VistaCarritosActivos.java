@@ -78,7 +78,7 @@ public class VistaCarritosActivos extends JPanel {
             panelCarritos.add(Box.createVerticalStrut(15));
             panelCarritos.add(new JSeparator());
         }
-        panelCarritos.revalidate();
-        panelCarritos.repaint();
+        this.revalidate();
+        this.repaint();
     }
 }

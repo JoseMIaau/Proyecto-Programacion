@@ -242,7 +242,25 @@ public class VistaProductos extends JPanel {
         stockLabel.setForeground(Color.GRAY);
         stockLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JButton addBtn = EstilosUI.roundedButton("Agregar", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
+        JButton addBtn;
+        if (prod.getStock() > 0) {
+            addBtn = EstilosUI.roundedButton("Agregar", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
+            addBtn.addActionListener(e -> showQuantityDialog(prod));
+        } else {
+            addBtn = EstilosUI.roundedButton("Avisame ", new Color(255, 230, 120), new Color(180, 120, 0));
+            addBtn.addActionListener(e -> {
+                if (red.Cliente.getInstancia() != null) {
+                    red.Cliente.getInstancia().enviarMensaje("!deseo " + prod.getId()); 
+                }
+                
+                frame.getVistaListaDeseados().agregarDeseoLocal(prod);
+                
+                JOptionPane.showMessageDialog(frame, 
+                    "¡Anotado! Te avisaremos cuando '" + prod.getNombre() + "' tenga stock.", 
+                    "Lista de Deseos", 
+                    JOptionPane.INFORMATION_MESSAGE);
+            });
+        }
         addBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         addBtn.setMaximumSize(new Dimension(120, 32));
         addBtn.addActionListener(e -> showQuantityDialog(prod));

@@ -11,6 +11,7 @@ public class BaseFrameCliente extends JFrame {
     private VistaMenuPrincipal vistaMenuPrincipal;
     private VistaProductos vistaProductos;
     private VistaCarrito vistaCarrito;
+    private VistaListaDeseados vistaListaDeseados;
 
     public BaseFrameCliente() {
         super("SuperCuricó - Tienda Online");
@@ -22,10 +23,12 @@ public class BaseFrameCliente extends JFrame {
         vistaMenuPrincipal = new VistaMenuPrincipal(this);
         vistaProductos = new VistaProductos(this);
         vistaCarrito = new VistaCarrito(this);
+        vistaListaDeseados = new VistaListaDeseados(this);
 
         root.add(vistaMenuPrincipal, "INICIO");
         root.add(vistaProductos, "PRODUCTOS");
         root.add(vistaCarrito, "CARRO");
+        root.add(vistaListaDeseados, "DESEOS");
 
         setContentPane(root);
         cardLayout.show(root, "INICIO");
@@ -61,5 +64,9 @@ public class BaseFrameCliente extends JFrame {
 
     public VistaCarrito getVistaCarrito() {
         return vistaCarrito;
+    }
+
+    public VistaListaDeseados getVistaListaDeseados(){
+        return vistaListaDeseados;
     }
 }
