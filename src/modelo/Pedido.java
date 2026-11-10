@@ -33,7 +33,7 @@ public class Pedido {
         return idCliente;
     }
     
-    public LocalDateTime getfechaCreacion(){
+    public LocalDateTime getFechaCreacion(){
         return fechaCreacion;
     }
 

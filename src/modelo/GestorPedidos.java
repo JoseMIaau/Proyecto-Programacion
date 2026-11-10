@@ -72,4 +72,32 @@ public class GestorPedidos {
         }
         return pedido.cambiarEstado(nuevoEstado);
     }
+
+    public boolean cancelarPedido(int numeroPedido){
+        Pedido pedido = buscarPedido(numeroPedido);
+
+        if (pedido==null || !pedido.puedeCancelarse()){
+            return false;
+        }
+
+        Compra compra = pedido.getCompra();
+        Inventario inventario = Inventario.getInstancia();
+
+        for (DetalleCompra detalle : compra.getDetalles()){
+            Producto producto = inventario.buscarProducto(detalle.getIdProducto());
+
+            if (producto == null){
+                return false;
+            }
+        }
+
+        for (DetalleCompra detalle : compra.getDetalles()){
+            boolean restaurado = inventario.agregarStock(detalle.getIdProducto(), (int) detalle.getCantidad());
+
+            if (!restaurado){
+                return false;
+            }
+        }
+        return pedido.marcarComoCancelado();
+    }
 }

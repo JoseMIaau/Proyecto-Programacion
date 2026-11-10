@@ -26,6 +26,7 @@ public class Inventario {
 
     private HashMap<String, Admin> usuariosAdmin;
     private Admin adminActual;
+    private Pedido ultimoPedidoCreado;
     //Multicarrito
     private final HashMap<String, Carrito> carritosActivos = new HashMap<>();
     private String idClienteActual = "Cliente_" + java.util.UUID.randomUUID().toString().substring(0, 6);
@@ -481,6 +482,11 @@ public class Inventario {
         String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
         int nuevoIdCompra = historialCompras.size() + 1;
         Compra compra = new Compra(nuevoIdCompra, run, nombre, fecha, calcularSubtotal(), calcularIVA(), calcularTotalCarrito(), detalles);
+        Pedido pedido = GestorPedidos.getInstancia().crearPedido(compra, idClienteActual);
+        if (pedido == null){
+            return false;
+        }
+        ultimoPedidoCreado = pedido;
 
         historialCompras.add(compra);
         gestorCompras.guardarCompras(historialCompras);
@@ -548,6 +554,9 @@ public class Inventario {
         return comprasCliente;
     }
 
-
-
+    //Funcionamiento de los pedidos
+    public Pedido getUltimopedidoCreado(){
+        return ultimoPedidoCreado;
+    }
+    
 }
