@@ -375,6 +375,10 @@ public class Inventario {
     public void setSesionActual(String idCliente) {
         this.idClienteActual = idCliente;
     }
+    
+    public String getIdClienteActual(){
+        return idClienteActual;
+    }
 
     public Carrito getCarritoActual() {
         if (!carritosActivos.containsKey(idClienteActual)) {
@@ -557,10 +561,6 @@ public class Inventario {
     //Funcionamiento de los pedidos
     public Pedido getUltimopedidoCreado(){
         return ultimoPedidoCreado;
-    }
-
-    public String getIdClienteActual(){
-        return idClienteActual;
     }
     
 }

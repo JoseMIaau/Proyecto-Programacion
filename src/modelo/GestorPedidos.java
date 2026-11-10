@@ -114,4 +114,27 @@ public class GestorPedidos {
         return null;
     }
     
+    public boolean avanzarEstado(int numeroPedido){
+        Pedido pedido = buscarPedido(numeroPedido);
+        if (pedido == null){
+            return false;
+        }
+
+        EstadoPedido siguienteEstado;
+
+        switch (pedido.getEstado()){
+            case PENDIENTE:
+                siguienteEstado = EstadoPedido.EN_PREPARACION;
+                break;
+            case EN_PREPARACION:
+                siguienteEstado = EstadoPedido.DESPACHADO;
+                break;
+            case DESPACHADO:
+                siguienteEstado = EstadoPedido.ENTREGADO;
+                break;
+            default:
+                return false;
+        }
+        return cambiarEstado(numeroPedido, siguienteEstado);
+    }
 }
