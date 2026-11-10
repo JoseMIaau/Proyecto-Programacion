@@ -100,4 +100,18 @@ public class GestorPedidos {
         }
         return pedido.marcarComoCancelado();
     }
+
+    public Pedido obtenerUltimoPedidoPorCliente(String idCliente){
+        if (idCliente == null){
+            return null;
+        }
+        for (int i = pedidos.size() - 1; i>=0; i--){
+            Pedido pedido = pedidos.get(i);
+            if(pedido.getIdCliente().equals(idCliente)){
+                return pedido;
+            }
+        }
+        return null;
+    }
+    
 }

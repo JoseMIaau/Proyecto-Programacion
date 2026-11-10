@@ -558,5 +558,9 @@ public class Inventario {
     public Pedido getUltimopedidoCreado(){
         return ultimoPedidoCreado;
     }
+
+    public String getIdClienteActual(){
+        return idClienteActual;
+    }
     
 }
