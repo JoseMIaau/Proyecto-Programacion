@@ -6,6 +6,7 @@ import modelo.ClienteRegistrado;
 import modelo.Compra;
 import modelo.DetalleCompra;
 import modelo.Admin;
+import modelo.Cupon;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.time.LocalDate;
 
 //Se encarga de la lectura y escritura en archivos CSV.
 public class GestorArchivo {
@@ -219,4 +221,86 @@ public class GestorArchivo {
         }
         return compras;
     }
+
+
+
+    // guardar los cupones
+
+    public void guardarCupones(Collection<Cupon> cupones) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(rutaArchivo))) {
+
+            for (Cupon cupon : cupones) {
+                String linea = cupon.getCodigo() + separador
+                        + cupon.getTipo().name() + separador
+                        + cupon.getValor() + separador
+                        + cupon.getFechaVencimiento() + separador
+                        + cupon.getUsosMaximos() + separador
+                        + cupon.getUsosRealizados();
+
+                bw.write(linea);
+                bw.newLine();
+            }
+
+        } catch (IOException e) {
+            System.err.println("Error al guardar cupones: " + e.getMessage());
+        }
+    }
+
+    // cargar cupones
+
+    public List<Cupon> cargarCupones() {
+        List<Cupon> cupones = new ArrayList<>();
+        File archivo = new File(rutaArchivo);
+
+        if (!archivo.exists()) {
+            return cupones;
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
+            String linea;
+
+            while ((linea = br.readLine()) != null) {
+                if (linea.trim().isEmpty()) {
+                    continue;
+                }
+
+                try {
+                    String[] datos = linea.split(separador, -1);
+
+                    if (datos.length != 6) {
+                        continue;
+                    }
+
+                    String codigo = datos[0].trim();
+
+                    Cupon.TipoDescuento tipo =
+                            Cupon.TipoDescuento.valueOf(datos[1].trim());
+
+                    double valor = Double.parseDouble(datos[2].trim());
+
+                    LocalDate fechaVencimiento =
+                            LocalDate.parse(datos[3].trim());
+
+                    int usosMaximos = Integer.parseInt(datos[4].trim());
+                    int usosRealizados = Integer.parseInt(datos[5].trim());
+
+                    Cupon cupon = new Cupon(
+                            codigo, tipo, valor, fechaVencimiento, usosMaximos
+                    );
+
+                    cupon.setUsosRealizados(usosRealizados);
+                    cupones.add(cupon);
+
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Cupon invalido: " + e.getMessage());
+                }
+            }
+
+        } catch (IOException e) {
+            System.err.println("Error al cargar cupones: " + e.getMessage());
+        }
+
+        return cupones;
+    }
+
 }

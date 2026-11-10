@@ -21,8 +21,11 @@ public class Inventario {
     // Historial y Clientes Mauri y Javi
     private GestorArchivo gestorClientes;
     private GestorArchivo gestorCompras;
+    private GestorArchivo gestorCupones;
     private final LinkedHashMap<String, ClienteRegistrado> clientesRegistrados = new LinkedHashMap<>();
     private final List<Compra> historialCompras = new ArrayList<>();
+    // cupones
+    private final HashMap<String, Cupon> cupones = new HashMap<>();
 
     private HashMap<String, Admin> usuariosAdmin;
     private Admin adminActual;
@@ -38,6 +41,11 @@ public class Inventario {
         
         this.gestorClientes = new GestorArchivo("clientes.csv");
         this.gestorCompras = new GestorArchivo("compras.csv");
+        this.gestorCupones = new GestorArchivo("cupones.csv");
+
+        for (Cupon cupon : gestorCupones.cargarCupones()) {
+                cupones.put(cupon.getCodigo(), cupon);
+        }
 
         for (ClienteRegistrado cliente : gestorClientes.cargarClientes()) {
             clientesRegistrados.put(cliente.getRun(), cliente);
@@ -507,6 +515,64 @@ public class Inventario {
 
         return comprasCliente;
     }
+
+
+    // administracion de los cupones
+
+    // Registra un nuevo cupon
+    public boolean crearCupon(Cupon cupon) {
+        if (cupon == null) {
+            return false;
+        }
+
+        String codigo = cupon.getCodigo();
+
+        if (cupones.containsKey(codigo)) {
+            return false;
+        }
+
+        cupones.put(codigo, cupon);
+        return true;
+    }
+
+    // Busca un cupon utilizando su codigo
+    public Cupon buscarCupon(String codigo) {
+        if (codigo == null || codigo.trim().isEmpty()) {
+            return null;
+        }
+
+        String codigoBuscado = codigo.trim().toUpperCase();
+
+        return cupones.get(codigoBuscado);
+    }
+
+    // Comprueba si un cupon existe y puede utilizarse
+    public boolean validarCupon(String codigo) {
+        Cupon cupon = buscarCupon(codigo);
+
+        if (cupon == null) {
+            return false;
+        }
+
+        return cupon.esValido();
+    }
+
+    // Devuelve todos los cupones registrados
+    public List<Cupon> obtenerCupones() {
+        return new ArrayList<>(cupones.values());
+    }
+
+    // Elimina un cupon segun su codigo
+    public boolean eliminarCupon(String codigo) {
+        if (codigo == null) {
+            return false;
+        }
+
+        String codigoBuscado = codigo.trim().toUpperCase();
+
+        return cupones.remove(codigoBuscado) != null;
+    }
+
 
 
 
