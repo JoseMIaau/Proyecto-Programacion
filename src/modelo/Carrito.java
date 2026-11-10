@@ -32,6 +32,25 @@ public class Carrito {
         return total;
     }
 
+    public int calcularCostoEnvio(int zona) {
+        int costoEnvio = 0;
+        double total = calcularTotal();
+
+        if (total < 60000) {
+            if (zona == 1) {
+                costoEnvio = 790;
+            } else if (zona == 2) {
+                costoEnvio = 990;
+            } else if (zona == 3) {
+                costoEnvio = 1190;
+            } else if (zona == 4) {
+                costoEnvio = 1390;
+            }
+        }
+
+        return costoEnvio;
+    }
+
     public List<ItemCarrito> getItems() { return items; }
     public String getIdCliente() { return idCliente; }
 }

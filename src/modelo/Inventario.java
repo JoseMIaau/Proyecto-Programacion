@@ -435,6 +435,8 @@ public class Inventario {
 
     public double calcularIVA() { return calcularTotalCarrito() - calcularSubtotal();}
 
+    public int calcularCostoEnvio(int zona) { return getCarritoActual().calcularCostoEnvio(zona);}
+  
     public double calcularSubtotal() { return calcularTotalCarrito() / 1.19;}
 
     public double calcularTotalCarrito() {
@@ -449,7 +451,7 @@ public class Inventario {
      * Finaliza la transaccion, crea la instancia de Venta para el historial
      * y limpia el carrito actual.
      */
-    public boolean procesarCompra(String run, String nombre) {
+    public boolean procesarCompra(String run, String nombre, int zona) {
         Carrito c = getCarritoActual();
         if (c.estaVacio()) return false;
 
@@ -480,7 +482,7 @@ public class Inventario {
 
         String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
         int nuevoIdCompra = historialCompras.size() + 1;
-        Compra compra = new Compra(nuevoIdCompra, run, nombre, fecha, calcularSubtotal(), calcularIVA(), calcularTotalCarrito(), detalles);
+Compra compra = new Compra(nuevoIdCompra, run, nombre, zona, fecha, calcularSubtotal(), calcularIVA(), calcularTotalCarrito() + calcularCostoEnvio(zona), calcularCostoEnvio(zona), detalles );
 
         historialCompras.add(compra);
         gestorCompras.guardarCompras(historialCompras);

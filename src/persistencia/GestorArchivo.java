@@ -156,7 +156,9 @@ public class GestorArchivo {
                     .append(compra.getFecha()).append("|")
                     .append(compra.getSubtotal()).append("|")
                     .append(compra.getIva()).append("|")
-                    .append(compra.getTotal()).append("|");
+                    .append(compra.getTotal()).append("|")
+                    .append(compra.getZona()).append("|")
+                    .append(compra.getCostoEnvio());
 
                 boolean primero = true;
                 for (DetalleCompra detalle : compra.getDetalles()) {
@@ -214,7 +216,7 @@ public class GestorArchivo {
                     ));
                 }
 
-                compras.add(new Compra(idCompra, run, nombre, fecha, subtotal, iva, total, detalles));
+                    compras.add(new Compra(idCompra, run, nombre, 0, fecha, subtotal, iva, total, 0, detalles));
             }
         } catch (IOException | NumberFormatException e) {
             System.err.println("Error al cargar compras: " + e.getMessage());

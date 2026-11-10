@@ -12,17 +12,21 @@ public class Compra {
     private final double subtotal;
     private final double iva;
     private final double total;
+    private final int zona;
+    private final int costoEnvio;
     private final List<DetalleCompra> detalles;
 
-    public Compra(int idCompra, String runCliente, String nombreCliente, String fecha,
-                double subtotal, double iva, double total, List<DetalleCompra> detalles) {
+    public Compra(int idCompra, String runCliente, String nombreCliente, int zona, String fecha,
+                double subtotal, double iva, double total, int costoEnvio, List<DetalleCompra> detalles) {
         this.idCompra = idCompra;
         this.runCliente = runCliente == null ? "" : runCliente.trim();
         this.nombreCliente = nombreCliente == null ? "" : nombreCliente.trim();
+        this.zona = zona;
         this.fecha = fecha == null ? "" : fecha;
         this.subtotal = subtotal;
         this.iva = iva;
         this.total = total;
+        this.costoEnvio = costoEnvio;
         this.detalles = new ArrayList<>(
                 detalles == null ? List.of() : detalles
         );
@@ -30,6 +34,14 @@ public class Compra {
 
     public int getidCompra() {
         return idCompra;
+    }
+
+    public int getCostoEnvio() {
+        return costoEnvio;
+    }
+
+    public int getZona() {
+        return zona;
     }
 
     public String getRunCliente() {
@@ -88,6 +100,8 @@ public class Compra {
         comprobante.append("---------------------------------\n");
         comprobante.append("Subtotal: $").append((int) subtotal).append("\n");
         comprobante.append("IVA (19%): $").append((int) iva).append("\n");
+        comprobante.append("Zona de envío: ").append(zona).append("\n");
+        comprobante.append("Costo de envío: $").append(costoEnvio).append("\n");
         comprobante.append("TOTAL: $").append((int) total).append("\n");
         comprobante.append("---------------------------------\n");
         comprobante.append("Gracias por comprar en SuperCuricó");

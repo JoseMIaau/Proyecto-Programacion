@@ -272,6 +272,7 @@ public class VistaCarrito extends JPanel {
 
         JTextField txtNombre = new JTextField();
         JTextField txtDireccion = new JTextField();
+        JComboBox<Integer> comboZona = new JComboBox<>(new Integer[]{1, 2, 3, 4});
         JTextField txtTarjeta = new JTextField();
         JTextField txtRun = new JTextField();
 
@@ -285,6 +286,8 @@ public class VistaCarrito extends JPanel {
         body.add(Box.createVerticalStrut(8));
         body.add(new JLabel("Direccion de entrega:"));
         body.add(txtDireccion);
+        body.add(new JLabel("Zona de envío:"));
+        body.add(comboZona);
         body.add(Box.createVerticalStrut(8));
         body.add(new JLabel("N° Tarjeta:"));
         body.add(txtTarjeta);
@@ -296,13 +299,14 @@ public class VistaCarrito extends JPanel {
             String nombre = txtNombre.getText().trim();
             String run = txtRun.getText().trim();
             String direccion = txtDireccion.getText().trim();
+            int zona = (Integer) comboZona.getSelectedItem();
 
             if (nombre.isEmpty() || run.isEmpty() || direccion.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, "Complete todos los campos obligatorios.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            boolean exito = Inventario.getInstancia().procesarCompra(run, nombre);
+            boolean exito = Inventario.getInstancia().procesarCompra(run, nombre, zona);
 
             if (exito) {
                 Compra ultimaCompra = Inventario.getInstancia().obtenerUltimaCompra();
