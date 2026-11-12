@@ -6,6 +6,9 @@ import modelo.ClienteRegistrado;
 import modelo.Compra;
 import modelo.DetalleCompra;
 import modelo.Admin;
+import modelo.Pedido;
+import modelo.EstadoPedido;
+import java.time.LocalDateTime;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -220,5 +223,20 @@ public class GestorArchivo {
             System.err.println("Error al cargar compras: " + e.getMessage());
         }
         return compras;
+    }
+
+    // --- PEDIDOS ---
+
+    public void guardarPedidos(Collection<Pedido> pedidos){
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(rutaArchivo))){
+            for (Pedido pedido : pedidos){
+                String linea = pedido.getNumeroPedido() + "|" + pedido.getCompra().getidCompra() + "|" + pedido.getIdCliente() + pedido.getEstado().name() + "|" + pedido.getFechaCreacion();
+
+                bw.write(linea);
+                bw.newLine();
+            }
+        } catch (IOException e){
+            System.err.println("Error al guardar pedidos: " + e.getMessage());
+        }
     }
 }

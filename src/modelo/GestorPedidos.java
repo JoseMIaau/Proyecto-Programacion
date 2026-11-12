@@ -1,27 +1,33 @@
 package modelo;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import persistencia.GestorArchivo;
 
 public class GestorPedidos {
     private static GestorPedidos instancia;
     private List<Pedido> pedidos;
     private int siguienteNumero;
-    private final String rutaArchivo = "pedidos.csv";
+    private GestorArchivo GestorPedidos;
 
     private GestorPedidos(){
-        pedidos = new ArrayList<>();
-        siguienteNumero = 1000;
+        gestorPedidos = new GestorArchivo("pedidos.csv");
 
-        cargarPedidos();
+        List<Compra> compras = Inventario.getInstancia().obtenerHistorialCompras();
+        pedidos = gestorPedidos.cargarPedidos(compras);
+        
         actualizarSiguienteNumero();
+    }
+
+    private void actualizarSiguienteNumero(){
+        int mayorNumero = 999;
+
+        for (Pedido pedido : pedidos){
+            if (pedido.getNumeroPedido() > mayorNumero){
+                mayorNumero = pedido.getNumeroPedido();
+            }
+        }
+        siguienteNumero = mayorNumero + 1;
     }
 
     public static GestorPedidos getInstancia() {
@@ -44,6 +50,7 @@ public class GestorPedidos {
 
         Pedido pedido = new Pedido(generarNumeroPedido(), compra, idCliente.trim());
         pedidos.add(pedido);
+        gestorPedidos.guardarPedidos(pedidos);
         return pedido;
     }
     
@@ -81,7 +88,12 @@ public class GestorPedidos {
         if(pedido == null){
             return false;
         }
-        return pedido.cambiarEstado(nuevoEstado);
+        
+        boolean cambiado = pedido.cambiarEstado(nuevoEstado);
+        if(cambiado){
+            gestorPedidos.guardarPedidos(pedidos);
+        }
+        return cambiado;
     }
 
     public boolean cancelarPedido(int numeroPedido){
@@ -109,7 +121,12 @@ public class GestorPedidos {
                 return false;
             }
         }
-        return pedido.marcarComoCancelado();
+        boolean cancelado = pedido.marcarComoCancelado();
+        if (cancelado){
+            gestorPedidos.guardarPedidos(pedidos);
+        }
+
+        return cancelado;
     }
 
     public Pedido obtenerUltimoPedidoPorCliente(String idCliente){
@@ -149,26 +166,4 @@ public class GestorPedidos {
         return cambiarEstado(numeroPedido, siguienteEstado);
     }
 
-    private void guardarPedidos(){
-        try (BufferedWriter escritor = new BufferedWriter(new FileWriter(rutaArchivo))){
-            for (Pedido pedido : pedidos){
-                String linea = pedido.getNumeroPedido() + ";" + pedido.getCompra().getidCompra() + ";" + pedido.getIdCliente() + ";" + pedido.getEstado() + ";" + pedido.getFechaCreacion();
-                escritor.write(linea);
-                escritor.newLine();
-            }
-        } catch (IOException error){
-            System.err.println("Error al guardar pedidos" + error.getMessage());
-        }
-    }
-
-    private Compra buscarCompraPorId(int idCompra){
-        List<Compra> compras = Inventario.getInstancia().obtenerHistorialCompras();
-        for (Compra compra : compras){
-            if (compra.getidCompra() == idCompra){
-                return compra;
-            }
-        }
-
-        return null;
-    }
 }

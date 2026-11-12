@@ -17,6 +17,16 @@ public class Pedido {
         this.fechaCreacion = LocalDateTime.now();
     }
 
+    public Pedido(int numeroPedido, Compra compra, String idCliente, EstadoPedido estado, LocalDateTime fechaCreacion){
+        this.numeroPedido = numeroPedido;
+        this.compra = compra;
+        this.idCliente = idCliente;
+        this.estado = estado;
+        this.fechaCreacion = fechaCreacion;
+    }
+
+    
+
     public int getNumeroPedido(){
         return numeroPedido;
     }
