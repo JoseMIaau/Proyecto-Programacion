@@ -559,7 +559,7 @@ public class Inventario {
     }
 
     //Funcionamiento de los pedidos
-    public Pedido getUltimopedidoCreado(){
+    public Pedido getUltimoPedidoCreado(){
         return ultimoPedidoCreado;
     }
     

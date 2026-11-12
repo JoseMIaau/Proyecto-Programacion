@@ -1,5 +1,12 @@
 package modelo;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,10 +14,14 @@ public class GestorPedidos {
     private static GestorPedidos instancia;
     private List<Pedido> pedidos;
     private int siguienteNumero;
+    private final String rutaArchivo = "pedidos.csv";
 
     private GestorPedidos(){
         pedidos = new ArrayList<>();
         siguienteNumero = 1000;
+
+        cargarPedidos();
+        actualizarSiguienteNumero();
     }
 
     public static GestorPedidos getInstancia() {
@@ -136,5 +147,28 @@ public class GestorPedidos {
                 return false;
         }
         return cambiarEstado(numeroPedido, siguienteEstado);
+    }
+
+    private void guardarPedidos(){
+        try (BufferedWriter escritor = new BufferedWriter(new FileWriter(rutaArchivo))){
+            for (Pedido pedido : pedidos){
+                String linea = pedido.getNumeroPedido() + ";" + pedido.getCompra().getidCompra() + ";" + pedido.getIdCliente() + ";" + pedido.getEstado() + ";" + pedido.getFechaCreacion();
+                escritor.write(linea);
+                escritor.newLine();
+            }
+        } catch (IOException error){
+            System.err.println("Error al guardar pedidos" + error.getMessage());
+        }
+    }
+
+    private Compra buscarCompraPorId(int idCompra){
+        List<Compra> compras = Inventario.getInstancia().obtenerHistorialCompras();
+        for (Compra compra : compras){
+            if (compra.getidCompra() == idCompra){
+                return compra;
+            }
+        }
+
+        return null;
     }
 }
