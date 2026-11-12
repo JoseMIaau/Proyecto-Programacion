@@ -8,7 +8,7 @@ public class GestorPedidos {
     private static GestorPedidos instancia;
     private List<Pedido> pedidos;
     private int siguienteNumero;
-    private GestorArchivo GestorPedidos;
+    private GestorArchivo gestorPedidos;
 
     private GestorPedidos(){
         gestorPedidos = new GestorArchivo("pedidos.csv");
