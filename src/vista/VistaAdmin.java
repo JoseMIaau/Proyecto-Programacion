@@ -6,6 +6,9 @@ import modelo.Compra;
 import modelo.DetalleCompra;
 import modelo.Inventario;
 import modelo.Producto;
+import modelo.Pedido;
+import modelo.GestorPedidos;
+import modelo.EstadoPedido;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -20,7 +23,7 @@ public class VistaAdmin extends JPanel {
     private JTable tablaProductos;
     private DefaultTableModel modeloTabla;
 
-    private JButton btnEliminar, btnAgregar, btnModificar, btnEstadisticas, btnVaciarInventario, btnChat, btnHistorial, btnCarritosActivos;
+    private JButton btnEliminar, btnAgregar, btnModificar, btnEstadisticas, btnVaciarInventario, btnChat, btnHistorial, btnPedidos, btnCarritosActivos;
 
     private red.Servidor servidor;
     private JDialog ventanaChat;
@@ -58,7 +61,7 @@ public class VistaAdmin extends JPanel {
         tablaProductos = new JTable(modeloTabla);
 
         JPanel panelLateral = new JPanel();
-        panelLateral.setLayout(new GridLayout(8, 1, 10, 10));
+        panelLateral.setLayout(new GridLayout(9, 1, 10, 10));
         panelLateral.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
 
         btnAgregar = new JButton("Agregar Producto");
@@ -68,6 +71,7 @@ public class VistaAdmin extends JPanel {
         btnEstadisticas = new JButton("Estadísticas");
         btnChat = new JButton("Chat de Soporte");
         btnHistorial = new JButton("Gestion de Historial");
+        btnPedidos = new JButton("Gestionar Pedidos");
         btnCarritosActivos = new JButton("Carritos Activos");
         panelLateral.add(btnAgregar);
         panelLateral.add(btnModificar);
@@ -76,9 +80,11 @@ public class VistaAdmin extends JPanel {
         panelLateral.add(btnEstadisticas);
         panelLateral.add(btnChat);
         panelLateral.add(btnHistorial);
+        panelLateral.add(btnPedidos);
         panelLateral.add(btnCarritosActivos);
 
-      JSplitPane division = new JSplitPane(
+
+    JSplitPane division = new JSplitPane(
     JSplitPane.HORIZONTAL_SPLIT,
     panelLateral,
     new JScrollPane(tablaProductos)
@@ -98,6 +104,7 @@ public class VistaAdmin extends JPanel {
         btnEstadisticas.addActionListener(e -> mostrarEstadisticas());
         btnChat.addActionListener(e -> abrirChatAdmin());
         btnHistorial.addActionListener(e -> { mostrarHistorialClientes(); });
+        btnPedidos.addActionListener(e -> mostrarPedidos());
         btnCarritosActivos.addActionListener(e -> {
             if (servidor != null) {
                 frame.mostrarVista("CARROS");
@@ -224,6 +231,86 @@ public class VistaAdmin extends JPanel {
         }
 
         JOptionPane.showMessageDialog(this, mensaje, "Estadísticas", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void mostrarPedidos(){
+        List<Pedido> pedidos = GestorPedidos.getInstancia().obtenerPedidos();
+        if (pedidos.isEmpty()){
+            JOptionPane.showMessageDialog(this, "No existen pedidos.");
+            return;
+        }
+        String[] columnas = {
+            "Pedido",
+            "Cliente",
+            "Total",
+            "EsTado"
+        };
+
+        DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
+        for(Pedido pedido : pedidos){
+            modelo.addRow(new Object[]{
+                pedido.getNumeroPedido(), pedido.getCompra().getNombreCliente(), pedido.getCompra().getTotal(), pedido.getEstado()
+            });
+        }
+
+        JTable tabla = new JTable(modelo);
+        JScrollPane scroll = new JScrollPane(tabla);
+        Object[] opciones = {
+            "Avanzar Estado", "Cancelar", "Cerrar"
+        };
+
+        while (true){
+            int opcion = JOptionPane.showOptionDialog(
+                this,
+                scroll,
+                "Pedidos",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                opciones,
+                opciones[0]
+            );
+            if (opcion == 2 || opcion == JOptionPane.CLOSED_OPTION){
+                break;
+            }
+            int fila = tabla.getSelectedRow();
+            if (fila == -1){
+                JOptionPane.showMessageDialog(
+                    this,
+                    "Seleccione un pedido."
+                );
+                continue;
+            }
+            int numeroPedido = Integer.parseInt(modelo.getValueAt(
+                fila,
+                0
+                ).toString()
+            );
+            if (opcion == 0){
+                boolean actualizado =
+                GestorPedidos.getInstancia().avanzarEstado(numeroPedido);
+                if (actualizado){
+                    Pedido pedido = GestorPedidos.getInstancia().buscarPedido(numeroPedido);
+                    modelo.setValueAt(
+                        pedido.getEstado(),
+                        fila,
+                        3
+                    );
+                }
+            }
+
+            if (opcion == 1){
+                boolean cancelado = GestorPedidos.getInstancia().cancelarPedido(numeroPedido);
+                if (cancelado){
+                    modelo.setValueAt(
+                        EstadoPedido.CANCELADO,
+                        fila,
+                        3
+                    );
+                    poblarTabla();
+                }
+            }
+        }
     }
 
     // --- CHAT ---

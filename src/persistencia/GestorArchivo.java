@@ -6,6 +6,9 @@ import modelo.ClienteRegistrado;
 import modelo.Compra;
 import modelo.DetalleCompra;
 import modelo.Admin;
+import modelo.Pedido;
+import modelo.EstadoPedido;
+import java.time.LocalDateTime;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -220,5 +223,67 @@ public class GestorArchivo {
             System.err.println("Error al cargar compras: " + e.getMessage());
         }
         return compras;
+    }
+
+    // --- PEDIDOS ---
+
+    public void guardarPedidos(Collection<Pedido> pedidos){
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(rutaArchivo))){
+            for (Pedido pedido : pedidos){
+                String linea = pedido.getNumeroPedido() + "|" + pedido.getCompra().getidCompra() + "|" + pedido.getIdCliente() + "|" + pedido.getEstado().name() + "|" + pedido.getFechaCreacion();
+
+                bw.write(linea);
+                bw.newLine();
+            }
+        } catch (IOException e){
+            System.err.println("Error al guardar pedidos: " + e.getMessage());
+        }
+    }
+
+    public List<Pedido> cargarPedidos(List<Compra> compras){
+        List<Pedido> pedidos = new ArrayList<>();
+        File archivo = new File(rutaArchivo);
+
+        if (!archivo.exists()){
+            return pedidos;
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))){
+            String linea;
+            while ((linea = br.readLine()) != null){
+                if (linea.trim().isEmpty()){
+                    continue;
+                }
+                String[] datos = linea.split("\\|", -1);
+                if (datos.length != 5){
+                    continue;
+                }
+                try {
+                    int numeroPedido = Integer.parseInt(datos[0].trim());
+                    int idCompra = Integer.parseInt(datos[1].trim());
+                    String idCliente = datos[2].trim();
+                    EstadoPedido estado = EstadoPedido.valueOf(datos[3].trim());
+                    LocalDateTime fechaCreacion =LocalDateTime.parse(datos[4].trim());
+
+                    Compra compraEncontrada = null;
+                    
+                    for (Compra compra : compras){
+                        if (compra.getidCompra() == idCompra){
+                            compraEncontrada = compra;
+                            break;
+                        }
+                    }
+                    if (compraEncontrada != null){
+                        Pedido pedido = new Pedido(numeroPedido, compraEncontrada, idCliente, estado, fechaCreacion);
+                        pedidos.add(pedido);
+                    }
+                } catch (IllegalArgumentException e){
+                    System.err.println("Pedido inválido: " + linea);
+                }
+            }
+        } catch (IOException e){
+            System.err.println("Error al cargar pedidos:" + e.getMessage());
+        }
+        return pedidos;
     }
 }
