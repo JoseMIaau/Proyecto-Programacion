@@ -532,6 +532,7 @@ public class Inventario {
         }
 
         cupones.put(codigo, cupon);
+        gestorCupones.guardarCupones(cupones.values());
         return true;
     }
 
@@ -564,14 +565,19 @@ public class Inventario {
 
     // Elimina un cupon segun su codigo
     public boolean eliminarCupon(String codigo) {
-        if (codigo == null) {
-            return false;
-        }
-
-        String codigoBuscado = codigo.trim().toUpperCase();
-
-        return cupones.remove(codigoBuscado) != null;
+    if (codigo == null) {
+        return false;
     }
+
+    String codigoBuscado = codigo.trim().toUpperCase();
+
+    if (cupones.remove(codigoBuscado) != null) {
+        gestorCupones.guardarCupones(cupones.values());
+        return true;
+    }
+    
+    return false;
+}
 
 
 
