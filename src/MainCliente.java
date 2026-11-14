@@ -10,7 +10,7 @@ public class MainCliente {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             } catch (Exception ignored) {}
 
-            // Pregunta la ip al iniciar el programa
+            // Pregunta la ip al iniciar el programa,
             String ipServidor = JOptionPane.showInputDialog(
                     null,
                     "Ingrese la IP del Servidor Administrador (Ej: 192.168.1.100):",
