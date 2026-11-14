@@ -3,6 +3,8 @@ package vista;
 import modelo.Inventario;
 import modelo.ItemCarrito;
 import modelo.Compra;
+import modelo.GestorPedidos;
+import modelo.Pedido;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -305,12 +307,18 @@ public class VistaCarrito extends JPanel {
             boolean exito = Inventario.getInstancia().procesarCompra(run, nombre);
 
             if (exito) {
+                String idCliente = Inventario.getInstancia().getIdClienteActual();
+                Pedido pedido = GestorPedidos.getInstancia().obtenerUltimoPedidoPorCliente(idCliente);
                 Compra ultimaCompra = Inventario.getInstancia().obtenerUltimaCompra();
                 if(ultimaCompra != null){
                     if(red.Cliente.getInstancia() != null){
                         red.Cliente.getInstancia().enviarDatos(0, "COMPRAR");
                     }
-                    JTextArea areaComprobante = new JTextArea(ultimaCompra.generarComprobante());
+                    String textoComprobante = ultimaCompra.generarComprobante();
+                    if (pedido !=null){
+                        textoComprobante += "\n\n==== SEGUIMIENTO DEL PEDIDO ====" + "\nPedido N° " + pedido.getNumeroPedido() + "\nEstado: " + pedido.getEstado();
+                    }
+                    JTextArea areaComprobante = new JTextArea(textoComprobante);
 
                     areaComprobante.setEditable(false);
                     areaComprobante.setFont(new Font ("Monospaced", Font.PLAIN, 14));

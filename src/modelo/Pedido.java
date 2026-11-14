@@ -17,6 +17,16 @@ public class Pedido {
         this.fechaCreacion = LocalDateTime.now();
     }
 
+    public Pedido(int numeroPedido, Compra compra, String idCliente, EstadoPedido estado, LocalDateTime fechaCreacion){
+        this.numeroPedido = numeroPedido;
+        this.compra = compra;
+        this.idCliente = idCliente;
+        this.estado = estado;
+        this.fechaCreacion = fechaCreacion;
+    }
+
+    
+
     public int getNumeroPedido(){
         return numeroPedido;
     }
@@ -33,7 +43,7 @@ public class Pedido {
         return idCliente;
     }
     
-    public LocalDateTime getfechaCreacion(){
+    public LocalDateTime getFechaCreacion(){
         return fechaCreacion;
     }
 
@@ -71,4 +81,5 @@ public class Pedido {
         estado=EstadoPedido.CANCELADO;
         return true;
     }
+
 }
