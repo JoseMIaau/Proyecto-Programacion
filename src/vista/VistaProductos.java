@@ -263,7 +263,6 @@ public class VistaProductos extends JPanel {
         }
         addBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         addBtn.setMaximumSize(new Dimension(120, 32));
-        addBtn.addActionListener(e -> showQuantityDialog(prod));
 
         card.add(boxColor);
         card.add(Box.createVerticalStrut(8));
@@ -357,15 +356,20 @@ public class VistaProductos extends JPanel {
                     return;
                 }
 
+                red.Cliente cl = red.Cliente.getInstancia();
+                if (cl == null || !cl.estaConectado()) {
+                    JOptionPane.showMessageDialog(dialog, "Sin conexión con el servidor. No se puede reservar stock.",
+                            "Sin conexión", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
                 if (Inventario.getInstancia().agregarAlCarrito(prod, cant)) {
-                    if (red.Cliente.getInstancia() != null) {
-                        red.Cliente.getInstancia().enviarDatos(prod.getId(), "AGREGAR:" + cant);
-                    }
+                    cl.enviarDatos(prod.getId(), "AGREGAR:" + cant);
                     JOptionPane.showMessageDialog(dialog, "¡" + prod.getNombre() + " agregado al carrito!");
                     dialog.dispose();
                     refrescarVistaActual();
                 } else {
-                    JOptionPane.showMessageDialog(dialog, "No se puede agregar: la cantidad supera el stock disponible (" + prod.getStock() + ").", "Stock Insuficiente", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(dialog, "No se puede agregar: la cantidad supera el stock disponible ("
+                            + prod.getStock() + ").", "Stock Insuficiente", JOptionPane.WARNING_MESSAGE);
                 }
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(dialog, "Por favor ingrese un número entero válido.", "Formato Inválido", JOptionPane.ERROR_MESSAGE);

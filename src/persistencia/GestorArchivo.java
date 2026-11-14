@@ -34,7 +34,7 @@ public class GestorArchivo {
                 String linea = p.getId() + separador +
                         p.getNombre() + separador +
                         p.getPrecio() + separador +
-                        p.getStock() + separador +
+                        (p.getStock() + p.getReservado()) + separador +
                         p.getCategoria().name() + separador +
                         (p.getRutaImagen() != null ? p.getRutaImagen() : "");
                 bw.write(linea);

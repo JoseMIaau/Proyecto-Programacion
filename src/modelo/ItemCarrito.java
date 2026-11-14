@@ -2,9 +2,9 @@ package modelo;
 
 public class ItemCarrito {
     private Producto producto;
-    private double cantidad;
+    private int cantidad;
 
-    public ItemCarrito(Producto producto, double cantidad) {
+    public ItemCarrito(Producto producto, int cantidad) {
         this.producto = producto;
         this.cantidad = cantidad;
     }
@@ -12,13 +12,13 @@ public class ItemCarrito {
     public Producto getProducto() {
         return producto;
     }
-    public double getCantidad() {
+    public int getCantidad() {
         return cantidad;
     }
     public double getSubtotal() { 
         return producto.getPrecio() * cantidad; 
     }
-    public void setCantidad(double cantidad) { 
+    public void setCantidad(int cantidad) { 
         this.cantidad = cantidad; 
     }
     

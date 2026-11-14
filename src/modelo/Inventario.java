@@ -48,7 +48,7 @@ public class Inventario {
         inicializarAdminPorDefecto();
     }
 
-    public static Inventario getInstancia() {
+    public static synchronized Inventario getInstancia() {
         if (instancia == null) {
             instancia = new Inventario();
         }
@@ -122,7 +122,7 @@ public class Inventario {
 
     // --- METODOS CRUD ---
 
-    public int generarId() {
+    public synchronized int generarId() {
         int mayorId = 0;
         for (Producto producto : productos) {
             if (producto.getId() > mayorId) {
@@ -132,7 +132,7 @@ public class Inventario {
         return mayorId + 1;
     }
 
-    public boolean crearProducto(Producto producto) {
+    public synchronized boolean crearProducto(Producto producto) {
         if (producto == null || producto.getPrecio() < 0 || producto.getStock() < 0) {
             return false;
         }
@@ -150,8 +150,7 @@ public class Inventario {
         return true;
     }
 
-        // Verifica que no exista otro producto con el mismo nombre
-    public boolean productoExistente(String nombre){
+    public synchronized boolean productoExistente(String nombre){
         if(nombre == null){
             return false;
         }
@@ -161,9 +160,9 @@ public class Inventario {
             }
         }
         return false;
-}
+    }   
     
-    public Producto buscarProducto(int id) {
+    public synchronized Producto buscarProducto(int id) {
         for (Producto p : productos) {
             if (p.getId() == id) {
                 return p;
@@ -172,11 +171,11 @@ public class Inventario {
         return null;
     }
     
-    public List<Producto> leerProductos() {
+    public synchronized List<Producto> leerProductos() {
         return new ArrayList<>(productos);
     }
 
-    public boolean actualizarProducto(int id, double nuevoPrecio, int nuevoStock) {
+    public synchronized boolean actualizarProducto(int id, double nuevoPrecio, int nuevoStock) {
         if (nuevoPrecio < 0 || nuevoStock < 0) return false;
 
         Producto producto = buscarProducto(id);
@@ -189,7 +188,7 @@ public class Inventario {
         return false;
     }
 
-    public boolean eliminarProducto(int id) {
+    public synchronized boolean eliminarProducto(int id) {
         Producto producto = buscarProducto(id);
         if (producto != null) {
             productos.remove(producto);
@@ -199,7 +198,7 @@ public class Inventario {
         return false;
     }
 
-    public boolean vaciarInventario() {
+    public synchronized boolean vaciarInventario() {
         if (productos.isEmpty()) return false;
         productos.clear();
         gestorArchivo.guardarCatalogo(productos);
@@ -208,7 +207,7 @@ public class Inventario {
 
     // --- ACTUALIZACION INDIVIDUAL DE PRECIO Y STOCK ---
 
-    public boolean actualizarPrecio(int id, double nuevoPrecio) {
+    public synchronized boolean actualizarPrecio(int id, double nuevoPrecio) {
         if (nuevoPrecio < 0) {
             return false;
         }
@@ -223,7 +222,7 @@ public class Inventario {
         return false;
     }
 
-    public boolean actualizarStock(int id, int nuevoStock) {
+    public synchronized boolean actualizarStock(int id, int nuevoStock) {
         if (nuevoStock < 0) {
             return false;
         }
@@ -239,7 +238,7 @@ public class Inventario {
     }
 
     //Aumenta el stock de un producto que ya existe
-    public boolean agregarStock(int id, int cantidad) {
+    public synchronized boolean agregarStock(int id, int cantidad) {
         if (cantidad <= 0) {
             return false;
         }
@@ -259,7 +258,7 @@ public class Inventario {
 
     // --- METODOS FRILTACION Y ESTADISTICAS ---
 
-    public int obtenerStockDisponible(int idProducto) {
+    public synchronized int obtenerStockDisponible(int idProducto) {
         Producto producto = buscarProducto(idProducto);
         if (producto == null) {
             return -1;
@@ -298,7 +297,7 @@ public class Inventario {
         return productoMenor;
     }
 
-    public List<Producto> filtrarPorCategoria(Categorias cat) {
+    public synchronized List<Producto> filtrarPorCategoria(Categorias cat) {
         if (cat == null) return leerProductos();
         List<Producto> filtrados = new ArrayList<>();
         for (Producto p : productos) {
@@ -307,7 +306,7 @@ public class Inventario {
         return filtrados;
     }
 
-    public List<Producto> filtrarPorPrecio(double precioMinimo, double precioMaximo) {
+    public synchronized List<Producto> filtrarPorPrecio(double precioMinimo, double precioMaximo) {
         List<Producto> productosFiltrados = new ArrayList<>();
         //validacion de negativos y que el minimo no sea mayor al maximo
         if (precioMinimo < 0 || precioMaximo < 0 || precioMinimo > precioMaximo) {
@@ -323,7 +322,7 @@ public class Inventario {
         return productosFiltrados;
     }
 
-    public List<Producto> buscarPorNombre(String texto) {
+    public synchronized List<Producto> buscarPorNombre(String texto) {
         if (texto == null || texto.trim().isEmpty()) return leerProductos();
         
         List<Producto> lista = new ArrayList<>();
@@ -361,7 +360,7 @@ public class Inventario {
         return sumaPrecio/cantidadProductos; //Retorna el promedio
     }
 
-    public double calculoValorTotalInventario() {
+    public synchronized double calculoValorTotalInventario() {
         double valorTotal = 0.0;
         for (Producto p : productos) {
             valorTotal += (p.getPrecio() * p.getStock());
@@ -375,7 +374,7 @@ public class Inventario {
         this.idClienteActual = idCliente;
     }
 
-    public Carrito getCarritoActual() {
+    public synchronized Carrito getCarritoActual() {
         if (!carritosActivos.containsKey(idClienteActual)) {
             carritosActivos.put(idClienteActual, new Carrito(idClienteActual));
         }
@@ -390,10 +389,10 @@ public class Inventario {
      * Agrega un producto al carrito y actualiza el stock de forma temporal
      * Si el producto ya esta en el carrito, se suma a la cantidad existente.
      */
-    public boolean agregarAlCarrito(Producto p, double cantidad) {
+    public synchronized boolean agregarAlCarrito(Producto p, int cantidad) {
         if (p == null || cantidad <= 0 || p.getStock() < cantidad) return false;
 
-        p.setStock((int) (p.getStock() - cantidad));
+        p.setStock(p.getStock() - cantidad);
         Carrito c = getCarritoActual();
         boolean existe = false; 
         
@@ -408,7 +407,7 @@ public class Inventario {
         return true;
     }
     
-    public void eliminarDelCarrito(int idProducto) {
+    public synchronized void eliminarDelCarrito(int idProducto) {
         Carrito c = getCarritoActual();
         ItemCarrito aEliminar = null;
         for (ItemCarrito item : c.getItems()) {
@@ -424,7 +423,7 @@ public class Inventario {
         }
     }
 
-    public void vaciarCarrito() {
+    public synchronized void vaciarCarrito() {
         Carrito c = getCarritoActual();
         for (ItemCarrito item : c.getItems()) {
             int nuevoStock = (int) (item.getProducto().getStock() + item.getCantidad());
@@ -437,7 +436,7 @@ public class Inventario {
 
     public double calcularSubtotal() { return calcularTotalCarrito() / 1.19;}
 
-    public double calcularTotalCarrito() {
+    public synchronized double calcularTotalCarrito() {
         double total = 0.0;
         for (ItemCarrito item : getCarritoActual().getItems()) {
             total += item.getSubtotal();
@@ -449,7 +448,7 @@ public class Inventario {
      * Finaliza la transaccion, crea la instancia de Venta para el historial
      * y limpia el carrito actual.
      */
-    public boolean procesarCompra(String run, String nombre) {
+    public synchronized boolean procesarCompra(String run, String nombre) {
         Carrito c = getCarritoActual();
         if (c.estaVacio()) return false;
 
@@ -548,6 +547,49 @@ public class Inventario {
         return comprasCliente;
     }
 
+    public static final int RESERVA_INEXISTENTE = -1;
+    public static final int RESERVA_INSUFICIENTE = -2;
 
+    public synchronized int reservarStock(int idProducto, int cant) {
+        Producto p = buscarProducto(idProducto);
+        if (p == null) return RESERVA_INEXISTENTE;
+        if (cant <= 0 || p.getStock() < cant) return RESERVA_INSUFICIENTE;
+        p.setStock(p.getStock() - cant);
+        p.setReservado(p.getReservado() + cant);
+        return p.getStock();
+    }
 
+    public synchronized int liberarStock(int idProducto, int cant) {
+        Producto p = buscarProducto(idProducto);
+        if (p == null || cant <= 0) return RESERVA_INEXISTENTE;
+        p.setStock(p.getStock() + cant);
+        p.setReservado(Math.max(0, p.getReservado() - cant));
+        return p.getStock();
+    }
+
+    public synchronized void confirmarVenta(int idProducto, int cant) {
+        Producto p = buscarProducto(idProducto);
+        if (p == null || cant <= 0) return;
+        p.setReservado(Math.max(0, p.getReservado() - cant));
+    }
+
+    public synchronized void persistirCatalogo() {
+        gestorArchivo.guardarCatalogo(productos);
+    }
+
+    public synchronized void revertirAgregado(int idProducto, int cant) {
+        Carrito c = getCarritoActual();
+        for (ItemCarrito item : c.getItems()) {
+            if (item.getProducto().getId() == idProducto) {
+                int restante = item.getCantidad() - cant;
+                if (restante <= 0) c.getItems().remove(item);
+                else item.setCantidad(restante);
+                return;
+            }
+        }
+    }
+
+    public synchronized void limpiarCarritoLocal() {
+        getCarritoActual().limpiar();
+    }
 }

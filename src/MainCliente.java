@@ -3,7 +3,6 @@ import red.Cliente;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-
 public class MainCliente {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
@@ -27,11 +26,18 @@ public class MainCliente {
             BaseFrameCliente frame = new BaseFrameCliente();
             frame.setVisible(true);
 
-            // Usar la ip ingresada
             Cliente cliente = new Cliente(ipServidor.trim(), 65432);
+
             cliente.setOnStockUpdateCallback(() -> {
-                SwingUtilities.invokeLater(() -> frame.getVistaProductos().refrescarVistaActual());
+                frame.getVistaProductos().refrescarVistaActual();
                 frame.getVistaCarrito().actualizarCarrito();
+            });
+            cliente.setAlCambiarConexion(estado -> {
+                if (!"conectado".equals(estado)) {
+                    JOptionPane.showMessageDialog(frame,
+                            estado + "\nLos cambios no se enviarán al servidor. Reinicie la aplicación para reconectar.",
+                            "Sin conexión", JOptionPane.ERROR_MESSAGE);
+                }
             });
             cliente.conectar();
         });

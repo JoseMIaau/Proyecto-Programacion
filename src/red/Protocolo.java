@@ -1,13 +1,17 @@
 package red;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Map;
 
-//Clase para lo json que hizo el profe, solo copié lo que ya estaba
 public class Protocolo {
     public static final String TYPE_MESSAGE = "message";
     public static final String TYPE_DATA = "data_exchange";
 
+    public static final String STOCK = "STOCK:";                 // servidor -> cliente: stock absoluto
+    public static final String PRECIO = "PRECIO:";               // servidor -> cliente: precio absoluto
+    public static final String RECHAZADO = "RECHAZADO:";         // servidor -> cliente: "<cantidad>:<motivo>"
+    public static final String AGREGAR = "AGREGAR:";             // cliente -> servidor: +n reserva, -n devuelve
+    public static final String COMPRAR = "COMPRAR";              // cliente -> servidor: pago confirmado
+    public static final String AGREGAR_DESEO = "AGREGAR_DESEO:"; // cliente -> servidor: aviso de reposicion
     public static String createJsonMessage(String content) {
         return "{\"type\": \"message\", \"content\": \"" + escapeJson(content) + "\"}";
     }
@@ -17,33 +21,22 @@ public class Protocolo {
     }
 
     public static String escapeJson(String text) {
-        return text.replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r")
-                .replace("\t", "\\t");
+        return Json.escape(text);
     }
 
     public static String extractJsonField(String json, String fieldName) {
-        Pattern stringPattern = Pattern.compile("\"" + fieldName + "\"\\s*:\\s*\"([^\"]*)\"");
-        Matcher stringMatcher = stringPattern.matcher(json);
-        if (stringMatcher.find()) {
-            return unescapeJson(stringMatcher.group(1));
+        try {
+            Object raiz = Json.parse(json);
+            if (!(raiz instanceof Map)) return null;
+            Object v = ((Map<?, ?>) raiz).get(fieldName);
+            if (v == null) return null;
+            if (v instanceof Double) {
+                double d = (Double) v;
+                return d == Math.rint(d) && !Double.isInfinite(d) ? String.valueOf((long) d) : String.valueOf(d);
+            }
+            return String.valueOf(v);
+        } catch (RuntimeException e) {
+            return null;
         }
-
-        Pattern numberPattern = Pattern.compile("\"" + fieldName + "\"\\s*:\\s*(-?\\d+)");
-        Matcher numberMatcher = numberPattern.matcher(json);
-        if (numberMatcher.find()) {
-            return numberMatcher.group(1);
-        }
-        return null;
-    }
-
-    public static String unescapeJson(String text) {
-        return text.replace("\\\"", "\"")
-                .replace("\\\\", "\\")
-                .replace("\\n", "\n")
-                .replace("\\r", "\r")
-                .replace("\\t", "\t");
     }
 }
