@@ -24,6 +24,10 @@ public class Inventario {
     private final LinkedHashMap<String, ClienteRegistrado> clientesRegistrados = new LinkedHashMap<>();
     private final List<Compra> historialCompras = new ArrayList<>();
 
+    private GestorArchivo gestorDeseos;
+    private final java.util.Map<String, java.util.List<Integer>> deseosGuardados = new java.util.LinkedHashMap<>();
+    private ListaDeseos listaDeseosActual = null;
+
     private HashMap<String, Admin> usuariosAdmin;
     private Admin adminActual;
     private Pedido ultimoPedidoCreado;
@@ -39,6 +43,8 @@ public class Inventario {
         
         this.gestorClientes = new GestorArchivo("clientes.csv");
         this.gestorCompras = new GestorArchivo("compras.csv");
+        this.gestorDeseos = new GestorArchivo("deseos.csv");
+        this.deseosGuardados.putAll(gestorDeseos.cargarDeseos());
 
         for (ClienteRegistrado cliente : gestorClientes.cargarClientes()) {
             clientesRegistrados.put(cliente.getRun(), cliente);
@@ -496,6 +502,7 @@ public class Inventario {
 
         gestorArchivo.guardarCatalogo(productos);
         c.limpiar(); 
+        if (!tieneClienteDeseosIdentificado()) identificarClienteDeseos(run); //para que no vuelva a poner si ya compro
         return true;
     }
     
@@ -601,5 +608,70 @@ public class Inventario {
 
     public synchronized void limpiarCarritoLocal() {
         getCarritoActual().limpiar();
+    }
+
+
+    // --- METODOS LISTA DE DESEADOS) ---
+
+    public ListaDeseos getListaDeseosActual() {
+        return listaDeseosActual;
+    }
+
+    public boolean tieneClienteDeseosIdentificado() {
+        return listaDeseosActual != null && !listaDeseosActual.getIdentificadorCliente().isEmpty();
+    }
+
+    public ListaDeseos identificarClienteDeseos(String identificador) {
+        if (identificador == null || identificador.trim().isEmpty()) return null;
+        String clave = identificador.trim().toUpperCase();
+
+        ListaDeseos lista = new ListaDeseos(clave);
+        List<Integer> idsPrevios = deseosGuardados.getOrDefault(clave, new ArrayList<>());
+        for (int idProd : idsPrevios) {
+            Producto p = buscarProducto(idProd);
+            if (p != null) {
+                lista.agregarProducto(p);
+                if (red.Cliente.getInstancia() != null && red.Cliente.getInstancia().estaConectado()) {
+                    red.Cliente.getInstancia().enviarDatos(idProd, red.Protocolo.AGREGAR_DESEO + "1");
+                }
+            }
+        }
+        this.listaDeseosActual = lista;
+        return lista;
+    }
+
+    public boolean esFavorito(int idProducto) {
+        return listaDeseosActual != null && listaDeseosActual.contieneProducto(idProducto);
+    }
+
+    public boolean agregarAFavoritos(Producto p) {
+        if (listaDeseosActual == null || p == null) return false;
+        boolean agregado = listaDeseosActual.agregarProducto(p);
+        if (agregado) {
+            persistirDeseosActuales();
+            if (red.Cliente.getInstancia() != null && red.Cliente.getInstancia().estaConectado()) {
+                red.Cliente.getInstancia().enviarDatos(p.getId(), red.Protocolo.AGREGAR_DESEO + "1");
+            }
+        }
+        return agregado;
+    }
+
+    public boolean quitarDeFavoritos(int idProducto) {
+        if (listaDeseosActual == null) return false;
+        boolean eliminado = listaDeseosActual.eliminarProducto(idProducto);
+        if (eliminado) {
+            persistirDeseosActuales();
+        }
+        return eliminado;
+    }
+
+    private void persistirDeseosActuales() {
+        if (listaDeseosActual == null) return;
+        List<Integer> ids = new ArrayList<>();
+        for (Producto prod : listaDeseosActual.getProductos()) {
+            ids.add(prod.getId());
+        }
+        deseosGuardados.put(listaDeseosActual.getIdentificadorCliente(), ids);
+        gestorDeseos.guardarDeseos(deseosGuardados);
     }
 }

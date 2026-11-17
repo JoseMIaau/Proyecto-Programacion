@@ -39,6 +39,8 @@ public class BaseFrameCliente extends JFrame {
             vistaProductos.mostrarTodosLosProductos();
         } else if ("CARRO".equals(vista)) {
             vistaCarrito.actualizarCarrito();
+        } else if ("DESEOS".equals(vista)) {
+            vistaListaDeseados.actualizarVista();
         }
         cardLayout.show(root, vista);
     }

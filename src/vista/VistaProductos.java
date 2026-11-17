@@ -198,10 +198,21 @@ public class VistaProductos extends JPanel {
 
         header.add(centro, BorderLayout.CENTER);
 
-        // Carrito
+        // Carrito y deseados
+        JButton btnDeseos = EstilosUI.iconButton("❤️");
+        btnDeseos.setToolTipText("Lista de Deseados");
+        btnDeseos.addActionListener(e -> frame.mostrarVista("DESEOS"));
+
         JButton cart = EstilosUI.iconButton("🛒");
+        cart.setToolTipText("Mi Carrito");
         cart.addActionListener(e -> frame.mostrarVista("CARRO"));
-        header.add(cart, BorderLayout.EAST);
+
+        JPanel panelDerecho = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        panelDerecho.setOpaque(false);
+        panelDerecho.add(btnDeseos);
+        panelDerecho.add(cart);
+
+        header.add(panelDerecho, BorderLayout.EAST);
 
         return header;
     }
@@ -242,27 +253,31 @@ public class VistaProductos extends JPanel {
         stockLabel.setForeground(Color.GRAY);
         stockLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        JPanel panelAcciones = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
+        panelAcciones.setOpaque(false);
+        panelAcciones.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panelAcciones.setMaximumSize(new Dimension(210, 38));
+
         JButton addBtn;
         if (prod.getStock() > 0) {
             addBtn = EstilosUI.roundedButton("Agregar", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
             addBtn.addActionListener(e -> showQuantityDialog(prod));
         } else {
-            addBtn = EstilosUI.roundedButton("Avisame ", new Color(255, 230, 120), new Color(180, 120, 0));
-            addBtn.addActionListener(e -> {
-                if (red.Cliente.getInstancia() != null) {
-                    red.Cliente.getInstancia().enviarMensaje("!deseo " + prod.getId()); 
-                }
-                
-                frame.getVistaListaDeseados().agregarDeseoLocal(prod);
-                
-                JOptionPane.showMessageDialog(frame, 
-                    "¡Anotado! Te avisaremos cuando '" + prod.getNombre() + "' tenga stock.", 
-                    "Lista de Deseos", 
-                    JOptionPane.INFORMATION_MESSAGE);
-            });
+            addBtn = EstilosUI.roundedButton("Avísame", new Color(255, 230, 120), new Color(180, 120, 0));
+            addBtn.addActionListener(e -> marcarComoFavorito(prod, true));
         }
-        addBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        addBtn.setMaximumSize(new Dimension(120, 32));
+
+        boolean yaEsFav = Inventario.getInstancia().esFavorito(prod.getId());
+        JButton favBtn = EstilosUI.roundedButton(
+                yaEsFav ? "❤️" : "♡",
+                yaEsFav ? new Color(255, 220, 225) : new Color(240, 240, 240),
+                new Color(200, 35, 55)
+        );
+        favBtn.setToolTipText(yaEsFav ? "Quitar de favoritos" : "Guardar en lista de deseos");
+        favBtn.addActionListener(e -> marcarComoFavorito(prod, false));
+
+        panelAcciones.add(addBtn);
+        panelAcciones.add(favBtn);
 
         card.add(boxColor);
         card.add(Box.createVerticalStrut(8));
@@ -270,7 +285,7 @@ public class VistaProductos extends JPanel {
         card.add(priceLabel);
         card.add(stockLabel);
         card.add(Box.createVerticalStrut(8));
-        card.add(addBtn);
+        card.add(panelAcciones);
 
         return card;
     }
@@ -380,5 +395,41 @@ public class VistaProductos extends JPanel {
         body.add(btnConfirmar);
         dialog.add(body, BorderLayout.CENTER);
         dialog.setVisible(true);
+    }
+
+    private void marcarComoFavorito(Producto prod, boolean soloAgregar) {
+        Inventario inv = Inventario.getInstancia();
+        if (!inv.tieneClienteDeseosIdentificado()) {
+            String id = JOptionPane.showInputDialog(
+                    frame,
+                    "Ingrese su RUN o nombre de usuario para guardar sus favoritos:",
+                    "Identificación de Cliente",
+                    JOptionPane.QUESTION_MESSAGE
+            );
+            if (id == null || id.trim().isEmpty()) return;
+            inv.identificarClienteDeseos(id);
+        }
+
+        if (inv.esFavorito(prod.getId())) {
+            if (soloAgregar) {
+                JOptionPane.showMessageDialog(frame,
+                        "Este producto ya está en tu lista de deseos. Te avisaremos cuando haya novedades.",
+                        "Lista de Deseos", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            inv.quitarDeFavoritos(prod.getId());
+            JOptionPane.showMessageDialog(frame,
+                    "Se quitó '" + prod.getNombre() + "' de tu lista de deseos.",
+                    "Lista de Deseos", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            inv.agregarAFavoritos(prod);
+            String msg = prod.getStock() == 0
+                    ? "¡Anotado! Te avisaremos cuando '" + prod.getNombre() + "' vuelva a tener stock o baje de precio."
+                    : "¡Guardado! '" + prod.getNombre() + "' se añadió a tu lista de deseos.";
+            JOptionPane.showMessageDialog(frame, msg, "Lista de Deseos", JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        refrescarVistaActual();
+        frame.getVistaListaDeseados().actualizarVista();
     }
 }

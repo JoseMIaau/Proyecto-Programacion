@@ -224,4 +224,50 @@ public class GestorArchivo {
         }
         return compras;
     }
+
+    // --- LISTA DE DESEOS ---
+    public void guardarDeseos(java.util.Map<String, List<Integer>> deseosPorCliente) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(rutaArchivo))) {
+            for (java.util.Map.Entry<String, List<Integer>> entry : deseosPorCliente.entrySet()) {
+                if (entry.getValue().isEmpty()) continue;
+                StringBuilder sb = new StringBuilder();
+                sb.append(entry.getKey()).append("|");
+                for (int i = 0; i < entry.getValue().size(); i++) {
+                    if (i > 0) sb.append(",");
+                    sb.append(entry.getValue().get(i));
+                }
+                bw.write(sb.toString());
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error al guardar lista de deseos: " + e.getMessage());
+        }
+    }
+
+    public java.util.Map<String, List<Integer>> cargarDeseos() {
+        java.util.Map<String, List<Integer>> mapa = new java.util.LinkedHashMap<>();
+        File archivo = new File(rutaArchivo);
+        if (!archivo.exists()) return mapa;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                if (linea.trim().isEmpty()) continue;
+                String[] p = linea.split("\\|", -1);
+                if (p.length >= 2 && !p[0].trim().isEmpty()) {
+                    String idCliente = p[0].trim();
+                    List<Integer> ids = new ArrayList<>();
+                    if (!p[1].trim().isEmpty()) {
+                        for (String num : p[1].split(",")) {
+                            ids.add(Integer.parseInt(num.trim()));
+                        }
+                    }
+                    mapa.put(idCliente, ids);
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Error al cargar lista de deseos: " + e.getMessage());
+        }
+        return mapa;
+    }
 }

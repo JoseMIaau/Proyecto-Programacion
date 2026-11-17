@@ -93,7 +93,7 @@ public class VistaMenuPrincipal extends JPanel {
 
         header.add(search, BorderLayout.CENTER);
         //lista deseados
-        JButton btnDeseos = EstilosUI.iconButton("🗿");
+        JButton btnDeseos = EstilosUI.iconButton("❤️");
         btnDeseos.addActionListener(e -> frame.mostrarVista("DESEOS"));
 
         // Carrito

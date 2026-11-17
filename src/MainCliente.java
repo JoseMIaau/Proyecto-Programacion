@@ -31,6 +31,7 @@ public class MainCliente {
             cliente.setOnStockUpdateCallback(() -> {
                 frame.getVistaProductos().refrescarVistaActual();
                 frame.getVistaCarrito().actualizarCarrito();
+                frame.getVistaListaDeseados().actualizarVista();
             });
             cliente.setAlCambiarConexion(estado -> {
                 if (!"conectado".equals(estado)) {
