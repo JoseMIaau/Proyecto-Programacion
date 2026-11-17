@@ -31,6 +31,9 @@ public class Inventario {
     private HashMap<String, Admin> usuariosAdmin;
     private Admin adminActual;
     private Pedido ultimoPedidoCreado;
+
+    private List<TarifaEnvio> tarifasEnvio;
+    private double minimoEnvioGratis = 60000.0;
     //Multicarrito
     private final HashMap<String, Carrito> carritosActivos = new HashMap<>();
     private String idClienteActual = "Cliente_" + java.util.UUID.randomUUID().toString().substring(0, 6);
@@ -53,6 +56,7 @@ public class Inventario {
         this.adminActual = null;
         inicializarDatosDemoSiVacio();
         inicializarAdminPorDefecto();
+        inicializarTarifasPorDefecto();
     }
 
     public static synchronized Inventario getInstancia() {
@@ -105,6 +109,15 @@ public class Inventario {
             Admin prueba = new Admin("admin@supercurico.cl", "admin123");
             usuariosAdmin.put(prueba.getUsuario(), prueba);
             gestorUsuario.guardarAdmin(new ArrayList<>(usuariosAdmin.values()));
+        }
+    }
+
+    private void inicializarTarifasPorDefecto() {
+        if (tarifasEnvio.isEmpty()) {
+            tarifasEnvio.add(new TarifaEnvio(1, "Curicó Centro", 790.0, 0));
+            tarifasEnvio.add(new TarifaEnvio(2, "Sector Norte / Sarmiento", 990.0, 1));
+            tarifasEnvio.add(new TarifaEnvio(3, "Sector Sur / Rauquén", 1190.0, 1));
+            tarifasEnvio.add(new TarifaEnvio(4, "Sector Oriente / Los Niches", 1390.0, 2));
         }
     }
 
@@ -673,5 +686,80 @@ public class Inventario {
         }
         deseosGuardados.put(listaDeseosActual.getIdentificadorCliente(), ids);
         gestorDeseos.guardarDeseos(deseosGuardados);
+    }
+
+    // --- METODOS DE TARIFAS Y DESPACHO ---
+
+    public synchronized List<TarifaEnvio> obtenerTarifasEnvio() {
+        return new ArrayList<>(tarifasEnvio);
+    }
+
+    public synchronized TarifaEnvio buscarTarifaPorZona(int zona) {
+        for (TarifaEnvio t : tarifasEnvio) {
+            if (t.getZona() == zona) {
+                return t;
+            }
+        }
+        return null;
+    }
+
+    public synchronized boolean actualizarTarifaEnvio(int zona, String descripcion, double nuevoCosto, int nuevosDias) {
+        if (nuevoCosto < 0 || nuevosDias < 0) {
+            return false;
+        }
+        TarifaEnvio tarifa = buscarTarifaPorZona(zona);
+        if (tarifa == null) {
+            return false;
+        }
+        tarifa.setDescripcion(descripcion);
+        tarifa.setCosto(nuevoCosto);
+        tarifa.setDiasHabiles(nuevosDias);
+        return true;
+    }
+
+    public synchronized double getMinimoEnvioGratis() {
+        return minimoEnvioGratis;
+    }
+
+    public synchronized boolean setMinimoEnvioGratis(double nuevoMinimo) {
+        if (nuevoMinimo < 0) {
+            return false;
+        }
+        this.minimoEnvioGratis = nuevoMinimo;
+        return true;
+    }
+
+    public synchronized double calcularSubtotalProductos() {
+        double suma = 0.0;
+        for (ItemCarrito item : getCarritoActual().getItems()) {
+            suma += item.getSubtotal();
+        }
+        return suma;
+    }
+
+    public synchronized double calcularCostoEnvio(boolean retiroEnTienda, int zona) {
+        if (retiroEnTienda) {
+            return 0.0;
+        }
+        double subtotal = calcularSubtotalProductos();
+        if (subtotal >= minimoEnvioGratis) {
+            return 0.0;
+        }
+        TarifaEnvio tarifa = buscarTarifaPorZona(zona);
+        if (tarifa == null) {
+            return 0.0;
+        }
+        return tarifa.getCosto();
+    }
+
+    public synchronized double calcularIVAConEnvio(double costoEnvio) {
+        double baseImponible = calcularSubtotalProductos() + costoEnvio;
+        return baseImponible * 0.19;
+    }
+
+    public synchronized double calcularTotalConEnvio(double costoEnvio) {
+        double baseImponible = calcularSubtotalProductos() + costoEnvio;
+        double iva = calcularIVAConEnvio(costoEnvio);
+        return baseImponible + iva;
     }
 }
