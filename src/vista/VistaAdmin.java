@@ -446,57 +446,108 @@ public class VistaAdmin extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         JPanel panelFormulario = new JPanel(new GridLayout(6, 2, 10, 10));
 
-        panel.add(new JLabel("Codigo del cupon:"));
-        panel.add(txtCodigo);
+        panelFormulario.add(new JLabel("Codigo del cupon:"));
+        panelFormulario.add(txtCodigo);
 
-        panel.add(new JLabel("Tipo de descuento:"));
-        panel.add(cmbTipo);
+        panelFormulario.add(new JLabel("Tipo de descuento:"));
+        panelFormulario.add(cmbTipo);
 
-        panel.add(new JLabel("Valor del descuento:"));
-        panel.add(txtValor);
+        panelFormulario.add(new JLabel("Valor del descuento:"));
+        panelFormulario.add(txtValor);
 
-        panel.add(new JLabel("Fecha de vencimiento (DD/MM/AAAA):"));
-        panel.add(txtVencimiento);
+        panelFormulario.add(new JLabel("Fecha de vencimiento (DD/MM/AAAA):"));
+        panelFormulario.add(txtVencimiento);
 
-        panel.add(new JLabel("Cantidad maxima de usos:"));
-        panel.add(txtUsosMaximos);
+        panelFormulario.add(new JLabel("Cantidad maxima de usos:"));
+        panelFormulario.add(txtUsosMaximos);
 
         panel.add(panelFormulario, BorderLayout.NORTH);
 
-        JButton btnVerCupones = new JButton("Ver Cupones Registrados");
+        String[] columnasCupones = {
+            "Codigo", "Tipo", "Valor", "Vencimiento", "Usos restantes"
+        };
 
-        btnVerCupones.addActionListener(e -> {
-            StringBuilder lista = new StringBuilder();
+        DefaultTableModel modeloCupones = new DefaultTableModel(columnasCupones, 0) {
+            @Override
+            public boolean isCellEditable(int fila, int columna) {
+                return false;
+            }
+        };
+        
+        for (Cupon cupon : inventario.obtenerCupones()) {
+            String valorDescuento;
 
-            for (modelo.Cupon cupon : inventario.obtenerCupones()) {
-                lista.append("Código: ").append(cupon.getCodigo()).append("\n");
-                lista.append("Tipo: ").append(cupon.getTipo()).append("\n");
-                lista.append("Valor: ").append(cupon.getValor()).append("\n");
-                lista.append("Vencimiento: ").append(cupon.getFechaVencimiento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))).append("\n");
-                lista.append("Usos restantes: ").append(cupon.getUsosRestantes()).append("\n");
-                lista.append("-----------------------------\n");
+            if (cupon.getTipo() == Cupon.TipoDescuento.PORCENTAJE) {
+                valorDescuento = cupon.getValor() + "%";
+            } else {
+                valorDescuento = EstilosUI.formatearCLP(cupon.getValor());
             }
 
-            if (lista.length() == 0) {
-                lista.append("No existen cupones registrados.");
+            modeloCupones.addRow(new Object[]{
+                cupon.getCodigo(),
+                cupon.getTipo(),
+                valorDescuento,
+                cupon.getFechaVencimiento().format(
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                ),
+                cupon.getUsosRestantes()
+            });
+        }
+
+        JTable tablaCupones = new JTable(modeloCupones);
+        tablaCupones.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        JScrollPane scrollCupones = new JScrollPane(tablaCupones);
+        scrollCupones.setPreferredSize(new Dimension(650, 200));
+
+        panel.add(scrollCupones, BorderLayout.CENTER);
+
+        //boton para eliminar un cupon seleccionado en la tabla
+
+        JButton btnEliminarCupon = new JButton("Eliminar seleccionado");
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panelBotones.add(btnEliminarCupon);
+
+       btnEliminarCupon.addActionListener(e -> {
+                int filaSeleccionada = tablaCupones.getSelectedRow();
+
+            if (filaSeleccionada == -1) {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Seleccione un cupón de la tabla.",
+                        "Aviso",
+                        JOptionPane.WARNING_MESSAGE
+                );
+            return;
             }
 
-            JTextArea area = new JTextArea(lista.toString());
-            area.setEditable(false);
+            String codigo = modeloCupones.getValueAt(
+              filaSeleccionada, 0
+                ).toString();
 
-            JScrollPane scroll = new JScrollPane(area);
-            scroll.setPreferredSize(new Dimension(400, 300));
+                int confirmacion = JOptionPane.showConfirmDialog(
+                    this,
+                    "¿Está seguro de eliminar el cupón " + codigo + "?",
+                    "Confirmar eliminación",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+                );
 
-            JOptionPane.showMessageDialog(
-                this,
-                scroll,
-                "Cupones Registrados",
-                JOptionPane.INFORMATION_MESSAGE
-            );
-        });
+                if (confirmacion == JOptionPane.YES_OPTION) {
+                    if (inventario.eliminarCupon(codigo)) {
+                        modeloCupones.removeRow(filaSeleccionada);
 
-        panel.add(new JLabel("Consultar cupones:"));
-        panel.add(btnVerCupones);
+                        JOptionPane.showMessageDialog(
+                            this,
+                            "Cupón eliminado correctamente.",
+                            "Éxito",
+                            JOptionPane.INFORMATION_MESSAGE
+                        );
+                    }
+                }
+            });
+
+        panel.add(panelBotones, BorderLayout.SOUTH);
 
         int resultado = JOptionPane.showConfirmDialog(
             this,

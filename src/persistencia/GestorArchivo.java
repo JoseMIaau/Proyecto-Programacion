@@ -222,7 +222,7 @@ public class GestorArchivo {
         return compras;
     }
 
-
+ // CUPONES
 
     // guardar los cupones
 

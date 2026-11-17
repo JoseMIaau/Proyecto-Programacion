@@ -2,6 +2,7 @@ package vista;
 
 import modelo.Inventario;
 import modelo.ItemCarrito;
+import modelo.Cupon;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -273,6 +274,7 @@ public class VistaCarrito extends JPanel {
         JTextField txtDireccion = new JTextField();
         JTextField txtTarjeta = new JTextField();
         JTextField txtRun = new JTextField();
+        JTextField txtCupon = new JTextField();
 
         body.add(totalTxt);
         body.add(Box.createVerticalStrut(15));
@@ -282,12 +284,27 @@ public class VistaCarrito extends JPanel {
         body.add(new JLabel("RUN del cliente:"));
         body.add(txtRun);
         body.add(Box.createVerticalStrut(8));
+        body.add(new JLabel("Código de cupón:"));
+        body.add(txtCupon);
+        body.add(Box.createVerticalStrut(8));
+        //Boton para aplicar el cupon
+        JButton btnAplicarCupon = EstilosUI.roundedButton(
+            "Aplicar cupón",
+            EstilosUI.VERDE_CLARO,
+            EstilosUI.VERDE
+         );
+
+        btnAplicarCupon.setAlignmentX(Component.CENTER_ALIGNMENT);
+        body.add(btnAplicarCupon);
+        body.add(Box.createVerticalStrut(15));
+        btnAplicarCupon.addActionListener(e -> aplicarCupon(txtCupon, dialog));
         body.add(new JLabel("Direccion de entrega:"));
         body.add(txtDireccion);
         body.add(Box.createVerticalStrut(8));
         body.add(new JLabel("N° Tarjeta:"));
         body.add(txtTarjeta);
         body.add(Box.createVerticalStrut(20));
+
 
         JButton btnConfirmar = EstilosUI.roundedButton("PAGAR AHORA", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
         btnConfirmar.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -320,4 +337,42 @@ public class VistaCarrito extends JPanel {
         dialog.add(body, BorderLayout.CENTER);
         dialog.setVisible(true);
     }
+
+    private void aplicarCupon(JTextField txtCupon, JDialog dialog) {
+
+    String codigo = txtCupon.getText().trim();
+
+    if (codigo.isEmpty()) {
+        JOptionPane.showMessageDialog(
+            dialog,
+            "Ingrese un código de cupón.",
+            "Aviso",
+            JOptionPane.WARNING_MESSAGE
+        );
+        return;
+    }
+
+    //para el boton de aplicar cupon (para no matar el orden del codigo en el showcheckoutdialog)
+    Cupon cupon = Inventario.getInstancia().buscarCupon(codigo);
+
+    if (cupon == null || !cupon.esValido()) {
+        JOptionPane.showMessageDialog(
+            dialog,
+            "El cupón no existe, está vencido o ya no tiene usos disponibles.",
+            "Cupón inválido",
+            JOptionPane.WARNING_MESSAGE
+        );
+        return;
+    }
+
+    JOptionPane.showMessageDialog(
+        dialog,
+        "¡Cupón válido! Descuento disponible: "
+            + (cupon.getTipo() == Cupon.TipoDescuento.PORCENTAJE
+                ? cupon.getValor() + "%"
+                : EstilosUI.formatearCLP(cupon.getValor())),
+        "Cupón aplicado",
+        JOptionPane.INFORMATION_MESSAGE
+    );
+}
 }
