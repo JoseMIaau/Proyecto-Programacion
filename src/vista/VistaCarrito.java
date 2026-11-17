@@ -268,13 +268,14 @@ public class VistaCarrito extends JPanel {
 
         JLabel totalTxt = new JLabel("Total a pagar: $" + (int) Inventario.getInstancia().calcularTotalCarrito());
         totalTxt.setFont(EstilosUI.FONT_TITLE);
-        totalTxt.setAlignmentX(Component.CENTER_ALIGNMENT);
+        totalTxt.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
 
-        JTextField txtNombre = new JTextField();
-        JTextField txtDireccion = new JTextField();
+        JTextField txtNombre = new JTextField(JTextField.LEFT);
+        JTextField txtDireccion = new JTextField(JTextField.LEFT);
         JComboBox<Integer> comboZona = new JComboBox<>(new Integer[]{1, 2, 3, 4});
-        JTextField txtTarjeta = new JTextField();
-        JTextField txtRun = new JTextField();
+        JTextField txtTarjeta = new JTextField(JTextField.LEFT);
+        JTextField txtRun = new JTextField(JTextField.LEFT);
 
         body.add(totalTxt);
         body.add(Box.createVerticalStrut(15));
@@ -295,6 +296,7 @@ public class VistaCarrito extends JPanel {
 
         JButton btnConfirmar = EstilosUI.roundedButton("PAGAR AHORA", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
         btnConfirmar.setAlignmentX(Component.CENTER_ALIGNMENT);
+        txtDireccion.setHorizontalAlignment(JTextField.LEFT);
         btnConfirmar.addActionListener(e -> {
             String nombre = txtNombre.getText().trim();
             String run = txtRun.getText().trim();
