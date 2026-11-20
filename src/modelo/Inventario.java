@@ -445,7 +445,7 @@ public class Inventario {
      * Finaliza la transaccion, crea la instancia de Venta para el historial
      * y limpia el carrito actual.
      */
-    public boolean procesarCompra(String run, String nombre) {
+    public boolean procesarCompra(String run, String nombre, Cupon cupon) {
         Carrito c = getCarritoActual();
         if (c.estaVacio()) return false;
 
@@ -475,7 +475,26 @@ public class Inventario {
         }
 
         String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
-        Compra compra = new Compra(run, nombre, fecha, calcularSubtotal(), calcularIVA(), calcularTotalCarrito(), detalles);
+        double subtotal = calcularSubtotal();
+        //cambios para aplicar el cupon en el historial e internamente
+        double descuento = 0.0;
+
+        if (cupon != null) {
+            if (!cupon.esValido()) {
+                return false;
+            }
+
+            descuento = cupon.calcularDescuento(subtotal);
+        }
+
+        double subtotalFinal = subtotal - descuento;
+        double ivaFinal = subtotalFinal * 0.19;
+        double totalFinal = subtotalFinal + ivaFinal;
+    
+        if (cupon != null && !registrarUsoCupon(cupon.getCodigo())) {
+        return false;
+        }
+        Compra compra = new Compra(run,nombre,fecha,subtotalFinal,ivaFinal,totalFinal,detalles);
 
         historialCompras.add(compra);
         gestorCompras.guardarCompras(historialCompras);
@@ -556,6 +575,17 @@ public class Inventario {
         }
 
         return cupon.esValido();
+    }
+    
+    public boolean registrarUsoCupon(String codigo) {
+    Cupon cupon = buscarCupon(codigo);
+
+    if (cupon == null || !cupon.registrarUso()) {
+        return false;
+    }
+
+    gestorCupones.guardarCupones(cupones.values());
+    return true;
     }
 
     // Devuelve todos los cupones registrados

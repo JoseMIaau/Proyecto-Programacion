@@ -18,6 +18,7 @@ public class VistaCarrito extends JPanel {
     private final JPanel leftPanel;
     private final JPanel rightPanel;
     private final JLabel totalLabel;
+    private Cupon cuponAplicado;
 
     public VistaCarrito(BaseFrameCliente frame) {
         this.frame = frame;
@@ -287,7 +288,9 @@ public class VistaCarrito extends JPanel {
         body.add(new JLabel("Código de cupón:"));
         body.add(txtCupon);
         body.add(Box.createVerticalStrut(8));
+
         //Boton para aplicar el cupon
+
         JButton btnAplicarCupon = EstilosUI.roundedButton(
             "Aplicar cupón",
             EstilosUI.VERDE_CLARO,
@@ -297,7 +300,7 @@ public class VistaCarrito extends JPanel {
         btnAplicarCupon.setAlignmentX(Component.CENTER_ALIGNMENT);
         body.add(btnAplicarCupon);
         body.add(Box.createVerticalStrut(15));
-        btnAplicarCupon.addActionListener(e -> aplicarCupon(txtCupon, dialog));
+        btnAplicarCupon.addActionListener(e -> aplicarCupon(txtCupon, dialog, totalTxt));
         body.add(new JLabel("Direccion de entrega:"));
         body.add(txtDireccion);
         body.add(Box.createVerticalStrut(8));
@@ -318,7 +321,7 @@ public class VistaCarrito extends JPanel {
                 return;
             }
 
-            boolean exito = Inventario.getInstancia().procesarCompra(run, nombre);
+            boolean exito = Inventario.getInstancia().procesarCompra(run, nombre, cuponAplicado);
 
             if (exito) {
                 if (red.Cliente.getInstancia() != null) {
@@ -338,7 +341,7 @@ public class VistaCarrito extends JPanel {
         dialog.setVisible(true);
     }
 
-    private void aplicarCupon(JTextField txtCupon, JDialog dialog) {
+    private void aplicarCupon(JTextField txtCupon, JDialog dialog, JLabel totalTxt) {
 
     String codigo = txtCupon.getText().trim();
 
@@ -365,6 +368,15 @@ public class VistaCarrito extends JPanel {
         return;
     }
 
+    cuponAplicado = cupon;
+
+    double subtotal = Inventario.getInstancia().calcularSubtotal();
+    double descuento = cuponAplicado.calcularDescuento(subtotal);
+    double subtotalFinal = subtotal - descuento;
+    double ivaFinal = subtotalFinal * 0.19;
+    double total = subtotalFinal + ivaFinal;
+
+totalTxt.setText("Total a pagar: $" + (int) total);
     JOptionPane.showMessageDialog(
         dialog,
         "¡Cupón válido! Descuento disponible: "
