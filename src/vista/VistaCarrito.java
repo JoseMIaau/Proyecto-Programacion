@@ -5,6 +5,9 @@ import modelo.ItemCarrito;
 import modelo.Compra;
 import modelo.GestorPedidos;
 import modelo.Pedido;
+import modelo.Despacho;
+import modelo.Direccion;
+import modelo.TarifaEnvio;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -268,40 +271,170 @@ public class VistaCarrito extends JPanel {
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
         body.setBorder(new EmptyBorder(20, 30, 20, 30));
 
-        JLabel totalTxt = new JLabel("Total a pagar: $" + (int) Inventario.getInstancia().calcularTotalCarrito());
-        totalTxt.setFont(EstilosUI.FONT_TITLE);
-        totalTxt.setAlignmentX(Component.CENTER_ALIGNMENT);
-
+        //Datos cliente
         JTextField txtNombre = new JTextField();
-        JTextField txtDireccion = new JTextField();
-        JTextField txtTarjeta = new JTextField();
         JTextField txtRun = new JTextField();
+        Inventario inv = Inventario.getInstancia();
+        if (inv.tieneClienteDeseosIdentificado()) {//auto completa datos en caso de tener su rut y nombre
+            String runGuardado = inv.getListaDeseosActual().getIdentificadorCliente();
+            if (!runGuardado.equalsIgnoreCase("INVITADO")) {
+                txtRun.setText(runGuardado);
+                modelo.ClienteRegistrado clientePrevio = inv.buscarClientePorRun(runGuardado);
+                if (clientePrevio != null) {
+                    txtNombre.setText(clientePrevio.getNombre());
+                }
+            }
+        }
+        JTextField txtTarjeta = new JTextField();
 
-        body.add(totalTxt);
-        body.add(Box.createVerticalStrut(15));
+        String[] modalidades = {"Retiro en tienda", "Despacho a domicilio"};
+        JComboBox<String> cmbModalidad = new JComboBox<>(modalidades);
+
+        //despacho a domicilio
+        JTextField txtReceptor = new JTextField();
+        JTextField txtDireccion = new JTextField();
+        JComboBox<TarifaEnvio> cmbZona = new JComboBox<>();
+
+        List<TarifaEnvio> tarifas = Inventario.getInstancia().obtenerTarifasEnvio();
+        for (TarifaEnvio t : tarifas) {
+            cmbZona.addItem(t);
+        }
+
+        JLabel lblSubtotal = new JLabel("Subtotal productos: $0");
+        lblSubtotal.setFont(EstilosUI.FONT_NORMAL);
+
+        JLabel lblEnvio = new JLabel("Costo de envío: $0");
+        lblEnvio.setFont(EstilosUI.FONT_NORMAL);
+
+        JLabel lblIva = new JLabel("IVA (19%): $0");
+        lblIva.setFont(EstilosUI.FONT_NORMAL);
+
+        JLabel lblFechaEstimada = new JLabel("Entrega estimada: -");
+        lblFechaEstimada.setFont(EstilosUI.FONT_BOLD);
+        lblFechaEstimada.setForeground(EstilosUI.VERDE);
+
+        JLabel totalTxt = new JLabel("Total a pagar: $0");
+        totalTxt.setFont(new Font("SansSerif", Font.BOLD, 20));
+
+        Runnable actualizarResumen = () -> {
+            String modalidad = (String) cmbModalidad.getSelectedItem();
+            boolean esRetiro = "Retiro en tienda".equals(modalidad);
+
+            txtReceptor.setEnabled(!esRetiro);
+            txtDireccion.setEnabled(!esRetiro);
+            cmbZona.setEnabled(!esRetiro);
+
+            double subtotal = inv.calcularSubtotalProductos();
+            double costoEnvio = 0.0;
+            String fechaTexto = "";
+
+            if (esRetiro) {
+                Despacho retiro = new Despacho();
+                costoEnvio = 0.0;
+                fechaTexto = retiro.getFechaEstimada();
+                lblEnvio.setText("Costo de envío: $0 (Retiro en tienda)");
+            } else {
+                TarifaEnvio tarifa = (TarifaEnvio) cmbZona.getSelectedItem();
+                if (tarifa != null) {
+                    costoEnvio = inv.calcularCostoEnvio(false, tarifa.getZona());
+                    fechaTexto = Despacho.calcularFechaEntrega(tarifa.getDiasHabiles());
+
+                    if (costoEnvio == 0.0 && subtotal >= inv.getMinimoEnvioGratis()) {
+                        lblEnvio.setText("Costo de envío: $0 (Envío gratis)");
+                    } else {
+                        lblEnvio.setText("Costo de envío: $" + (int) costoEnvio);
+                    }
+                } else {
+                    lblEnvio.setText("Costo de envío: Zona no válida");
+                    fechaTexto = "No disponible";
+                }
+            }
+
+            double iva = inv.calcularIVAConEnvio(costoEnvio);
+            double total = inv.calcularTotalConEnvio(costoEnvio);
+
+            lblSubtotal.setText("Subtotal productos: $" + (int) subtotal);
+            lblIva.setText("IVA (19%): $" + (int) iva);
+            totalTxt.setText("Total a pagar: $" + (int) total);
+            lblFechaEstimada.setText("Entrega estimada: " + fechaTexto);
+        };
+
+        cmbModalidad.addActionListener(e -> actualizarResumen.run());
+        cmbZona.addActionListener(e -> actualizarResumen.run());
+
         body.add(new JLabel("Nombre Completo:"));
         body.add(txtNombre);
-        body.add(Box.createVerticalStrut(8));
+        body.add(Box.createVerticalStrut(6));
+
         body.add(new JLabel("RUN del cliente:"));
         body.add(txtRun);
-        body.add(Box.createVerticalStrut(8));
-        body.add(new JLabel("Direccion de entrega:"));
+        body.add(Box.createVerticalStrut(6));
+
+        body.add(new JLabel("Modalidad de entrega:"));
+        body.add(cmbModalidad);
+        body.add(Box.createVerticalStrut(6));
+
+        body.add(new JLabel("Nombre de quien recibe:"));
+        body.add(txtReceptor);
+        body.add(Box.createVerticalStrut(6));
+
+        body.add(new JLabel("Dirección de entrega (Curicó):"));
         body.add(txtDireccion);
-        body.add(Box.createVerticalStrut(8));
+        body.add(Box.createVerticalStrut(6));
+
+        body.add(new JLabel("Zona de reparto:"));
+        body.add(cmbZona);
+        body.add(Box.createVerticalStrut(6));
+
         body.add(new JLabel("N° Tarjeta:"));
         body.add(txtTarjeta);
-        body.add(Box.createVerticalStrut(20));
+        body.add(Box.createVerticalStrut(14));
+
+        body.add(lblSubtotal);
+        body.add(lblEnvio);
+        body.add(lblIva);
+        body.add(Box.createVerticalStrut(4));
+        body.add(totalTxt);
+        body.add(Box.createVerticalStrut(6));
+        body.add(lblFechaEstimada);
+        body.add(Box.createVerticalStrut(16));
+        actualizarResumen.run();
 
         JButton btnConfirmar = EstilosUI.roundedButton("PAGAR AHORA", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
         btnConfirmar.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnConfirmar.addActionListener(e -> {
             String nombre = txtNombre.getText().trim();
             String run = txtRun.getText().trim();
-            String direccion = txtDireccion.getText().trim();
+            String modalidad = (String) cmbModalidad.getSelectedItem();
+            boolean esRetiro = "Retiro en tienda".equals(modalidad);
 
-            if (nombre.isEmpty() || run.isEmpty() || direccion.isEmpty()) {
-                JOptionPane.showMessageDialog(dialog, "Complete todos los campos obligatorios.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            if (nombre.isEmpty() || run.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, "Complete su nombre y RUN.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
+            }
+
+            Despacho despachoElegido;
+
+            if (esRetiro) {
+                despachoElegido = new Despacho();
+            } else {
+                TarifaEnvio tarifa = (TarifaEnvio) cmbZona.getSelectedItem();
+                if (tarifa == null || Inventario.getInstancia().buscarTarifaPorZona(tarifa.getZona()) == null) {
+                    JOptionPane.showMessageDialog(dialog, "La zona seleccionada no existe en la tabla de tarifas.", "Zona inválida", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                String receptor = txtReceptor.getText().trim();
+                String calle = txtDireccion.getText().trim();
+                Direccion dir = new Direccion(receptor, calle, tarifa.getZona());
+
+                if (!dir.estaCompleta()) {
+                    JOptionPane.showMessageDialog(dialog, "Complete el nombre de quien recibe y la dirección en Curicó.", "Datos de despacho incompletos", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                double costoEnvio = Inventario.getInstancia().calcularCostoEnvio(false, tarifa.getZona());
+                despachoElegido = new Despacho(dir, costoEnvio, tarifa.getDiasHabiles());
             }
 
             boolean exito = Inventario.getInstancia().procesarCompra(run, nombre);
@@ -310,36 +443,49 @@ public class VistaCarrito extends JPanel {
                 String idCliente = Inventario.getInstancia().getIdClienteActual();
                 Pedido pedido = GestorPedidos.getInstancia().obtenerUltimoPedidoPorCliente(idCliente);
                 Compra ultimaCompra = Inventario.getInstancia().obtenerUltimaCompra();
-                if(ultimaCompra != null){
-                    if(red.Cliente.getInstancia() != null){
+
+                if (ultimaCompra != null) {
+                    if (red.Cliente.getInstancia() != null) {
                         red.Cliente.getInstancia().enviarDatos(0, "COMPRAR");
                     }
-                    String textoComprobante = ultimaCompra.generarComprobante();
-                    if (pedido !=null){
-                        textoComprobante += "\n\n==== SEGUIMIENTO DEL PEDIDO ====" + "\nPedido N° " + pedido.getNumeroPedido() + "\nEstado: " + pedido.getEstado();
-                    }
-                    JTextArea areaComprobante = new JTextArea(textoComprobante);
 
+                    String textoComprobante = ultimaCompra.generarComprobante();
+                    textoComprobante += "\n\n==== DATOS DE ENTREGA ====";
+                    textoComprobante += "\nModalidad: " + despachoElegido.getModalidadTexto();
+                    if (!despachoElegido.esRetiroEnTienda()) {
+                        textoComprobante += "\nDirección: " + despachoElegido.getDireccion().toString();
+                    }
+                    textoComprobante += "\nCosto envío: $" + (int) despachoElegido.getCostoEnvio();
+                    textoComprobante += "\nFecha estimada: " + despachoElegido.getFechaEstimada();
+
+                    if (pedido != null) {
+                        textoComprobante += "\n\n==== SEGUIMIENTO DEL PEDIDO ===="
+                                + "\nPedido N° " + pedido.getNumeroPedido()
+                                + "\nEstado: " + pedido.getEstado();
+                    }
+
+                    JTextArea areaComprobante = new JTextArea(textoComprobante);
                     areaComprobante.setEditable(false);
-                    areaComprobante.setFont(new Font ("Monospaced", Font.PLAIN, 14));
+                    areaComprobante.setFont(new Font("Monospaced", Font.PLAIN, 14));
                     areaComprobante.setBackground(Color.WHITE);
                     areaComprobante.setCaretPosition(0);
 
                     JScrollPane scrollComprobante = new JScrollPane(areaComprobante);
-                    scrollComprobante.setPreferredSize(new Dimension(450, 350));
-                    
+                    scrollComprobante.setPreferredSize(new Dimension(450, 380));
+
                     JOptionPane.showMessageDialog(dialog, scrollComprobante, "Comprobante de compra", JOptionPane.INFORMATION_MESSAGE);
                 }
+
                 actualizarCarrito();
                 dialog.dispose();
                 frame.mostrarVista("INICIO");
-
             } else {
                 JOptionPane.showMessageDialog(dialog, "Error al procesar el pago. Por favor revise su carrito.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
+
         body.add(btnConfirmar);
-        dialog.add(body, BorderLayout.CENTER);
+        dialog.add(new JScrollPane(body), BorderLayout.CENTER);
         dialog.setVisible(true);
     }
 }
