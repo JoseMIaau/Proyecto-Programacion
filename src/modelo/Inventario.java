@@ -526,6 +526,10 @@ public class Inventario {
         return true;
     }
     
+    public Pedido getUltimoPedidoCreado(){
+        return ultimoPedidoCreado;
+    }
+
     // --- METODOS DE HISTORIAL ---
     private void sincronizarHistoriales() {
         clientesRegistrados.clear();
@@ -771,4 +775,6 @@ public class Inventario {
         double iva = calcularIVAConEnvio(costoEnvio);
         return baseImponible + iva;
     }
+
+
 }
