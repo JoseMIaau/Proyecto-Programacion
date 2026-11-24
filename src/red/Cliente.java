@@ -16,6 +16,7 @@ public class Cliente {
     
     private Runnable onStockUpdateCallback;//Notificar a swing
     private java.util.function.Consumer<String> alRecibirMensaje;
+    private java.util.function.Consumer<String> alRecibirRespuestaIA;
 
     public Cliente(String host, int puerto) {
         this.host = host;
@@ -27,6 +28,7 @@ public class Cliente {
 
     public void setOnStockUpdateCallback(Runnable callback) { this.onStockUpdateCallback = callback; }
     public void setAlRecibirMensaje(java.util.function.Consumer<String> notificador) { this.alRecibirMensaje = notificador; }
+    public void setAlRecibirRespuestaIA(java.util.function.Consumer<String> notificador) { this.alRecibirRespuestaIA = notificador; }
 
     //Inicia un hilo secundario para escuchar mensajes del servidor sin que se congele la ventana.
     public void conectar() {
@@ -75,6 +77,18 @@ public class Cliente {
                                 javax.swing.JOptionPane.showMessageDialog(null, mensaje, "Carrito Expirado", javax.swing.JOptionPane.ERROR_MESSAGE);
                                 if (onStockUpdateCallback != null) onStockUpdateCallback.run();
                             });
+                        }
+                        else if (texto.startsWith("RESPUESTA_IA:")) {
+                            String resp = texto.substring(13);
+                            if (alRecibirRespuestaIA != null) {
+                                javax.swing.SwingUtilities.invokeLater(() -> alRecibirRespuestaIA.accept(resp));
+                            }
+                        }
+                        else if (texto.startsWith("ERROR_IA:")) {
+                            String err = texto.substring(9);
+                            if (alRecibirRespuestaIA != null) {
+                                javax.swing.SwingUtilities.invokeLater(() -> alRecibirRespuestaIA.accept("ERROR:" + err));
+                            }
                         }
 
 
