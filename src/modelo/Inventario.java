@@ -21,8 +21,11 @@ public class Inventario {
     // Historial y Clientes Mauri y Javi
     private GestorArchivo gestorClientes;
     private GestorArchivo gestorCompras;
+    private GestorArchivo gestorCupones;
     private final LinkedHashMap<String, ClienteRegistrado> clientesRegistrados = new LinkedHashMap<>();
     private final List<Compra> historialCompras = new ArrayList<>();
+    // cupones
+    private final HashMap<String, Cupon> cupones = new HashMap<>();
 
     private GestorArchivo gestorDeseos;
     private final java.util.Map<String, java.util.List<Integer>> deseosGuardados = new java.util.LinkedHashMap<>();
@@ -48,6 +51,11 @@ public class Inventario {
         this.gestorCompras = new GestorArchivo("compras.csv");
         this.gestorDeseos = new GestorArchivo("deseos.csv");
         this.deseosGuardados.putAll(gestorDeseos.cargarDeseos());
+        this.gestorCupones = new GestorArchivo("cupones.csv");
+
+        for (Cupon cupon : gestorCupones.cargarCupones()) {
+                cupones.put(cupon.getCodigo(), cupon);
+        }
 
         for (ClienteRegistrado cliente : gestorClientes.cargarClientes()) {
             clientesRegistrados.put(cliente.getRun(), cliente);
@@ -472,7 +480,8 @@ public class Inventario {
      * Finaliza la transaccion, crea la instancia de Venta para el historial
      * y limpia el carrito actual.
      */
-    public synchronized boolean procesarCompra(String run, String nombre) {
+    
+    public synchronized boolean procesarCompra(String run, String nombre, Cupon cupon) {
         Carrito c = getCarritoActual();
         if (c.estaVacio()) return false;
 
@@ -500,16 +509,38 @@ public class Inventario {
                 item.getSubtotal()
             ));
         }
-
+    
         String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
         int nuevoIdCompra = historialCompras.size() + 1;
-        Compra compra = new Compra(nuevoIdCompra, run, nombre, fecha, calcularSubtotal(), calcularIVA(), calcularTotalCarrito(), detalles);
+        
+        
+        double subtotal = calcularSubtotal();
+        //cambios para aplicar el cupon en el historial e internamente
+        double descuento = 0.0;
+
+        if (cupon != null) {
+            if (!cupon.esValido()) {
+                return false;
+            }
+
+            descuento = cupon.calcularDescuento(subtotal);
+        }
+
+        double subtotalFinal = subtotal - descuento;
+        double ivaFinal = subtotalFinal * 0.19;
+        double totalFinal = subtotalFinal + ivaFinal;
+    
+        if (cupon != null && !registrarUsoCupon(cupon.getCodigo())) {
+        return false;
+        }
+
+        Compra compra = new Compra(nuevoIdCompra,run,nombre,fecha,subtotalFinal,ivaFinal,totalFinal,detalles);
+        
         Pedido pedido = GestorPedidos.getInstancia().crearPedido(compra, idClienteActual);
         if (pedido == null){
             return false;
         }
         ultimoPedidoCreado = pedido;
-
         historialCompras.add(compra);
         gestorCompras.guardarCompras(historialCompras);
 
@@ -622,6 +653,81 @@ public class Inventario {
     public synchronized void limpiarCarritoLocal() {
         getCarritoActual().limpiar();
     }
+
+    // administracion de los cupones
+
+    // Registra un nuevo cupon
+    public boolean crearCupon(Cupon cupon) {
+        if (cupon == null) {
+            return false;
+        }
+
+        String codigo = cupon.getCodigo();
+
+        if (cupones.containsKey(codigo)) {
+            return false;
+        }
+
+        cupones.put(codigo, cupon);
+        gestorCupones.guardarCupones(cupones.values());
+        return true;
+    }
+
+    // Busca un cupon utilizando su codigo
+    public Cupon buscarCupon(String codigo) {
+        if (codigo == null || codigo.trim().isEmpty()) {
+            return null;
+        }
+
+        String codigoBuscado = codigo.trim().toUpperCase();
+
+        return cupones.get(codigoBuscado);
+    }
+
+    // Comprueba si un cupon existe y puede utilizarse
+    public boolean validarCupon(String codigo) {
+        Cupon cupon = buscarCupon(codigo);
+
+        if (cupon == null) {
+            return false;
+        }
+
+        return cupon.esValido();
+    }
+    
+    public boolean registrarUsoCupon(String codigo) {
+    Cupon cupon = buscarCupon(codigo);
+
+    if (cupon == null || !cupon.registrarUso()) {
+        return false;
+    }
+
+    gestorCupones.guardarCupones(cupones.values());
+    return true;
+    }
+
+    // Devuelve todos los cupones registrados
+    public List<Cupon> obtenerCupones() {
+        return new ArrayList<>(cupones.values());
+    }
+
+    // Elimina un cupon segun su codigo
+    public boolean eliminarCupon(String codigo) {
+    if (codigo == null) {
+        return false;
+    }
+
+    String codigoBuscado = codigo.trim().toUpperCase();
+
+    if (cupones.remove(codigoBuscado) != null) {
+        gestorCupones.guardarCupones(cupones.values());
+        return true;
+    }
+    
+    return false;
+}
+
+
 
 
     // --- METODOS LISTA DE DESEADOS) ---
