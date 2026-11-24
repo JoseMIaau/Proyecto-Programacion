@@ -14,7 +14,7 @@ public class GestorPedidos {
         gestorPedidos = new GestorArchivo("pedidos.csv");
 
         List<Compra> compras = Inventario.getInstancia().obtenerHistorialCompras();
-        //pedidos = gestorPedidos.cargarPedidos(compras);
+        pedidos = gestorPedidos.cargarPedidos(compras);
         
         actualizarSiguienteNumero();
     }
@@ -50,7 +50,7 @@ public class GestorPedidos {
 
         Pedido pedido = new Pedido(generarNumeroPedido(), compra, idCliente.trim());
         pedidos.add(pedido);
-        //gestorPedidos.guardarPedidos(pedidos);
+        gestorPedidos.guardarPedidos(pedidos);
         return pedido;
     }
     
@@ -91,7 +91,7 @@ public class GestorPedidos {
         
         boolean cambiado = pedido.cambiarEstado(nuevoEstado);
         if(cambiado){
-            //gestorPedidos.guardarPedidos(pedidos);
+            gestorPedidos.guardarPedidos(pedidos);
         }
         return cambiado;
     }

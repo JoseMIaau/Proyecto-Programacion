@@ -67,6 +67,12 @@ public class Cliente {
             } finally {
                 conectado = false;
                 out = null;
+                if (socket != null && !socket.isClosed()) {
+                    try {
+                        socket.close();
+                    } catch (IOException ignored) {}
+                }
+                socket = null;
                 if (motivoCierre != null) notificarConexion(motivoCierre);
             }
         }, "cliente-socket");

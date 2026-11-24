@@ -549,6 +549,10 @@ public class Inventario {
         if (!tieneClienteDeseosIdentificado()) identificarClienteDeseos(run); //para que no vuelva a poner si ya compro
         return true;
     }
+
+    public Pedido getUltimoPedidoCreado(){
+        return ultimoPedidoCreado;
+    }
     
     // --- METODOS DE HISTORIAL ---
     private void sincronizarHistoriales() {
