@@ -8,6 +8,7 @@ import modelo.DetalleCompra;
 import modelo.Admin;
 import modelo.Pedido;
 import modelo.EstadoPedido;
+import modelo.TarifaEnvio;
 import java.time.LocalDateTime;
 import modelo.Cupon;
 import java.io.BufferedReader;
@@ -413,6 +414,75 @@ public class GestorArchivo {
         }
 
         return cupones;
+    }
+
+    // --- TARIFAS DE ENVIO ---
+    public void guardarTarifas(List<TarifaEnvio> tarifas, double minimoEnvioGratis) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(rutaArchivo))) {
+            bw.write("MINIMO|" + minimoEnvioGratis);
+            bw.newLine();
+
+            for (TarifaEnvio t : tarifas) {
+                String linea = t.getZona() + "|"
+                        + t.getDescripcion() + "|"
+                        + t.getCosto() + "|"
+                        + t.getDiasHabiles();
+                bw.write(linea);
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error al guardar tarifas de envío: " + e.getMessage());
+        }
+    }
+
+    public double cargarMinimoEnvioGratis(double valorPorDefecto) {
+        File archivo = new File(rutaArchivo);
+        if (!archivo.exists()) {
+            return valorPorDefecto;
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
+            String primeraLinea = br.readLine();
+            if (primeraLinea != null && primeraLinea.startsWith("MINIMO|")) {
+                String[] partes = primeraLinea.split("\\|", -1);
+                if (partes.length >= 2) {
+                    return Double.parseDouble(partes[1].trim());
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Error al cargar mínimo de envío gratis: " + e.getMessage());
+        }
+
+        return valorPorDefecto;
+    }
+
+    public List<TarifaEnvio> cargarTarifas() {
+        List<TarifaEnvio> tarifas = new ArrayList<>();
+        File archivo = new File(rutaArchivo);
+        if (!archivo.exists()) {
+            return tarifas;
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                if (linea.trim().isEmpty() || linea.startsWith("MINIMO|")) {
+                    continue;
+                }
+                String[] p = linea.split("\\|", -1);
+                if (p.length >= 4) {
+                    int zona = Integer.parseInt(p[0].trim());
+                    String descripcion = p[1].trim();
+                    double costo = Double.parseDouble(p[2].trim());
+                    int dias = Integer.parseInt(p[3].trim());
+                    tarifas.add(new TarifaEnvio(zona, descripcion, costo, dias));
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Error al cargar tarifas de envío: " + e.getMessage());
+        }
+
+        return tarifas;
     }
 
 }
