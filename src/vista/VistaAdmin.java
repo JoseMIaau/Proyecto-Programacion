@@ -65,26 +65,27 @@ public class VistaAdmin extends JPanel {
         panelLateral.setLayout(new GridLayout(10, 1, 10, 10));
         panelLateral.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
 
-        btnAgregar = new JButton("Agregar Producto");
-        btnModificar = new JButton("Modificar Producto");
-        btnEliminar = new JButton("Eliminar Producto");
-        btnVaciarInventario = new JButton("Vaciar Inventario");
-        btnEstadisticas = new JButton("Estadísticas");
-        btnChat = new JButton("Chat de Soporte");
-        btnHistorial = new JButton("Gestion de Historial");
-        btnPedidos = new JButton("Gestionar Pedidos");
-        btnCarritosActivos = new JButton("Carritos Activos");
-        btnTarifas = new JButton("Configurar Envío");
+        btnAgregar = EstilosUI.roundedButton("Agregar Producto", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
+        btnModificar = EstilosUI.roundedButton("Modificar Producto", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
+        btnEstadisticas = EstilosUI.roundedButton("Estadísticas", EstilosUI.VERDE, Color.WHITE);
+        btnChat = EstilosUI.roundedButton("Chat de Soporte", EstilosUI.VERDE, Color.WHITE);
+        btnHistorial = EstilosUI.roundedButton("Gestión de Historial", EstilosUI.VERDE, Color.WHITE);
+        btnPedidos = EstilosUI.roundedButton("Gestionar Pedidos", EstilosUI.VERDE, Color.WHITE);
+        btnCarritosActivos = EstilosUI.roundedButton("Carritos Activos", EstilosUI.VERDE, Color.WHITE);
+        btnTarifas = EstilosUI.roundedButton("Configurar Envío", EstilosUI.VERDE, Color.WHITE);
+        btnEliminar = EstilosUI.roundedButton("Eliminar Producto", new Color(220, 53, 69), Color.WHITE);
+        btnVaciarInventario = EstilosUI.roundedButton("Vaciar Inventario", new Color(220, 53, 69), Color.WHITE);
+
         panelLateral.add(btnAgregar);
         panelLateral.add(btnModificar);
-        panelLateral.add(btnEliminar);
-        panelLateral.add(btnVaciarInventario);
         panelLateral.add(btnEstadisticas);
         panelLateral.add(btnChat);
         panelLateral.add(btnHistorial);
         panelLateral.add(btnPedidos);
         panelLateral.add(btnCarritosActivos);
         panelLateral.add(btnTarifas);
+        panelLateral.add(btnEliminar);
+        panelLateral.add(btnVaciarInventario);
 
 
     JSplitPane division = new JSplitPane(
