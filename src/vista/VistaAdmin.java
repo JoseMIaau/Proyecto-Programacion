@@ -9,6 +9,7 @@ import modelo.Producto;
 import modelo.Pedido;
 import modelo.GestorPedidos;
 import modelo.EstadoPedido;
+import modelo.TarifaEnvio;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -23,7 +24,7 @@ public class VistaAdmin extends JPanel {
     private JTable tablaProductos;
     private DefaultTableModel modeloTabla;
 
-    private JButton btnEliminar, btnAgregar, btnModificar, btnEstadisticas, btnVaciarInventario, btnChat, btnHistorial, btnPedidos, btnCarritosActivos;
+    private JButton btnEliminar, btnAgregar, btnModificar, btnEstadisticas, btnVaciarInventario, btnChat, btnHistorial, btnPedidos, btnCarritosActivos, btnTarifas;
 
     private red.Servidor servidor;
     private JDialog ventanaChat;
@@ -61,7 +62,7 @@ public class VistaAdmin extends JPanel {
         tablaProductos = new JTable(modeloTabla);
 
         JPanel panelLateral = new JPanel();
-        panelLateral.setLayout(new GridLayout(9, 1, 10, 10));
+        panelLateral.setLayout(new GridLayout(10, 1, 10, 10));
         panelLateral.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
 
         btnAgregar = new JButton("Agregar Producto");
@@ -73,6 +74,7 @@ public class VistaAdmin extends JPanel {
         btnHistorial = new JButton("Gestion de Historial");
         btnPedidos = new JButton("Gestionar Pedidos");
         btnCarritosActivos = new JButton("Carritos Activos");
+        btnTarifas = new JButton("Configurar Envío");
         panelLateral.add(btnAgregar);
         panelLateral.add(btnModificar);
         panelLateral.add(btnEliminar);
@@ -82,6 +84,7 @@ public class VistaAdmin extends JPanel {
         panelLateral.add(btnHistorial);
         panelLateral.add(btnPedidos);
         panelLateral.add(btnCarritosActivos);
+        panelLateral.add(btnTarifas);
 
 
     JSplitPane division = new JSplitPane(
@@ -113,6 +116,7 @@ public class VistaAdmin extends JPanel {
             }
 
         });
+        btnTarifas.addActionListener(e -> configurarTarifasEnvio());
     }
 
     // --- ACCIONES DE TABLA E INVENTARIO ---
@@ -525,6 +529,136 @@ public class VistaAdmin extends JPanel {
                 "Historial de Compras - " + cliente.getNombre(),
                 JOptionPane.INFORMATION_MESSAGE
         );
+    }
+
+    // --- TARIFAS DE ENVIO ---
+    private void configurarTarifasEnvio() {
+        String[] columnas = {"Zona", "Sector de Curicó", "Costo", "Días Hábiles"};
+
+        DefaultTableModel modeloTarifas = new DefaultTableModel(columnas, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        List<TarifaEnvio> tarifas = inventario.obtenerTarifasEnvio();
+        for (TarifaEnvio t : tarifas) {
+            modeloTarifas.addRow(new Object[]{
+                t.getZona(),
+                t.getDescripcion(),
+                (int) t.getCosto(),
+                t.getDiasHabiles()
+            });
+        }
+
+        JTable tablaTarifas = new JTable(modeloTarifas);
+        tablaTarifas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        JScrollPane scroll = new JScrollPane(tablaTarifas);
+        scroll.setPreferredSize(new Dimension(520, 180));
+
+        JTextField txtMinimoGratis = new JTextField(String.valueOf((int) inventario.getMinimoEnvioGratis()), 10);
+        JPanel panelMinimo = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        panelMinimo.add(new JLabel("Envío gratis en compras desde:"));
+        panelMinimo.add(txtMinimoGratis);
+
+        JPanel panelPrincipal = new JPanel(new BorderLayout(10, 10));
+        panelPrincipal.add(panelMinimo, BorderLayout.NORTH);
+        panelPrincipal.add(scroll, BorderLayout.CENTER);
+
+        Object[] opciones = {"Editar zona", "Guardar mínimo gratis", "cerrar"};
+
+        while (true) {
+            int opcion = JOptionPane.showOptionDialog(
+                    this,
+                    panelPrincipal,
+                    "Configuración de tarifas de envío - Curicó",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    opciones,
+                    opciones[0]
+            );
+
+            if (opcion == 2 || opcion == JOptionPane.CLOSED_OPTION) {
+                break;
+            }
+
+            if (opcion == 0) {
+                int fila = tablaTarifas.getSelectedRow();
+                if (fila == -1) {
+                    JOptionPane.showMessageDialog(this, "Seleccione una zona de la tabla para editar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                    continue;
+                }
+
+                int zona = Integer.parseInt(modeloTarifas.getValueAt(fila, 0).toString());
+                String descActual = modeloTarifas.getValueAt(fila, 1).toString();
+                String costoActual = modeloTarifas.getValueAt(fila, 2).toString();
+                String diasActual = modeloTarifas.getValueAt(fila, 3).toString();
+
+                JTextField txtDesc = new JTextField(descActual);
+                JTextField txtCosto = new JTextField(costoActual);
+                JTextField txtDias = new JTextField(diasActual);
+
+                JPanel panelEditar = new JPanel(new GridLayout(3, 2, 8, 8));
+                panelEditar.add(new JLabel("Descripción del sector:"));
+                panelEditar.add(txtDesc);
+                panelEditar.add(new JLabel("Nuevo costo:"));
+                panelEditar.add(txtCosto);
+                panelEditar.add(new JLabel("Días hábiles de entrega:"));
+                panelEditar.add(txtDias);
+
+                int confirmar = JOptionPane.showConfirmDialog(
+                        this,
+                        panelEditar,
+                        "Editar zona " + zona,
+                        JOptionPane.OK_CANCEL_OPTION,
+                        JOptionPane.PLAIN_MESSAGE
+                );
+
+                if (confirmar == JOptionPane.OK_OPTION) {
+                    try {
+                        String nuevaDesc = txtDesc.getText().trim();
+                        double nuevoCosto = Double.parseDouble(txtCosto.getText().trim());
+                        int nuevosDias = Integer.parseInt(txtDias.getText().trim());
+
+                        if (nuevaDesc.isEmpty()) {
+                            JOptionPane.showMessageDialog(this, "La descripción no puede estar vacía.", "Error", JOptionPane.ERROR_MESSAGE);
+                            continue;
+                        }
+                        if (nuevoCosto < 0 || nuevosDias < 0) {
+                            JOptionPane.showMessageDialog(this, "El costo y los días no pueden ser negativos.", "Error", JOptionPane.ERROR_MESSAGE);
+                            continue;
+                        }
+
+                        if (inventario.actualizarTarifaEnvio(zona, nuevaDesc, nuevoCosto, nuevosDias)) {
+                            modeloTarifas.setValueAt(nuevaDesc, fila, 1);
+                            modeloTarifas.setValueAt((int) nuevoCosto, fila, 2);
+                            modeloTarifas.setValueAt(nuevosDias, fila, 3);
+                            JOptionPane.showMessageDialog(this, "Tarifa de zona " + zona + " actualizada.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(this, "Ingrese números válidos para el costo y los días.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+
+            if (opcion == 1) {
+                try {
+                    double nuevoMinimo = Double.parseDouble(txtMinimoGratis.getText().trim());
+                    if (nuevoMinimo < 0) {
+                        JOptionPane.showMessageDialog(this, "El monto mínimo no puede ser negativo.", "Error", JOptionPane.ERROR_MESSAGE);
+                        continue;
+                    }
+                    if (inventario.setMinimoEnvioGratis(nuevoMinimo)) {
+                        JOptionPane.showMessageDialog(this, "Monto mínimo de envío gratis actualizado a " + EstilosUI.formatearCLP(nuevoMinimo) + ".", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this, "Ingrese un monto numérico válido.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
     }
 
 }

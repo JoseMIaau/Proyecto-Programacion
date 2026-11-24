@@ -32,7 +32,8 @@ public class Inventario {
     private Admin adminActual;
     private Pedido ultimoPedidoCreado;
 
-    private List<TarifaEnvio> tarifasEnvio;
+    private GestorArchivo gestorTarifas;
+    private List<TarifaEnvio> tarifasEnvio = new ArrayList<>();;
     private double minimoEnvioGratis = 60000.0;
     //Multicarrito
     private final HashMap<String, Carrito> carritosActivos = new HashMap<>();
@@ -49,6 +50,12 @@ public class Inventario {
         this.gestorDeseos = new GestorArchivo("deseos.csv");
         this.deseosGuardados.putAll(gestorDeseos.cargarDeseos());
 
+        this.gestorTarifas = new GestorArchivo("tarifas.csv");
+        this.minimoEnvioGratis = gestorTarifas.cargarMinimoEnvioGratis(60000.0);
+        this.tarifasEnvio.clear();
+        this.tarifasEnvio.addAll(gestorTarifas.cargarTarifas());
+        inicializarTarifasPorDefecto();
+
         for (ClienteRegistrado cliente : gestorClientes.cargarClientes()) {
             clientesRegistrados.put(cliente.getRun(), cliente);
         }
@@ -56,7 +63,6 @@ public class Inventario {
         this.adminActual = null;
         inicializarDatosDemoSiVacio();
         inicializarAdminPorDefecto();
-        inicializarTarifasPorDefecto();
     }
 
     public static synchronized Inventario getInstancia() {
@@ -118,6 +124,7 @@ public class Inventario {
             tarifasEnvio.add(new TarifaEnvio(2, "Sector Norte / Sarmiento", 990.0, 1));
             tarifasEnvio.add(new TarifaEnvio(3, "Sector Sur / Rauquén", 1190.0, 1));
             tarifasEnvio.add(new TarifaEnvio(4, "Sector Oriente / Los Niches", 1390.0, 2));
+            gestorTarifas.guardarTarifas(tarifasEnvio, minimoEnvioGratis);
         }
     }
 
@@ -714,6 +721,7 @@ public class Inventario {
         tarifa.setDescripcion(descripcion);
         tarifa.setCosto(nuevoCosto);
         tarifa.setDiasHabiles(nuevosDias);
+        gestorTarifas.guardarTarifas(tarifasEnvio, minimoEnvioGratis);
         return true;
     }
 
@@ -726,6 +734,7 @@ public class Inventario {
             return false;
         }
         this.minimoEnvioGratis = nuevoMinimo;
+        gestorTarifas.guardarTarifas(tarifasEnvio, minimoEnvioGratis);
         return true;
     }
 
