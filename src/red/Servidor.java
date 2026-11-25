@@ -2,6 +2,7 @@ package red;
 
 import modelo.Inventario;
 import modelo.Producto;
+import IA.GeminiAPIClient;
 import vista.BaseFrameAdmin;
 
 import java.io.*;
@@ -184,6 +185,8 @@ public class Servidor {
         private final String idCliente;
         private final Map<Integer, Integer> miCarrito = new HashMap<>();
         private final Set<Integer> listaDeseos = ConcurrentHashMap.newKeySet();
+        private final List<String[]> historialIA = new ArrayList<>();
+        private static final int MAX_HISTORIAL_IA = 10;
         public volatile long ultimoAcceso = System.currentTimeMillis();
         public volatile boolean avisoEnviado = false;
 
@@ -202,6 +205,36 @@ public class Servidor {
 
         public void agregarListaDeseos(int idProducto) { listaDeseos.add(idProducto); }
         public boolean deseaProducto(int idProducto) { return listaDeseos.contains(idProducto); }
+
+        private String construirInstruccionSistema() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Eres el asistente virtual de SuperCuricó, una tienda online de productos. ");
+            sb.append("Tu nombre es Asistente SuperCuricó. ");
+            sb.append("Responde de forma amigable, breve y útil. ");
+            sb.append("Si te preguntan por productos, usa SOLO los que están en el inventario actual. ");
+            sb.append("Los precios están en pesos chilenos (CLP). ");
+            sb.append("No inventes productos que no existan en el inventario. ");
+            sb.append("Si preguntan por algo que no vendes, dilo y sugiere alternativas del catálogo. ");
+            sb.append("Cuando recomiendes o menciones un producto, SIEMPRE incluye su ID en formato [ID:X] justo después del nombre. ");
+            sb.append("Por ejemplo: Plátano Granel [ID:1] a $1.290. Esto es OBLIGATORIO para cada producto que menciones. ");
+            sb.append("No uses comillas dobles en tus respuestas.\n\n");
+            sb.append("=== INVENTARIO ACTUAL ===\n");
+
+            List<Producto> productos = Inventario.getInstancia().leerProductos();
+            if (productos.isEmpty()) {
+                sb.append("(No hay productos disponibles)\n");
+            } else {
+                for (Producto p : productos) {
+                    sb.append("- ID:").append(p.getId())
+                    .append(" | ").append(p.getNombre())
+                    .append(" | Precio: $").append((int) p.getPrecio())
+                    .append(" | Stock disponible: ").append(p.getStock())
+                    .append(" | Categoría: ").append(p.getCategoria().name().replace("_", " "))
+                    .append("\n");
+                }
+            }
+            return sb.toString();
+        }
 
         public void renovarReserva() {
             this.ultimoAcceso = System.currentTimeMillis();
@@ -267,8 +300,35 @@ public class Servidor {
                     agregarListaDeseos(numero);
                     System.out.println("[SERVIDOR] " + idCliente + " suscrito a producto ID: " + numero);
 
+                } else if (texto.startsWith("CONSULTA_IA:")) {
+                    renovarReserva();
+                    String pregunta = texto.substring("CONSULTA_IA:".length());
+                    System.out.println("[SERVIDOR] " + idCliente + " pregunta a IA: " + pregunta);
+
+                    new Thread(() -> {
+                        try {
+                            String instruccion = construirInstruccionSistema();
+                            GeminiAPIClient gemini = new GeminiAPIClient();
+                            String respuesta;
+                            synchronized (historialIA) {
+                                respuesta = gemini.consultar(instruccion, historialIA, pregunta);
+                                historialIA.add(new String[]{"user", pregunta});
+                                historialIA.add(new String[]{"model", respuesta});
+                                while (historialIA.size() > MAX_HISTORIAL_IA * 2) {
+                                    historialIA.remove(0);
+                                    historialIA.remove(0);
+                                }
+                            }
+                            System.out.println("[SERVIDOR] Respuesta IA para " + idCliente + " lista.");
+                            enviar(Protocolo.createJsonData(0, "RESPUESTA_IA:" + respuesta));
+                        } catch (Exception ex) {
+                            System.err.println("[SERVIDOR] Error IA: " + ex.getMessage());
+                            enviar(Protocolo.createJsonData(0, "ERROR_IA:" + ex.getMessage()));
+                        }
+                    }).start();
+
                 } else if (texto.startsWith(Protocolo.AGREGAR)) {
-                    renovarReserva(); 
+                    renovarReserva();
                     int cant = (int) Double.parseDouble(texto.substring(Protocolo.AGREGAR.length()));
                     if (cant > 0) reservar(numero, cant);
                     else if (cant < 0) devolver(numero, -cant);
@@ -338,7 +398,7 @@ public class Servidor {
             } else {
                 System.err.println("[SERVIDOR] " + idCliente + " intento devolver producto " + idProducto + " que no tenia reservado.");
                 int stockReal = Inventario.getInstancia().obtenerStockDisponible(idProducto);
-                if (stockReal >= 0) enviar(Protocolo.createJsonData(idProducto, Protocolo.STOCK + stockReal)); 
+                if (stockReal >= 0) enviar(Protocolo.createJsonData(idProducto, Protocolo.STOCK + stockReal));
             }
         }
 

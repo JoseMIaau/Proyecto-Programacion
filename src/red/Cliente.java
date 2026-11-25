@@ -19,8 +19,9 @@ public class Cliente {
 
     private Runnable onStockUpdateCallback;
     private Consumer<String> alRecibirMensaje;
-    private Consumer<String> alCambiarConexion;           
-    private BiConsumer<String, String> mostradorAvisos = Cliente::avisoPorDefecto; 
+    private Consumer<String> alRecibirRespuestaIA;
+    private Consumer<String> alCambiarConexion;
+    private BiConsumer<String, String> mostradorAvisos = Cliente::avisoPorDefecto;
 
     public Cliente(String host, int puerto) {
         this.host = host;
@@ -32,6 +33,7 @@ public class Cliente {
 
     public void setOnStockUpdateCallback(Runnable callback) { this.onStockUpdateCallback = callback; }
     public void setAlRecibirMensaje(Consumer<String> notificador) { this.alRecibirMensaje = notificador; }
+    public void setAlRecibirRespuestaIA(Consumer<String> notificador) { this.alRecibirRespuestaIA = notificador; }
     public void setAlCambiarConexion(Consumer<String> listener) { this.alCambiarConexion = listener; }
     public void setMostradorAvisos(BiConsumer<String, String> mostrador) { this.mostradorAvisos = mostrador; }
 
@@ -56,7 +58,7 @@ public class Cliente {
                     try {
                         procesarLinea(line);
                     } catch (RuntimeException ex) {
-                        System.err.println("[!] mensaje ignorado (" + ex + "): " + line);//casos que mataban el hilo
+                        System.err.println("[!] mensaje ignorado (" + ex + "): " + line);
                     }
                 }
                 motivoCierre = "El servidor cerró la conexión.";
@@ -129,6 +131,18 @@ public class Cliente {
                     refrescarVistas();
                     mostradorAvisos.accept("Carrito Expirado", mensaje);
                 });
+
+            } else if (texto.startsWith("RESPUESTA_IA:")) {
+                String resp = texto.substring(13);
+                if (alRecibirRespuestaIA != null) {
+                    enEdt(() -> alRecibirRespuestaIA.accept(resp));
+                }
+
+            } else if (texto.startsWith("ERROR_IA:")) {
+                String err = texto.substring(9);
+                if (alRecibirRespuestaIA != null) {
+                    enEdt(() -> alRecibirRespuestaIA.accept("ERROR:" + err));
+                }
             }
 
         } else if (Protocolo.TYPE_MESSAGE.equals(type)) {
@@ -159,7 +173,6 @@ public class Cliente {
             System.out.println("[AVISO] " + titulo + ": " + mensaje);
         }
     }
-
 
     public boolean enviarDatos(int numero, String texto) {
         PrintWriter w = out;
