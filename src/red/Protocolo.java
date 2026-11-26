@@ -12,6 +12,10 @@ public class Protocolo {
     public static final String AGREGAR = "AGREGAR:";             // cliente -> servidor: +n reserva, -n devuelve
     public static final String COMPRAR = "COMPRAR";              // cliente -> servidor: pago confirmado
     public static final String AGREGAR_DESEO = "AGREGAR_DESEO:"; // cliente -> servidor: aviso de reposicion
+    public static final String CONSULTA_IA = "CONSULTA_IA:";     // cliente -> servidor: pregunta al asistente IA
+    public static final String RESPUESTA_IA = "RESPUESTA_IA:";   // servidor -> cliente: respuesta del asistente IA
+    public static final String ERROR_IA = "ERROR_IA:";           // servidor -> cliente: error del asistente IA
+    public static final String LIMPIAR_IA = "LIMPIAR_IA";        // cliente -> servidor: reinicia historial IA
     public static String createJsonMessage(String content) {
         return "{\"type\": \"message\", \"content\": \"" + escapeJson(content) + "\"}";
     }

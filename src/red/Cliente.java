@@ -18,7 +18,6 @@ public class Cliente {
     private volatile boolean conectado = false;
 
     private Runnable onStockUpdateCallback;
-    private Consumer<String> alRecibirMensaje;
     private Consumer<String> alRecibirRespuestaIA;
     private Consumer<String> alCambiarConexion;
     private BiConsumer<String, String> mostradorAvisos = Cliente::avisoPorDefecto;
@@ -32,7 +31,6 @@ public class Cliente {
     public static Cliente getInstancia() { return instancia; }
 
     public void setOnStockUpdateCallback(Runnable callback) { this.onStockUpdateCallback = callback; }
-    public void setAlRecibirMensaje(Consumer<String> notificador) { this.alRecibirMensaje = notificador; }
     public void setAlRecibirRespuestaIA(Consumer<String> notificador) { this.alRecibirRespuestaIA = notificador; }
     public void setAlCambiarConexion(Consumer<String> listener) { this.alCambiarConexion = listener; }
     public void setMostradorAvisos(BiConsumer<String, String> mostrador) { this.mostradorAvisos = mostrador; }
@@ -132,23 +130,17 @@ public class Cliente {
                     mostradorAvisos.accept("Carrito Expirado", mensaje);
                 });
 
-            } else if (texto.startsWith("RESPUESTA_IA:")) {
-                String resp = texto.substring(13);
+            } else if (texto.startsWith(Protocolo.RESPUESTA_IA)) {
+                String resp = texto.substring(Protocolo.RESPUESTA_IA.length());
                 if (alRecibirRespuestaIA != null) {
                     enEdt(() -> alRecibirRespuestaIA.accept(resp));
                 }
 
-            } else if (texto.startsWith("ERROR_IA:")) {
-                String err = texto.substring(9);
+            } else if (texto.startsWith(Protocolo.ERROR_IA)) {
+                String err = texto.substring(Protocolo.ERROR_IA.length());
                 if (alRecibirRespuestaIA != null) {
                     enEdt(() -> alRecibirRespuestaIA.accept("ERROR:" + err));
                 }
-            }
-
-        } else if (Protocolo.TYPE_MESSAGE.equals(type)) {
-            String contenido = Protocolo.extractJsonField(line, "content");
-            if (alRecibirMensaje != null && contenido != null) {
-                enEdt(() -> alRecibirMensaje.accept(contenido));
             }
         }
     }
@@ -178,13 +170,6 @@ public class Cliente {
         PrintWriter w = out;
         if (w == null) return false;
         w.println(Protocolo.createJsonData(numero, texto));
-        return !w.checkError();
-    }
-
-    public boolean enviarMensaje(String msg) {
-        PrintWriter w = out;
-        if (w == null) return false;
-        w.println(Protocolo.createJsonMessage(msg));
         return !w.checkError();
     }
 }

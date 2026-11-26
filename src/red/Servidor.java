@@ -22,7 +22,6 @@ public class Servidor {
     private ServerSocket serverSocket;
     private final BaseFrameAdmin frameAdmin;
     private int contadorClientes = 0;
-    private java.util.function.Consumer<String> alRecibirMensajeAdmin;
     private volatile boolean corriendo = false;
 
     // Reserva de carritos (configurables). Por defecto: expira a los 15 min y avisa 1 min antes.
@@ -168,10 +167,6 @@ public class Servidor {
         return new ArrayList<>(clientes);
     }
 
-    public void setAlRecibirMensajeAdmin(java.util.function.Consumer<String> notificador) {
-        this.alRecibirMensajeAdmin = notificador;
-    }
-
     private void refrescarAdmin() {
         if (frameAdmin != null) {
             SwingUtilities.invokeLater(() -> frameAdmin.refrescarTablaAdmin());
@@ -208,29 +203,30 @@ public class Servidor {
 
         private String construirInstruccionSistema() {
             StringBuilder sb = new StringBuilder();
-            sb.append("Eres el asistente virtual de SuperCuricó, una tienda online de productos. ");
+            sb.append("Eres el asistente virtual de SuperCuricó, un supermercado y tienda online especializada en abarrotes, ");
+            sb.append("frutas y verduras, lácteos, panadería, carnicería, bebidas y limpieza. ");
             sb.append("Tu nombre es Asistente SuperCuricó. ");
             sb.append("Responde de forma amigable, breve y útil. ");
-            sb.append("Si te preguntan por productos, usa SOLO los que están en el inventario actual. ");
+            sb.append("SOLO debes responder sobre los productos de la tienda SuperCuricó. ");
+            sb.append("Si te preguntan por temas ajenos a la tienda, indica amablemente que solo puedes ayudar con los productos del catálogo. ");
             sb.append("Los precios están en pesos chilenos (CLP). ");
             sb.append("No inventes productos que no existan en el inventario. ");
-            sb.append("Si preguntan por algo que no vendes, dilo y sugiere alternativas del catálogo. ");
-            sb.append("Cuando recomiendes o menciones un producto, SIEMPRE incluye su ID en formato [ID:X] justo después del nombre. ");
-            sb.append("Por ejemplo: Plátano Granel [ID:1] a $1.290. Esto es OBLIGATORIO para cada producto que menciones. ");
-            sb.append("No uses comillas dobles en tus respuestas.\n\n");
-            sb.append("=== INVENTARIO ACTUAL ===\n");
+            sb.append("Si preguntan por un producto que no vendemos, indica que no lo comercializamos y sugiere alternativas del catálogo. ");
+            sb.append("Cuando recomiendes o menciones un producto existente, SIEMPRE incluye su ID en formato [ID:X] justo después del nombre ");
+            sb.append("(por ejemplo: Plátano Granel (kg) [ID:1] a $1.290). Esto es OBLIGATORIO para habilitar el botón de agregar al carrito.\n\n");
+            sb.append("=== CATÁLOGO VIGENTE DE LA TIENDA ===\n");
 
             List<Producto> productos = Inventario.getInstancia().leerProductos();
             if (productos.isEmpty()) {
-                sb.append("(No hay productos disponibles)\n");
+                sb.append("(No hay productos disponibles en este momento)\n");
             } else {
                 for (Producto p : productos) {
                     sb.append("- ID:").append(p.getId())
-                    .append(" | ").append(p.getNombre())
-                    .append(" | Precio: $").append((int) p.getPrecio())
-                    .append(" | Stock disponible: ").append(p.getStock())
-                    .append(" | Categoría: ").append(p.getCategoria().name().replace("_", " "))
-                    .append("\n");
+                      .append(" | Nombre: ").append(p.getNombre())
+                      .append(" | Categoría: ").append(p.getCategoria().name().replace("_", " "))
+                      .append(" | Precio: $").append((int) p.getPrecio())
+                      .append(" | Stock disponible: ").append(p.getStock())
+                      .append("\n");
                 }
             }
             return sb.toString();
@@ -300,9 +296,9 @@ public class Servidor {
                     agregarListaDeseos(numero);
                     System.out.println("[SERVIDOR] " + idCliente + " suscrito a producto ID: " + numero);
 
-                } else if (texto.startsWith("CONSULTA_IA:")) {
+                } else if (texto.startsWith(Protocolo.CONSULTA_IA)) {
                     renovarReserva();
-                    String pregunta = texto.substring("CONSULTA_IA:".length());
+                    String pregunta = texto.substring(Protocolo.CONSULTA_IA.length());
                     System.out.println("[SERVIDOR] " + idCliente + " pregunta a IA: " + pregunta);
 
                     new Thread(() -> {
@@ -320,12 +316,18 @@ public class Servidor {
                                 }
                             }
                             System.out.println("[SERVIDOR] Respuesta IA para " + idCliente + " lista.");
-                            enviar(Protocolo.createJsonData(0, "RESPUESTA_IA:" + respuesta));
+                            enviar(Protocolo.createJsonData(0, Protocolo.RESPUESTA_IA + respuesta));
                         } catch (Exception ex) {
                             System.err.println("[SERVIDOR] Error IA: " + ex.getMessage());
-                            enviar(Protocolo.createJsonData(0, "ERROR_IA:" + ex.getMessage()));
+                            enviar(Protocolo.createJsonData(0, Protocolo.ERROR_IA + ex.getMessage()));
                         }
-                    }).start();
+                    }, "gemini-worker-" + idCliente).start();
+
+                } else if (texto.equals(Protocolo.LIMPIAR_IA)) {
+                    synchronized (historialIA) {
+                        historialIA.clear();
+                    }
+                    System.out.println("[SERVIDOR] Historial IA reiniciado para " + idCliente);
 
                 } else if (texto.startsWith(Protocolo.AGREGAR)) {
                     renovarReserva();
@@ -354,11 +356,6 @@ public class Servidor {
                     } catch (NumberFormatException ex) {
                         enviar(Protocolo.createJsonMessage("SISTEMA: Error. Usa el formato '!deseo ID' (Ej: !deseo 2)"));
                     }
-                    return;
-                }
-
-                if (alRecibirMensajeAdmin != null) {
-                    SwingUtilities.invokeLater(() -> alRecibirMensajeAdmin.accept(idCliente + " : " + content));
                 }
             }
         }
