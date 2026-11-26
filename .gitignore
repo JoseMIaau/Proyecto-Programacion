@@ -1,7 +1,10 @@
 *.class
 *.jar
 .vscode/
+.env
+config.properties
 bin/
+out/
 build/
 !AplicacionCliente.jar
 !ServidorAdmin.jar
