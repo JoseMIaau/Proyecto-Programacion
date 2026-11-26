@@ -37,13 +37,15 @@ public class VistaListaDeseados extends JPanel {
 
         JButton btnIdentificar = EstilosUI.roundedButton("Identificar RUN", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
         btnIdentificar.addActionListener(e -> pedirIdentificacion());
-        header.add(btnIdentificar, BorderLayout.EAST);
 
         JButton carro = EstilosUI.iconButton("🛒");
         carro.addActionListener(e -> frame.mostrarVista("CARRO"));
-        header.add(carro, BorderLayout.EAST);
-
-        add(header, BorderLayout.NORTH);
+        
+        JPanel panelDerecho = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        panelDerecho.setOpaque(false);
+        panelDerecho.add(btnIdentificar);
+        panelDerecho.add(carro);
+        header.add(panelDerecho, BorderLayout.EAST);
 
         // Barra sub-header con el RUN/usuario activo
         JPanel subHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 8));

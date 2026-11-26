@@ -273,36 +273,41 @@ public class GestorArchivo {
         }
         return mapa;
     }
+
     // --- PEDIDOS ---
-    public void guardarPedidos(Collection<Pedido> pedidos){
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(rutaArchivo))){
-            for (Pedido pedido : pedidos){
-                String linea = pedido.getNumeroPedido() + "|" + pedido.getCompra().getidCompra() + "|" + pedido.getIdCliente() + "|" + pedido.getEstado().name() + "|" + pedido.getFechaCreacion();
+    public void guardarPedidos(Collection<Pedido> pedidos) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(rutaArchivo))) {
+            for (Pedido pedido : pedidos) {
+                String linea = pedido.getNumeroPedido() + "|"
+                        + pedido.getCompra().getidCompra() + "|"
+                        + pedido.getIdCliente() + "|"
+                        + pedido.getEstado().name() + "|"
+                        + pedido.getFechaCreacion();
 
                 bw.write(linea);
                 bw.newLine();
             }
-        } catch (IOException e){
+        } catch (IOException e) {
             System.err.println("Error al guardar pedidos: " + e.getMessage());
         }
     }
 
-    public List<Pedido> cargarPedidos(List<Compra> compras){
+    public List<Pedido> cargarPedidos(List<Compra> compras) {
         List<Pedido> pedidos = new ArrayList<>();
         File archivo = new File(rutaArchivo);
 
-        if (!archivo.exists()){
+        if (!archivo.exists()) {
             return pedidos;
         }
 
-        try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))){
+        try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
             String linea;
-            while ((linea = br.readLine()) != null){
-                if (linea.trim().isEmpty()){
+            while ((linea = br.readLine()) != null) {
+                if (linea.trim().isEmpty()) {
                     continue;
                 }
                 String[] datos = linea.split("\\|", -1);
-                if (datos.length != 5){
+                if (datos.length != 5) {
                     continue;
                 }
                 try {
@@ -310,38 +315,32 @@ public class GestorArchivo {
                     int idCompra = Integer.parseInt(datos[1].trim());
                     String idCliente = datos[2].trim();
                     EstadoPedido estado = EstadoPedido.valueOf(datos[3].trim());
-                    LocalDateTime fechaCreacion =LocalDateTime.parse(datos[4].trim());
+                    LocalDateTime fechaCreacion = LocalDateTime.parse(datos[4].trim());
 
                     Compra compraEncontrada = null;
-                    
-                    for (Compra compra : compras){
-                        if (compra.getidCompra() == idCompra){
+                    for (Compra compra : compras) {
+                        if (compra.getidCompra() == idCompra) {
                             compraEncontrada = compra;
                             break;
                         }
                     }
-                    if (compraEncontrada != null){
+                    if (compraEncontrada != null) {
                         Pedido pedido = new Pedido(numeroPedido, compraEncontrada, idCliente, estado, fechaCreacion);
                         pedidos.add(pedido);
                     }
-                } catch (IllegalArgumentException e){
+                } catch (IllegalArgumentException e) {
                     System.err.println("Pedido inválido: " + linea);
                 }
             }
-        } catch (IOException e){
-            System.err.println("Error al cargar pedidos:" + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error al cargar pedidos: " + e.getMessage());
         }
         return pedidos;
     }
 
-
- // CUPONES
-
-    // guardar los cupones
-
+    // --- CUPONES ---
     public void guardarCupones(Collection<Cupon> cupones) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(rutaArchivo))) {
-
             for (Cupon cupon : cupones) {
                 String linea = cupon.getCodigo() + separador
                         + cupon.getTipo().name() + separador
@@ -353,13 +352,10 @@ public class GestorArchivo {
                 bw.write(linea);
                 bw.newLine();
             }
-
         } catch (IOException e) {
             System.err.println("Error al guardar cupones: " + e.getMessage());
         }
     }
-
-    // cargar cupones
 
     public List<Cupon> cargarCupones() {
         List<Cupon> cupones = new ArrayList<>();
@@ -371,7 +367,6 @@ public class GestorArchivo {
 
         try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
             String linea;
-
             while ((linea = br.readLine()) != null) {
                 if (linea.trim().isEmpty()) {
                     continue;
@@ -379,36 +374,24 @@ public class GestorArchivo {
 
                 try {
                     String[] datos = linea.split(separador, -1);
-
                     if (datos.length != 6) {
                         continue;
                     }
 
                     String codigo = datos[0].trim();
-
-                    Cupon.TipoDescuento tipo =
-                            Cupon.TipoDescuento.valueOf(datos[1].trim());
-
+                    Cupon.TipoDescuento tipo = Cupon.TipoDescuento.valueOf(datos[1].trim());
                     double valor = Double.parseDouble(datos[2].trim());
-
-                    LocalDate fechaVencimiento =
-                            LocalDate.parse(datos[3].trim());
-
+                    LocalDate fechaVencimiento = LocalDate.parse(datos[3].trim());
                     int usosMaximos = Integer.parseInt(datos[4].trim());
                     int usosRealizados = Integer.parseInt(datos[5].trim());
 
-                    Cupon cupon = new Cupon(
-                            codigo, tipo, valor, fechaVencimiento, usosMaximos
-                    );
-
+                    Cupon cupon = new Cupon(codigo, tipo, valor, fechaVencimiento, usosMaximos);
                     cupon.setUsosRealizados(usosRealizados);
                     cupones.add(cupon);
-
                 } catch (IllegalArgumentException e) {
                     System.err.println("Cupon invalido: " + e.getMessage());
                 }
             }
-
         } catch (IOException e) {
             System.err.println("Error al cargar cupones: " + e.getMessage());
         }
@@ -484,5 +467,4 @@ public class GestorArchivo {
 
         return tarifas;
     }
-
 }

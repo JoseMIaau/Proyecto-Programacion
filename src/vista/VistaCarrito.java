@@ -8,6 +8,7 @@ import modelo.Pedido;
 import modelo.Despacho;
 import modelo.Direccion;
 import modelo.TarifaEnvio;
+import modelo.Cupon;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -263,7 +264,7 @@ public class VistaCarrito extends JPanel {
 
     private void showCheckoutDialog() {
         JDialog dialog = new JDialog(frame, "Finalizar Pago", true);
-        dialog.setSize(480, 420);
+        dialog.setSize(480, 680);
         dialog.setLocationRelativeTo(frame);
         dialog.setLayout(new BorderLayout());
 
@@ -271,11 +272,12 @@ public class VistaCarrito extends JPanel {
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
         body.setBorder(new EmptyBorder(20, 30, 20, 30));
 
-        //Datos cliente
+        // Datos del cliente
         JTextField txtNombre = new JTextField();
         JTextField txtRun = new JTextField();
+
         Inventario inv = Inventario.getInstancia();
-        if (inv.tieneClienteDeseosIdentificado()) {//auto completa datos en caso de tener su rut y nombre
+        if (inv.tieneClienteDeseosIdentificado()) {
             String runGuardado = inv.getListaDeseosActual().getIdentificadorCliente();
             if (!runGuardado.equalsIgnoreCase("INVITADO")) {
                 txtRun.setText(runGuardado);
@@ -285,40 +287,39 @@ public class VistaCarrito extends JPanel {
                 }
             }
         }
+
+        // Cupón de descuento
         JTextField txtCupon = new JTextField();
-        JTextField txtTarjeta = new JTextField();
+        Cupon[] cuponAplicado = new Cupon[1];
 
-         body.add(new JLabel("Código de cupón:"));
-        body.add(txtCupon);
-        body.add(Box.createVerticalStrut(8));
-        //Boton para aplicar el cupon
         JButton btnAplicarCupon = EstilosUI.roundedButton(
-            "Aplicar cupón",
-            EstilosUI.VERDE_CLARO,
-            EstilosUI.VERDE
-         );
-
+                "Aplicar cupón",
+                EstilosUI.VERDE_CLARO,
+                EstilosUI.VERDE
+        );
         btnAplicarCupon.setAlignmentX(Component.CENTER_ALIGNMENT);
-        body.add(btnAplicarCupon);
-        body.add(Box.createVerticalStrut(15));
-        btnAplicarCupon.addActionListener(e -> aplicarCupon(txtCupon, dialog));
 
-
+        // Despacho a domicilio
         String[] modalidades = {"Retiro en tienda", "Despacho a domicilio"};
         JComboBox<String> cmbModalidad = new JComboBox<>(modalidades);
 
-        //despacho a domicilio
         JTextField txtReceptor = new JTextField();
         JTextField txtDireccion = new JTextField();
         JComboBox<TarifaEnvio> cmbZona = new JComboBox<>();
 
-        List<TarifaEnvio> tarifas = Inventario.getInstancia().obtenerTarifasEnvio();
+        List<TarifaEnvio> tarifas = inv.obtenerTarifasEnvio();
         for (TarifaEnvio t : tarifas) {
             cmbZona.addItem(t);
         }
 
+        JTextField txtTarjeta = new JTextField();
+
+        // Resumen
         JLabel lblSubtotal = new JLabel("Subtotal productos: $0");
         lblSubtotal.setFont(EstilosUI.FONT_NORMAL);
+
+        JLabel lblDescuento = new JLabel("Descuento cupón: $0");
+        lblDescuento.setFont(EstilosUI.FONT_NORMAL);
 
         JLabel lblEnvio = new JLabel("Costo de envío: $0");
         lblEnvio.setFont(EstilosUI.FONT_NORMAL);
@@ -342,6 +343,15 @@ public class VistaCarrito extends JPanel {
             cmbZona.setEnabled(!esRetiro);
 
             double subtotal = inv.calcularSubtotalProductos();
+            double descuento = 0.0;
+
+            if (cuponAplicado[0] != null && cuponAplicado[0].esValido()) {
+                descuento = cuponAplicado[0].calcularDescuento(subtotal);
+                lblDescuento.setText("Descuento cupón (" + cuponAplicado[0].getCodigo() + "): -$" + (int) descuento);
+            } else {
+                lblDescuento.setText("Descuento cupón: $0");
+            }
+
             double costoEnvio = 0.0;
             String fechaTexto = "";
 
@@ -367,8 +377,9 @@ public class VistaCarrito extends JPanel {
                 }
             }
 
-            double iva = inv.calcularIVAConEnvio(costoEnvio);
-            double total = inv.calcularTotalConEnvio(costoEnvio);
+            double baseImponible = (subtotal - descuento) + costoEnvio;
+            double iva = baseImponible * 0.19;
+            double total = baseImponible + iva;
 
             lblSubtotal.setText("Subtotal productos: $" + (int) subtotal);
             lblIva.setText("IVA (19%): $" + (int) iva);
@@ -376,10 +387,31 @@ public class VistaCarrito extends JPanel {
             lblFechaEstimada.setText("Entrega estimada: " + fechaTexto);
         };
 
+        // Listeners
+        btnAplicarCupon.addActionListener(e -> {
+            String codigo = txtCupon.getText().trim();
+            if (codigo.isEmpty()) {
+                cuponAplicado[0] = null;
+                actualizarResumen.run();
+                JOptionPane.showMessageDialog(dialog, "Ingrese un código de cupón.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            Cupon encontrado = inv.buscarCupon(codigo);
+            if (encontrado == null || !encontrado.esValido()) {
+                cuponAplicado[0] = null;
+                actualizarResumen.run();
+                JOptionPane.showMessageDialog(dialog, "El cupón no existe, está vencido o no tiene usos disponibles.", "Cupón inválido", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            cuponAplicado[0] = encontrado;
+            actualizarResumen.run();
+            JOptionPane.showMessageDialog(dialog, "Cupón '" + encontrado.getCodigo() + "' aplicado.", "Cupón válido", JOptionPane.INFORMATION_MESSAGE);
+        });
+
         cmbModalidad.addActionListener(e -> actualizarResumen.run());
         cmbZona.addActionListener(e -> actualizarResumen.run());
-
-
 
         body.add(new JLabel("Nombre Completo:"));
         body.add(txtNombre);
@@ -388,6 +420,12 @@ public class VistaCarrito extends JPanel {
         body.add(new JLabel("RUN del cliente:"));
         body.add(txtRun);
         body.add(Box.createVerticalStrut(6));
+
+        body.add(new JLabel("Código de cupón (opcional):"));
+        body.add(txtCupon);
+        body.add(Box.createVerticalStrut(6));
+        body.add(btnAplicarCupon);
+        body.add(Box.createVerticalStrut(10));
 
         body.add(new JLabel("Modalidad de entrega:"));
         body.add(cmbModalidad);
@@ -410,6 +448,7 @@ public class VistaCarrito extends JPanel {
         body.add(Box.createVerticalStrut(14));
 
         body.add(lblSubtotal);
+        body.add(lblDescuento);
         body.add(lblEnvio);
         body.add(lblIva);
         body.add(Box.createVerticalStrut(4));
@@ -417,6 +456,7 @@ public class VistaCarrito extends JPanel {
         body.add(Box.createVerticalStrut(6));
         body.add(lblFechaEstimada);
         body.add(Box.createVerticalStrut(16));
+
         actualizarResumen.run();
 
         JButton btnConfirmar = EstilosUI.roundedButton("PAGAR AHORA", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
@@ -438,7 +478,7 @@ public class VistaCarrito extends JPanel {
                 despachoElegido = new Despacho();
             } else {
                 TarifaEnvio tarifa = (TarifaEnvio) cmbZona.getSelectedItem();
-                if (tarifa == null || Inventario.getInstancia().buscarTarifaPorZona(tarifa.getZona()) == null) {
+                if (tarifa == null || inv.buscarTarifaPorZona(tarifa.getZona()) == null) {
                     JOptionPane.showMessageDialog(dialog, "La zona seleccionada no existe en la tabla de tarifas.", "Zona inválida", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
@@ -452,16 +492,16 @@ public class VistaCarrito extends JPanel {
                     return;
                 }
 
-                double costoEnvio = Inventario.getInstancia().calcularCostoEnvio(false, tarifa.getZona());
+                double costoEnvio = inv.calcularCostoEnvio(false, tarifa.getZona());
                 despachoElegido = new Despacho(dir, costoEnvio, tarifa.getDiasHabiles());
             }
 
-            boolean exito = Inventario.getInstancia().procesarCompra(run, nombre);
+            boolean exito = inv.procesarCompra(run, nombre, cuponAplicado[0]);
 
             if (exito) {
-                String idCliente = Inventario.getInstancia().getIdClienteActual();
+                String idCliente = inv.getIdClienteActual();
                 Pedido pedido = GestorPedidos.getInstancia().obtenerUltimoPedidoPorCliente(idCliente);
-                Compra ultimaCompra = Inventario.getInstancia().obtenerUltimaCompra();
+                Compra ultimaCompra = inv.obtenerUltimaCompra();
 
                 if (ultimaCompra != null) {
                     if (red.Cliente.getInstancia() != null) {
@@ -469,6 +509,9 @@ public class VistaCarrito extends JPanel {
                     }
 
                     String textoComprobante = ultimaCompra.generarComprobante();
+                    if (cuponAplicado[0] != null) {
+                        textoComprobante += "\nCupón aplicado: " + cuponAplicado[0].getCodigo();
+                    }
                     textoComprobante += "\n\n==== DATOS DE ENTREGA ====";
                     textoComprobante += "\nModalidad: " + despachoElegido.getModalidadTexto();
                     if (!despachoElegido.esRetiroEnTienda()) {
@@ -498,14 +541,14 @@ public class VistaCarrito extends JPanel {
                 actualizarCarrito();
                 dialog.dispose();
                 frame.mostrarVista("INICIO");
-
             } else {
-                JOptionPane.showMessageDialog(dialog, "Error al procesar el pago. Por favor revise su carrito.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, "Error al procesar el pago. Por favor revise su carrito o el cupón.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
         body.add(btnConfirmar);
         dialog.add(new JScrollPane(body), BorderLayout.CENTER);
         dialog.setVisible(true);
+                
     }
 }
