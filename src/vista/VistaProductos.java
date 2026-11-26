@@ -32,6 +32,7 @@ public class VistaProductos extends JPanel {
         headerTitle = new JLabel("Catálogo de Productos");
 
         add(createHeader(), BorderLayout.NORTH);
+        add(createPanelFiltro(), BorderLayout.WEST);
 
         grid = new JPanel(new GridLayout(0, 4, 20, 20));
         grid.setBackground(EstilosUI.FONDO);
@@ -94,6 +95,40 @@ public class VistaProductos extends JPanel {
             JOptionPane.showMessageDialog(this, "Ingrese precios válidos.");
         }
     }
+
+    private JPanel createPanelFiltro() {
+    JPanel panel = new JPanel();
+    panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+    panel.setBackground(EstilosUI.FONDO);
+    panel.setPreferredSize(new Dimension(180, 0));
+    panel.setBorder(new EmptyBorder(25, 15, 25, 15));
+    JLabel titulo = new JLabel("Filtros");
+    titulo.setFont(EstilosUI.FONT_BOLD);
+    JLabel lblDesde = new JLabel("Desde $");
+    JLabel lblHasta = new JLabel("Hasta $");
+    precioMin.setMaximumSize(new Dimension(150, 30));
+    precioMax.setMaximumSize(new Dimension(150, 30));
+    JButton btnFiltrar = EstilosUI.roundedButton("Filtrar", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
+    btnFiltrar.addActionListener(e -> filtrarPorPrecio());
+    
+    titulo.setAlignmentX(Component.LEFT_ALIGNMENT);
+    lblDesde.setAlignmentX(Component.LEFT_ALIGNMENT);
+    lblHasta.setAlignmentX(Component.LEFT_ALIGNMENT);
+    precioMin.setAlignmentX(Component.LEFT_ALIGNMENT);
+    precioMax.setAlignmentX(Component.LEFT_ALIGNMENT);
+    btnFiltrar.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+    panel.add(titulo);
+    panel.add(Box.createVerticalStrut(20));
+    panel.add(lblDesde);
+    panel.add(precioMin);
+    panel.add(Box.createVerticalStrut(10));
+    panel.add(lblHasta);
+    panel.add(precioMax);
+    panel.add(Box.createVerticalStrut(15));
+    panel.add(btnFiltrar);
+    return panel;
+}
         
     private void renderizarLista(List<Producto> lista) {
         grid.removeAll();
@@ -178,24 +213,6 @@ public class VistaProductos extends JPanel {
         JPanel centro = new JPanel(new BorderLayout());
         centro.setOpaque(false);
         centro.add(searchField, BorderLayout.CENTER);
-
-        // Filtro precios
-        JPanel filtros = new JPanel(new FlowLayout());
-        filtros.setOpaque(false);
-        JLabel lblDesde = new JLabel("Desde $");
-        lblDesde.setForeground(Color.WHITE);
-        JLabel lblHasta = new JLabel("Hasta $");
-        lblHasta.setForeground(Color.WHITE);
-        JButton btnFiltrar = new JButton("Filtrar");
-        btnFiltrar.addActionListener(e -> filtrarPorPrecio());
-
-        filtros.add(lblDesde);
-        filtros.add(precioMin);
-        filtros.add(lblHasta);
-        filtros.add(precioMax);
-        filtros.add(btnFiltrar);
-        centro.add(filtros, BorderLayout.SOUTH);
-
         header.add(centro, BorderLayout.CENTER);
 
         // Carrito y deseados
@@ -224,18 +241,26 @@ public class VistaProductos extends JPanel {
         card.setBorder(new CompoundBorder(new LineBorder(new Color(230, 230, 230), 1, true), new EmptyBorder(12, 12, 12, 12)));
 
         JPanel boxColor = new JPanel(new BorderLayout());
-        boxColor.setBackground(EstilosUI.getColorPorCategoria(prod.getCategoria()));
+        boxColor.setBackground(Color.WHITE);
         boxColor.setMaximumSize(new Dimension(140, 80));
         boxColor.setPreferredSize(new Dimension(140, 80));
+        boxColor.setMinimumSize(new Dimension(140, 80));
         boxColor.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         String ruta = prod.getRutaImagen();
+
         if (ruta != null && !ruta.isEmpty()) {
             ImageIcon icono = new ImageIcon(ruta);
-            if (icono.getIconWidth() > 0) {
-                Image imagen = icono.getImage().getScaledInstance(140, 80, Image.SCALE_SMOOTH);
+            if (icono.getIconWidth() > 0 && icono.getIconHeight() > 0) {
+                int anchoOriginal = icono.getIconWidth();
+                int altoOriginal = icono.getIconHeight();
+                double escala = Math.min(140.0 / anchoOriginal, 80.0 / altoOriginal);
+                int ancho = Math.max(1, (int) (anchoOriginal * escala));
+                int alto = Math.max(1, (int) (altoOriginal * escala));
+                Image imagen = icono.getImage().getScaledInstance(ancho, alto, Image.SCALE_SMOOTH);
                 JLabel lblImagen = new JLabel(new ImageIcon(imagen));
                 lblImagen.setHorizontalAlignment(SwingConstants.CENTER);
+                lblImagen.setVerticalAlignment(SwingConstants.CENTER);
                 boxColor.add(lblImagen, BorderLayout.CENTER);
             }
         }
