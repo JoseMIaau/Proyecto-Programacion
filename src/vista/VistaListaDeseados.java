@@ -47,6 +47,8 @@ public class VistaListaDeseados extends JPanel {
         panelDerecho.add(carro);
         header.add(panelDerecho, BorderLayout.EAST);
 
+        add(header, BorderLayout.NORTH);
+
         // Barra sub-header con el RUN/usuario activo
         JPanel subHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 8));
         subHeader.setBackground(new Color(245, 248, 245));
