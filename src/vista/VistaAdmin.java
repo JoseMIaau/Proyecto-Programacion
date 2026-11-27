@@ -618,146 +618,219 @@ public class VistaAdmin extends JPanel {
 
     // muestra la ventana de administracion de cupones
     
-    private void mostrarGestionCupones() {
+   
+private void mostrarGestionCupones() {
 
-        JTextField txtCodigo = new JTextField();
-        JComboBox<String> cmbTipo = new JComboBox<>(
-            new String[]{"PORCENTAJE", "MONTO_FIJO"}
+    JTextField txtCodigo = new JTextField();
+    JComboBox<String> cmbTipo = new JComboBox<>(
+        new String[]{"PORCENTAJE", "MONTO_FIJO"}
+    );
+    JTextField txtValor = new JTextField();
+    JTextField txtVencimiento = new JTextField("Ejemplo: 31/12/2027");
+    JTextField txtUsosMaximos = new JTextField();
+
+    JPanel panel = new JPanel(new BorderLayout(10, 10));
+    JPanel panelFormulario = new JPanel(new GridLayout(5, 2, 10, 10));
+
+    panelFormulario.add(new JLabel("Código del cupón:"));
+    panelFormulario.add(txtCodigo);
+
+    panelFormulario.add(new JLabel("Tipo de descuento:"));
+    panelFormulario.add(cmbTipo);
+
+    panelFormulario.add(new JLabel("Valor del descuento:"));
+    panelFormulario.add(txtValor);
+
+    panelFormulario.add(new JLabel("Fecha de vencimiento (DD/MM/AAAA):"));
+    panelFormulario.add(txtVencimiento);
+
+    panelFormulario.add(new JLabel("Cantidad máxima de usos:"));
+    panelFormulario.add(txtUsosMaximos);
+
+    panel.add(panelFormulario, BorderLayout.NORTH);
+
+    JButton btnVerCupones = new JButton("Ver Cupones Registrados");
+
+    btnVerCupones.addActionListener(e -> mostrarTablaCupones());
+
+    JPanel panelConsulta = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    panelConsulta.add(new JLabel("Consultar cupones:"));
+    panelConsulta.add(btnVerCupones);
+
+    panel.add(panelConsulta, BorderLayout.SOUTH);
+
+    int resultado = JOptionPane.showConfirmDialog(
+        this,
+        panel,
+        "Crear Cupón",
+        JOptionPane.OK_CANCEL_OPTION,
+        JOptionPane.PLAIN_MESSAGE
+    );
+
+    if (resultado != JOptionPane.OK_OPTION) {
+        return;
+    }
+
+    try {
+        String codigo = txtCodigo.getText().trim();
+
+        Cupon.TipoDescuento tipo = Cupon.TipoDescuento.valueOf(
+            (String) cmbTipo.getSelectedItem()
         );
-        JTextField txtValor = new JTextField();
-        JTextField txtVencimiento = new JTextField("Ejemplo: 31/12/2027");
-        JTextField txtUsosMaximos = new JTextField();
 
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-        JPanel panelFormulario = new JPanel(new GridLayout(6, 2, 10, 10));
+        double valor = Double.parseDouble(txtValor.getText().trim());
 
-        panel.add(new JLabel("Codigo del cupon:"));
-        panel.add(txtCodigo);
+        DateTimeFormatter formato = DateTimeFormatter
+            .ofPattern("dd/MM/uuuu")
+            .withResolverStyle(ResolverStyle.STRICT);
 
-        panel.add(new JLabel("Tipo de descuento:"));
-        panel.add(cmbTipo);
+        LocalDate vencimiento = LocalDate.parse(
+            txtVencimiento.getText().trim(), formato
+        );
 
-        panel.add(new JLabel("Valor del descuento:"));
-        panel.add(txtValor);
+        int usosMaximos = Integer.parseInt(
+            txtUsosMaximos.getText().trim()
+        );
 
-        panel.add(new JLabel("Fecha de vencimiento (DD/MM/AAAA):"));
-        panel.add(txtVencimiento);
+        Cupon cupon = new Cupon(
+            codigo, tipo, valor, vencimiento, usosMaximos
+        );
 
-        panel.add(new JLabel("Cantidad maxima de usos:"));
-        panel.add(txtUsosMaximos);
-
-        panel.add(panelFormulario, BorderLayout.NORTH);
-
-        JButton btnVerCupones = new JButton("Ver Cupones Registrados");
-
-        btnVerCupones.addActionListener(e -> {
-            StringBuilder lista = new StringBuilder();
-
-            for (modelo.Cupon cupon : inventario.obtenerCupones()) {
-                lista.append("Código: ").append(cupon.getCodigo()).append("\n");
-                lista.append("Tipo: ").append(cupon.getTipo()).append("\n");
-                lista.append("Valor: ").append(cupon.getValor()).append("\n");
-                lista.append("Vencimiento: ").append(cupon.getFechaVencimiento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))).append("\n");
-                lista.append("Usos restantes: ").append(cupon.getUsosRestantes()).append("\n");
-                lista.append("-----------------------------\n");
-            }
-
-            if (lista.length() == 0) {
-                lista.append("No existen cupones registrados.");
-            }
-
-            JTextArea area = new JTextArea(lista.toString());
-            area.setEditable(false);
-
-            JScrollPane scroll = new JScrollPane(area);
-            scroll.setPreferredSize(new Dimension(400, 300));
-
+        if (inventario.crearCupon(cupon)) {
             JOptionPane.showMessageDialog(
                 this,
-                scroll,
-                "Cupones Registrados",
+                "Cupón creado correctamente.",
+                "Éxito",
                 JOptionPane.INFORMATION_MESSAGE
             );
-        });
 
-        panel.add(new JLabel("Consultar cupones:"));
-        panel.add(btnVerCupones);
+        } else {
+            JOptionPane.showMessageDialog(
+                this,
+                "Ya existe un cupón con ese código.",
+                "Cupón duplicado",
+                JOptionPane.WARNING_MESSAGE
+            );
+        }
 
-        int resultado = JOptionPane.showConfirmDialog(
+    } catch (DateTimeParseException e) {
+        JOptionPane.showMessageDialog(
             this,
-            panel,
-            "Crear Cupón",
-            JOptionPane.OK_CANCEL_OPTION,
-            JOptionPane.PLAIN_MESSAGE
+            "Fecha inválida. Utilice el formato DD/MM/AAAA.",
+            "Error de fecha",
+            JOptionPane.ERROR_MESSAGE
         );
 
-        if (resultado != JOptionPane.OK_OPTION) {
+    } catch (IllegalArgumentException e) {
+        JOptionPane.showMessageDialog(
+            this,
+            "Datos inválidos: " + e.getMessage(),
+            "Error",
+            JOptionPane.ERROR_MESSAGE
+        );
+    }
+}
+
+
+private void mostrarTablaCupones() {
+
+    javax.swing.table.DefaultTableModel modeloTabla =
+        new javax.swing.table.DefaultTableModel(
+            new Object[]{"Código", "Tipo", "Valor", "Vencimiento", "Usos restantes", "Estado"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+    JTable tabla = new JTable(modeloTabla);
+    tabla.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+
+    Runnable actualizarTabla = () -> {
+        modeloTabla.setRowCount(0);
+
+        for (Cupon cupon : inventario.obtenerCupones()) {
+            modeloTabla.addRow(new Object[]{
+                cupon.getCodigo(),
+                cupon.getTipo(),
+                cupon.getValor(),
+                cupon.getFechaVencimiento().format(
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                ),
+                cupon.getUsosRestantes(),
+                cupon.esValido() ? "Vigente" : "No vigente"
+            });
+        }
+    };
+
+    actualizarTabla.run();
+
+    JScrollPane scroll = new JScrollPane(tabla);
+    scroll.setPreferredSize(new Dimension(750, 300));
+
+    JButton btnEliminar = new JButton("Eliminar seleccionado");
+    JButton btnCerrar = new JButton("Cerrar");
+
+    JPanel panelBotones = new JPanel();
+    panelBotones.add(btnEliminar);
+    panelBotones.add(btnCerrar);
+
+    JDialog dialog = new JDialog(
+        javax.swing.SwingUtilities.getWindowAncestor(this),
+        "Cupones registrados",
+        java.awt.Dialog.ModalityType.APPLICATION_MODAL
+    );
+
+    dialog.setLayout(new BorderLayout(10, 10));
+    dialog.add(scroll, BorderLayout.CENTER);
+    dialog.add(panelBotones, BorderLayout.SOUTH);
+
+    btnEliminar.addActionListener(e -> {
+
+        int fila = tabla.getSelectedRow();
+
+        if (fila == -1) {
+            JOptionPane.showMessageDialog(
+                dialog,
+                "Seleccione un cupón de la tabla.",
+                "Aviso",
+                JOptionPane.WARNING_MESSAGE
+            );
             return;
         }
 
-        try {
-            String codigo = txtCodigo.getText().trim();
+        String codigo = modeloTabla.getValueAt(fila, 0).toString();
 
-            Cupon.TipoDescuento tipo = Cupon.TipoDescuento.valueOf(
-                (String) cmbTipo.getSelectedItem()
-            );
+        int confirmacion = JOptionPane.showConfirmDialog(
+            dialog,
+            "¿Está seguro de eliminar el cupón " + codigo + "?",
+            "Confirmar eliminación",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE
+        );
 
-            double valor = Double.parseDouble(txtValor.getText().trim());
+        if (confirmacion == JOptionPane.YES_OPTION) {
 
-            DateTimeFormatter formato = DateTimeFormatter
-                .ofPattern("dd/MM/uuuu")
-                .withResolverStyle(ResolverStyle.STRICT);
+            if (inventario.eliminarCupon(codigo)) {
+                actualizarTabla.run();
 
-            LocalDate vencimiento = LocalDate.parse(
-                txtVencimiento.getText().trim(), formato
-            );
-
-            int usosMaximos = Integer.parseInt(
-                txtUsosMaximos.getText().trim()
-            );
-
-            Cupon cupon = new Cupon(
-                codigo, tipo, valor, vencimiento, usosMaximos
-            );
-
-            if (inventario.crearCupon(cupon)) {
                 JOptionPane.showMessageDialog(
-                    this,
-                    "Cupón creado correctamente.",
+                    dialog,
+                    "Cupón eliminado correctamente.",
                     "Éxito",
                     JOptionPane.INFORMATION_MESSAGE
                 );
-
-            } else {
-                JOptionPane.showMessageDialog(
-                    this,
-                    "Ya existe un cupón con ese código.",
-                    "Cupón duplicado",
-                    JOptionPane.WARNING_MESSAGE
-                );
             }
-
-        } catch (DateTimeParseException e) {
-            JOptionPane.showMessageDialog(
-                this,
-                "Fecha inválida. Utilice el formato DD/MM/AAAA.",
-                "Error de fecha",
-                JOptionPane.ERROR_MESSAGE
-            );
-
-        } catch (IllegalArgumentException e) {
-            JOptionPane.showMessageDialog(
-                this,
-                "Datos inválidos: " + e.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE
-            );
         }
+    });
 
-            }
+    btnCerrar.addActionListener(e -> dialog.dispose());
 
-
-
+    dialog.pack();
+    dialog.setLocationRelativeTo(this);
+    dialog.setVisible(true);
+}
 
 
 }
