@@ -15,9 +15,6 @@ public class VistaMenuPrincipal extends JPanel {
     private final BaseFrameCliente frame;
     private int indicePromo = 0;
 
-    private JDialog ventanaChat;
-    private JTextArea areaChat;
-
     public VistaMenuPrincipal(BaseFrameCliente frame) {
         this.frame = frame;
         setLayout(new BorderLayout());
@@ -206,7 +203,8 @@ public class VistaMenuPrincipal extends JPanel {
         enter.addActionListener(e -> frame.mostrarVista("PRODUCTOS"));
 
         JButton chat = EstilosUI.roundedButton("🗪", EstilosUI.VERDE_CLARO, EstilosUI.VERDE);
-        chat.addActionListener(e -> abrirChat());
+        chat.setToolTipText("Asistente IA");
+        chat.addActionListener(e -> frame.mostrarVista("CHAT_IA"));
 
         JPanel botonesAbajo = new JPanel(new FlowLayout(FlowLayout.RIGHT, 180, 0));
         botonesAbajo.setOpaque(false);
@@ -215,56 +213,5 @@ public class VistaMenuPrincipal extends JPanel {
         botonesAbajo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
 
         center.add(botonesAbajo);
-    }
-
-    // --- CHAT GLOBAL ---
-
-    private void abrirChat() {
-        if (ventanaChat != null && ventanaChat.isVisible()) {
-            ventanaChat.toFront();
-            return;
-        }
-        ventanaChat = new JDialog();
-        ventanaChat.setTitle("Chat Global");
-        ventanaChat.setSize(350, 450);
-        ventanaChat.setLayout(new BorderLayout());
-
-        areaChat = new JTextArea();
-        areaChat.setEditable(false);
-        areaChat.setLineWrap(true);
-        areaChat.setWrapStyleWord(true);
-
-        JTextField campoMensaje = new JTextField();
-        JButton btnEnviar = new JButton("Enviar");
-
-        JPanel panelAbajo = new JPanel(new BorderLayout());
-        panelAbajo.add(campoMensaje, BorderLayout.CENTER);
-        panelAbajo.add(btnEnviar, BorderLayout.EAST);
-
-        ventanaChat.add(new JScrollPane(areaChat), BorderLayout.CENTER);
-        ventanaChat.add(panelAbajo, BorderLayout.SOUTH);
-        ventanaChat.setLocationRelativeTo(frame);
-
-        btnEnviar.addActionListener(e -> {
-            String texto = campoMensaje.getText().trim();
-            if (!texto.isEmpty() && red.Cliente.getInstancia() != null) {
-                areaChat.append("Tú: " + texto + "\n");
-                red.Cliente.getInstancia().enviarMensaje(texto);
-                campoMensaje.setText("");
-            }
-        });
-
-        campoMensaje.addActionListener(e -> btnEnviar.doClick());
-
-        if (red.Cliente.getInstancia() != null) {
-            red.Cliente.getInstancia().setAlRecibirMensaje(mensajeRecibido -> {
-                if (areaChat != null) {
-                    areaChat.append(mensajeRecibido + "\n");
-                    areaChat.setCaretPosition(areaChat.getDocument().getLength());
-                }
-            });
-        }
-        ventanaChat.setVisible(true);
-        campoMensaje.requestFocusInWindow();
     }
 }

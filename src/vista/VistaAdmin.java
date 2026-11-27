@@ -29,11 +29,9 @@ public class VistaAdmin extends JPanel {
     private JTable tablaProductos;
     private DefaultTableModel modeloTabla;
 
-    private JButton btnEliminar, btnAgregar, btnModificar, btnEstadisticas, btnVaciarInventario, btnChat, btnHistorial, btnPedidos, btnCarritosActivos, btnTarifas, btnCupones;
+    private JButton btnEliminar, btnAgregar, btnModificar, btnEstadisticas, btnVaciarInventario, btnHistorial, btnPedidos, btnCarritosActivos, btnTarifas, btnCupones;
 
     private red.Servidor servidor;
-    private JDialog ventanaChat;
-    private JTextArea areaChat;
 
     public VistaAdmin(BaseFrameAdmin frame) {
         this.frame = frame;
@@ -44,12 +42,6 @@ public class VistaAdmin extends JPanel {
 
     public void setServidor(red.Servidor servidor) {
         this.servidor = servidor;
-        this.servidor.setAlRecibirMensajeAdmin(mensaje -> {
-            if (areaChat != null) {
-                areaChat.append(mensaje + "\n");
-                areaChat.setCaretPosition(areaChat.getDocument().getLength());
-            }
-        });
     }
 
     // --- INICIALIZACION UI ---
@@ -67,7 +59,7 @@ public class VistaAdmin extends JPanel {
         tablaProductos = new JTable(modeloTabla);
 
         JPanel panelLateral = new JPanel();
-        panelLateral.setLayout(new GridLayout(11, 1, 10, 10));
+        panelLateral.setLayout(new GridLayout(10, 1, 10, 10));
         panelLateral.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
 
         btnAgregar = new JButton("Agregar Producto");
@@ -75,7 +67,6 @@ public class VistaAdmin extends JPanel {
         btnEliminar = new JButton("Eliminar Producto");
         btnVaciarInventario = new JButton("Vaciar Inventario");
         btnEstadisticas = new JButton("Estadísticas");
-        btnChat = new JButton("Chat de Soporte");
         btnHistorial = new JButton("Gestion de Historial");
         btnPedidos = new JButton("Gestionar Pedidos");
         btnCarritosActivos = new JButton("Carritos Activos");
@@ -86,7 +77,6 @@ public class VistaAdmin extends JPanel {
         panelLateral.add(btnEliminar);
         panelLateral.add(btnVaciarInventario);
         panelLateral.add(btnEstadisticas);
-        panelLateral.add(btnChat);
         panelLateral.add(btnHistorial);
         panelLateral.add(btnPedidos);
         panelLateral.add(btnCarritosActivos);
@@ -112,7 +102,6 @@ public class VistaAdmin extends JPanel {
         btnEliminar.addActionListener(e -> eliminarProducto());
         btnVaciarInventario.addActionListener(e -> vaciarInventario());
         btnEstadisticas.addActionListener(e -> mostrarEstadisticas());
-        btnChat.addActionListener(e -> abrirChatAdmin());
         btnHistorial.addActionListener(e -> { mostrarHistorialClientes(); });
         btnPedidos.addActionListener(e -> mostrarPedidos());
         btnCarritosActivos.addActionListener(e -> {
@@ -323,48 +312,6 @@ public class VistaAdmin extends JPanel {
                 }
             }
         }
-    }
-
-    // --- CHAT ---
-
-    private void abrirChatAdmin() {
-        if (ventanaChat != null && ventanaChat.isVisible()) {
-            ventanaChat.toFront();
-            return;
-        }
-
-        ventanaChat = new JDialog();
-        ventanaChat.setTitle("Soporte a Clientes (Admin)");
-        ventanaChat.setSize(350, 450);
-        ventanaChat.setLayout(new BorderLayout());
-
-        areaChat = new JTextArea();
-        areaChat.setEditable(false);
-        areaChat.setLineWrap(true);
-
-        JTextField campoMensaje = new JTextField();
-        JButton btnEnviar = new JButton("Enviar");
-
-        btnEnviar.addActionListener(e -> {
-            String texto = campoMensaje.getText().trim();
-            if (!texto.isEmpty() && servidor != null) {
-                areaChat.append("Tú (Admin): " + texto + "\n");
-                servidor.difundir(red.Protocolo.createJsonMessage("Admin: " + texto));
-                campoMensaje.setText("");
-            }
-        });
-        campoMensaje.addActionListener(e -> btnEnviar.doClick());
-
-        JPanel panelAbajo = new JPanel(new BorderLayout());
-        panelAbajo.add(campoMensaje, BorderLayout.CENTER);
-        panelAbajo.add(btnEnviar, BorderLayout.EAST);
-
-        ventanaChat.add(new JScrollPane(areaChat), BorderLayout.CENTER);
-        ventanaChat.add(panelAbajo, BorderLayout.SOUTH);
-        ventanaChat.setLocationRelativeTo(this);
-
-        ventanaChat.setVisible(true);
-        campoMensaje.requestFocusInWindow();
     }
 
     //Mostrar Clientes
